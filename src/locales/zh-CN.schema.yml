@@ -1,0 +1,6 @@
+﻿jrrp:
+  $desc: JRRP 配置
+  $inner:
+    cleanupDays: 人品记录保留天数，过期将自动清理
+    rankLimit: 每日人品排名数量限制（仅在不启用转发消息发送时生效）
+    rankUseForwardMsg: 每日人品排名是否使用转发消息发送
