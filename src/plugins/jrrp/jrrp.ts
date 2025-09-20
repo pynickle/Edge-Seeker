@@ -2,8 +2,8 @@
 import * as crypto from 'crypto';
 import { getFestivalBonus, getFestivals } from "./festival";
 import {} from '@koishijs/plugin-adapter-onebot'
-import { Config } from "../index";
-import {createTextMsgNode, getUserName} from "../utils/onebot_helper";
+import { Config } from "../../index";
+import {createTextMsgNode, getUserName} from "../../utils/onebot_helper";
 
 export interface Jrrp {
     id: number;
