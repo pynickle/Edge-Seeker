@@ -1,9 +1,9 @@
-﻿import { Context, Schema } from 'koishi';
+﻿import { Context } from 'koishi';
 import whoiser from 'whoiser';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import {stickEmoji} from "../../utils/emoji/emoji_helper";
+import {stickEmoji} from "../../utils/msg_emoji/emoji_helper";
 
 // 启用 UTC 和时区插件
 dayjs.extend(utc);
@@ -17,18 +17,14 @@ function formatDateToChinese(isoDate: string): string {
 
 export const name = 'whois';
 
-export interface Config {
-    // 可以在这里添加配置选项，例如自定义 whois 服务器
-}
-
-export const schema: Schema<Config> = Schema.object({
-    // 如果需要配置，可以在这里定义
-});
-
-export function whois(ctx: Context, config: Config) {
+export function whois(ctx: Context) {
     ctx.command('whois <domain:string>', '查询域名 whois 信息')
         .action(async ({ session }, domain) => {
             try {
+                if (!domain) {
+                    return '请提供一个域名，例如: example.com';
+                }
+
                 if (session.onebot) {
                     await stickEmoji(session, ctx, ["元宝"]);
                 }

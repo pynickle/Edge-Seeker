@@ -2,10 +2,15 @@ import {Context, Schema} from 'koishi'
 import {zanwo} from "./plugins/zanwo/zanwo";
 import JrrpPlugin from "./plugins/jrrp/jrrp";
 import {cat} from "./plugins/cat/cat";
-import {gh_url} from "./plugins/github/gh_url";
+import {gh_url} from "./message/github/gh_url";
 import {whois} from "./plugins/whois/whois";
+import {minecraft_notifier} from "./intervals/minecraft/minecraft_notifier";
+import {emoji_gen} from "./plugins/emoji/emoji";
+import StarCoinPlugin from "./plugins/starcoin/starcoin";
+import {waifu} from "./plugins/waifu/waifu";
+import JrysPlugin from "./plugins/jrys/jrys";
 
-export const inject = ['database']
+export const inject = ['database', 'puppeteer']
 
 export const name = 'edge-seeker'
 
@@ -40,8 +45,15 @@ export const Config: Schema<Config> = Schema.object({
 
 export function apply(ctx: Context, cfg: Config) {
     ctx.plugin(JrrpPlugin, cfg);
+    ctx.plugin(JrysPlugin, cfg);
+    ctx.plugin(StarCoinPlugin, cfg);
     ctx.plugin(zanwo, cfg);
     ctx.plugin(cat, cfg);
-    ctx.plugin(gh_url, cfg);
     ctx.plugin(whois, cfg);
+    ctx.plugin(emoji_gen, cfg);
+    ctx.plugin(waifu, cfg);
+
+    ctx.plugin(gh_url, cfg);
+
+    ctx.plugin(minecraft_notifier, cfg)
 }

@@ -74,10 +74,35 @@ class JrrpPlugin {
     private async calculateAndStoreLuck(session: Session, today: string): Promise<number> {
         const baseLuck = this.calculateBaseLuck(session.userId, today);
         const { bonus } = this.getFestivalBonus(session.userId, today);
-        const finalLuck = baseLuck + bonus;
+        let finalLuck = baseLuck + bonus;
+
+        // 检查用户前两次人品记录
+        const recentRecords = await this.getRecentLuckRecords(session.userId, 2);
+        // 如果前两次人品都低于20，则本次确保不低于50
+        if (recentRecords.length === 2 && recentRecords.every(record => record.luck < 20)) {
+            finalLuck = Math.max(finalLuck, 50 + Math.floor(Math.random() * 50));
+        }
 
         await this.storeLuckRecord(session, today, finalLuck);
         return finalLuck;
+    }
+
+    private async getRecentLuckRecords(userId: string, count: number): Promise<Jrrp[]> {
+        // 获取用户最近的几条人品记录，排除今天的记录
+        const today = this.getTodayString();
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const sevenDaysAgoStr = this.formatDate(sevenDaysAgo);
+
+        return await this.ctx.database
+            .select('jrrp')
+            .where({
+                userId,
+                date: { $gte: sevenDaysAgoStr, $lt: today }
+            })
+            .orderBy('date', 'desc')
+            .limit(count)
+            .execute();
     }
 
     private calculateBaseLuck(userId: string, date: string): number {
@@ -222,10 +247,6 @@ class JrrpPlugin {
     private formatDate(date: Date): string {
         return date.toISOString().split('T')[0];
     }
-}
-
-namespace JrrpPlugin {
-    export interface Config {}
 }
 
 export default JrrpPlugin;
