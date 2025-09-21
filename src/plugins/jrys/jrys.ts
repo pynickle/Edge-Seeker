@@ -5,6 +5,8 @@ import {} from 'koishi-plugin-puppeteer';
 import axios from "axios";
 import {getRandomElement} from "../../utils/utils";
 import {stickEmoji} from "../../utils/msg_emoji/emoji_helper";
+import {getAssetPath, getFontBase64} from "../../utils/asset_helper";
+import {readFile} from "node:fs/promises";
 
 // 定义运势数据接口
 export interface FortuneData {
@@ -48,7 +50,9 @@ class JrysPlugin {
 
     private async handleJrysCommand(session: Session): Promise<string> {
         try {
-            await stickEmoji(session, ['棒棒糖']);
+            if (session.onebot) {
+                await stickEmoji(session, ['棒棒糖']);
+            }
             const fortuneData = await this.calculateFortune(session.userId);
             return await this.renderToImage(fortuneData, session.userId);
         } catch (error) {
@@ -82,15 +86,15 @@ class JrysPlugin {
         const solarDate = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
 
         // 获取宜和忌
-        const dos = lunar.getDayYi().slice(0, 10).join(' ');
-        const donts = lunar.getDayJi().slice(0, 10).join(' ');
+        const dos = lunar.getDayYi().slice(0, 7).join(' ');
+        const donts = lunar.getDayJi().slice(0, 7).join(' ');
 
         let sentence: string, sentenceFrom: string;
         try {
             const res = await axios.get("https://v1.hitokoto.cn", {
                 timeout: 10000,
                 params: {
-                    max_length: 20
+                    max_length: 30
                 }
             });
             sentence = res.data.hitokoto;
@@ -156,13 +160,13 @@ class JrysPlugin {
             throw new Error('puppeteer插件未启用');
         }
 
-        const html = this.buildHtmlContent(fortuneData, userId);
+        const html = await this.buildHtmlContent(fortuneData, userId);
         return puppeteer.render(html);
     }
 
-    private buildHtmlContent(fortuneData: FortuneData, userId: string): string {
+    private async buildHtmlContent(fortuneData: FortuneData, userId: string): Promise<string> {
         const luckyColorValue = this.getColorValue(fortuneData.luckyColor);
-
+        const mapleMono = await getFontBase64('MapleMono-NF-CN-Regular.ttf');
         return `
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -170,16 +174,15 @@ class JrysPlugin {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=400, initial-scale=1.0">
     <title>今日运势</title>
-    <link rel="preload" as="style" crossorigin
-          href="https://fontsapi.zeoseven.com/442/main/result.css"
-          onload="this.rel='stylesheet'"
-          onerror="this.href='https://fontsapi-storage.zeoseven.com/442/main/result.css'" />
-    <noscript>
-        <link rel="stylesheet" href="https://fontsapi.zeoseven.com/442/main/result.css" />
-    </noscript>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.0.1/css/all.min.css">
     <style>
+        ${await readFile(getAssetPath('bulma.min.css'))}
+        @font-face {
+            font-family: 'Maple Mono NF CN';
+            src: url(data:font/woff2;base64,${mapleMono}) format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
         body {
             width: 400px;
             margin: 0 auto;
@@ -266,17 +269,17 @@ class JrysPlugin {
             <p class="subtitle is-6 has-text-white">${fortuneData.solarDate}</p>
         </div>
         <figure class="avatar">
-            <img src="https://q1.qlogo.cn/g?b=qq&nk=${userId}&s=40" alt="头像">
+            <img src="https://q1.qlogo.cn/g?b=qq&nk=${userId}&s=640" alt="头像">
         </figure>
     </div>
     <div class="content">
         <div class="content-inner">
             <p class="title is-4"><i class="fas fa-chart-line icon"></i>运势指数: ${fortuneData.score}</p>
-            <p class="subtitle is-6 mt-4" style="margin-bottom: 2px"><i class="fas fa-quote-left icon"></i>${fortuneData.sentence}</p>
+            <p class="subtitle is-6 mt-4 mb-1"><i class="fas fa-quote-left icon"></i>${fortuneData.sentence}</p>
             <p class="is-7">—— ${fortuneData.sentenceFrom}</p>
             <p class="mt-4"><i class="fas fa-dice icon"></i><strong>幸运数字:</strong> ${fortuneData.luckyNumber}</p>
             <p><i class="fas fa-palette icon"></i><strong>幸运颜色:</strong> ${fortuneData.luckyColor}</p>
-            <p class="mt-4"><strong>宜:</strong> ${fortuneData.dos}</p>
+            <p class="mt-3"><strong>宜:</strong> ${fortuneData.dos}</p>
             <p><strong>忌:</strong> ${fortuneData.donts}</p>
         </div>
     </div>
