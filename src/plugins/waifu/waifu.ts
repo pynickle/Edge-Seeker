@@ -20,7 +20,7 @@ export function waifu(ctx: Context) {
             }
 
             if (session.onebot) {
-                await stickEmoji(session, ctx, ["戳一戳"]);
+                await stickEmoji(session, ["戳一戳"]);
             }
 
             if (!category) {
