@@ -88,7 +88,7 @@ class JrysPlugin {
         let sentence: string, sentenceFrom: string;
         try {
             const res = await axios.get("https://v1.hitokoto.cn", {
-                timeout: 5000,
+                timeout: 10000,
                 params: {
                     max_length: 20
                 }
@@ -170,6 +170,13 @@ class JrysPlugin {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=400, initial-scale=1.0">
     <title>今日运势</title>
+    <link rel="preload" as="style" crossorigin
+          href="https://fontsapi.zeoseven.com/442/main/result.css"
+          onload="this.rel='stylesheet'"
+          onerror="this.href='https://fontsapi-storage.zeoseven.com/442/main/result.css'" />
+    <noscript>
+        <link rel="stylesheet" href="https://fontsapi.zeoseven.com/442/main/result.css" />
+    </noscript>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.0.1/css/all.min.css">
     <style>
@@ -178,6 +185,11 @@ class JrysPlugin {
             margin: 0 auto;
             background: #f8f8f8;
             font-size: 14px;
+            font-family: "Maple Mono NF CN", serif;
+            font-weight: normal;
+        }
+        .content blockquote:not(:last-child), .content dl:not(:last-child), .content ol:not(:last-child), .content p:not(:last-child), .content pre:not(:last-child), .content table:not(:last-child), .content ul:not(:last-child) {
+            margin-bottom: 8px;
         }
         .container {
             background: #fff;
@@ -254,17 +266,17 @@ class JrysPlugin {
             <p class="subtitle is-6 has-text-white">${fortuneData.solarDate}</p>
         </div>
         <figure class="avatar">
-            <img src="https://q1.qlogo.cn/g?b=qq&nk=${userId}&s=48" alt="头像">
+            <img src="https://q1.qlogo.cn/g?b=qq&nk=${userId}&s=40" alt="头像">
         </figure>
     </div>
     <div class="content">
         <div class="content-inner">
             <p class="title is-4"><i class="fas fa-chart-line icon"></i>运势指数: ${fortuneData.score}</p>
-            <p class="subtitle is-6 mt-4" style="margin-bottom: 3px"><i class="fas fa-quote-left icon"></i>${fortuneData.sentence}</p>
+            <p class="subtitle is-6 mt-4" style="margin-bottom: 2px"><i class="fas fa-quote-left icon"></i>${fortuneData.sentence}</p>
             <p class="is-7">—— ${fortuneData.sentenceFrom}</p>
-            <p class="mt-2"><i class="fas fa-dice icon"></i><strong>幸运数字:</strong> ${fortuneData.luckyNumber}</p>
+            <p class="mt-4"><i class="fas fa-dice icon"></i><strong>幸运数字:</strong> ${fortuneData.luckyNumber}</p>
             <p><i class="fas fa-palette icon"></i><strong>幸运颜色:</strong> ${fortuneData.luckyColor}</p>
-            <p class="mt-2"><strong>宜:</strong> ${fortuneData.dos}</p>
+            <p class="mt-4"><strong>宜:</strong> ${fortuneData.dos}</p>
             <p><strong>忌:</strong> ${fortuneData.donts}</p>
         </div>
     </div>
