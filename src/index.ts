@@ -9,6 +9,7 @@ import {emoji_gen} from "./plugins/emoji/emoji";
 import StarCoinPlugin from "./plugins/starcoin/starcoin";
 import {waifu} from "./plugins/waifu/waifu";
 import JrysPlugin from "./plugins/jrys/jrys";
+import {choose} from "./plugins/choose/choose";
 
 export const inject = ['database', 'puppeteer']
 
@@ -52,6 +53,7 @@ export function apply(ctx: Context, cfg: Config) {
     ctx.plugin(whois, cfg);
     ctx.plugin(emoji_gen, cfg);
     ctx.plugin(waifu, cfg);
+    ctx.plugin(choose, cfg);
 
     ctx.plugin(gh_url, cfg);
 

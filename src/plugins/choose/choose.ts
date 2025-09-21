@@ -1,0 +1,49 @@
+import {Context} from 'koishi';
+import {getRandomElement} from '../../utils/utils';
+
+export const name = 'choose';
+
+export function choose(ctx: Context) {
+    ctx.command('choose <...options:string>', '从多个选项中随机选择一个')
+        .usage('用法：choose 选项1 选项2 选项3 ...\n示例：choose 吃饭 睡觉 打游戏')
+        .action(async ({}, ...options) => {
+            // 检查参数
+            if (!options || options.length < 2) {
+                const tips = [
+                    '至少需要提供两个选项哦~',
+                    '你得给我至少两个选项才能帮你选呀！',
+                    '请输入至少两个选项，用空格分隔~',
+                ];
+                return getRandomElement(tips);
+            }
+
+            // 处理选项
+            const result = getRandomElement(options);
+
+            // 随机回复风格
+            const responses = [
+                `经过慎重考虑，我选择：${result}`,
+                `让我来看看... 嗯，选${result}吧！`,
+                `我觉得${result}是个不错的选择~`,
+                `随机挑选的结果是：${result}`,
+                `经过宇宙随机算法计算，最终结果是：${result}`,
+                `叮！你的随机结果是：${result}`,
+                `✨ 答案揭晓：${result} ✨`,
+            ];
+
+            return getRandomElement(responses);
+        });
+
+    // 添加一个特殊的掷硬币命令
+    ctx.command('coin', '掷硬币决定')
+        .action(() => {
+            const result = Math.random() > 0.5 ? '正面' : '反面';
+            const coinResponses = [
+                `硬币落地！是${result}！`,
+                `叮铃铃~ 硬币显示：${result}`,
+                `抛硬币结果：${result}`,
+                `硬币翻转... ${result}朝上！`,
+            ];
+            return getRandomElement(coinResponses);
+        });
+}
