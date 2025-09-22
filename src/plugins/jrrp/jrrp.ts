@@ -3,10 +3,10 @@ import * as crypto from 'crypto';
 import { getFestivalBonus, getFestivals } from "./festival";
 import {} from '@koishijs/plugin-adapter-onebot'
 import { Config } from "../../index";
-import {createTextMsgNode, getUserName} from "../../utils/onebot_helper";
+import { createTextMsgNode, getUserName } from "../../utils/onebot_helper";
 
 export interface Jrrp {
-    id: number;
+    id: number; // 自增主键
     userId: string;
     channelId: string;
     date: string;
@@ -26,13 +26,24 @@ const LUCK_LEVELS = [
     { min: 50, message: (luck: number) => `今日人品值：${luck}。运势平稳，适合按部就班完成计划。` },
     { min: 30, message: (luck: number) => `今日人品值：${luck}。运势稍低，建议谨慎行事，避免冒险。` },
     { min: 0, message: (luck: number) => `今日人品值：${luck}。运势较低，保持乐观，明天会更好！` }
-];
+] as const;
 
 class JrrpPlugin {
     constructor(private ctx: Context, private config: Config) {
         this.setupDatabase();
         this.setupCleanupTask();
         this.registerCommands();
+    }
+
+    /**
+     * 获取用户在特定群组的人品记录
+     */
+    private async getUserLuckRecord(userId: string, channelId: string, date: string): Promise<Jrrp | null> {
+        const records = await this.ctx.database
+            .select('jrrp')
+            .where({ userId, channelId, date })
+            .execute();
+        return records.length > 0 ? records[0] : null;
     }
 
     private setupDatabase(): void {
@@ -42,6 +53,11 @@ class JrrpPlugin {
             channelId: 'string',
             date: 'string',
             luck: 'integer',
+        }, {
+            primary: 'id',
+            autoInc: true,
+            // 添加唯一约束以防止重复记录
+            unique: [['userId', 'channelId', 'date']]
         });
     }
 
@@ -50,6 +66,8 @@ class JrrpPlugin {
             const thresholdDate = new Date();
             thresholdDate.setDate(thresholdDate.getDate() - this.config.jrrp.cleanupDays);
             const thresholdDateStr = this.formatDate(thresholdDate);
+
+            // 删除过期记录
             await this.ctx.database.remove('jrrp', { date: { $lt: thresholdDateStr } });
         }, 24 * 60 * 60 * 1000);
     }
@@ -67,28 +85,42 @@ class JrrpPlugin {
 
     private async handleJrrpCommand(session: Session): Promise<string> {
         const today = this.getTodayString();
+        const { userId, channelId } = session;
+
+        // 检查今日是否已经查询过
+        const existingRecord = await this.getUserLuckRecord(userId, channelId, today);
+        if (existingRecord) {
+            return this.formatLuckMessage(userId, today, existingRecord.luck);
+        }
+
+        // 计算并存储新的人品值
         const luck = await this.calculateAndStoreLuck(session, today);
-        return this.formatLuckMessage(session.userId, today, luck);
+        return this.formatLuckMessage(userId, today, luck);
     }
 
     private async calculateAndStoreLuck(session: Session, today: string): Promise<number> {
-        const baseLuck = this.calculateBaseLuck(session.userId, today);
-        const { bonus } = this.getFestivalBonus(session.userId, today);
+        const { userId, channelId } = session;
+        const baseLuck = this.calculateBaseLuck(userId, today);
+        const { bonus } = this.getFestivalBonus(userId, today);
         let finalLuck = baseLuck + bonus;
 
-        // 检查用户前两次人品记录
-        const recentRecords = await this.getRecentLuckRecords(session.userId, 2);
+        // 检查用户前两次人品记录（在当前群组中）
+        const recentRecords = await this.getRecentLuckRecords(userId, channelId, 2);
+
         // 如果前两次人品都低于20，则本次确保不低于50
         if (recentRecords.length === 2 && recentRecords.every(record => record.luck < 20)) {
             finalLuck = Math.max(finalLuck, 50 + Math.floor(Math.random() * 50));
         }
 
+        // 确保人品值在0-100范围内
+        finalLuck = Math.min(Math.max(finalLuck, 0), 100);
+
         await this.storeLuckRecord(session, today, finalLuck);
         return finalLuck;
     }
 
-    private async getRecentLuckRecords(userId: string, count: number): Promise<Jrrp[]> {
-        // 获取用户最近的几条人品记录，排除今天的记录
+    private async getRecentLuckRecords(userId: string, channelId: string, count: number): Promise<Jrrp[]> {
+        // 获取用户在特定群组中最近的几条人品记录，排除今天的记录
         const today = this.getTodayString();
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -98,6 +130,7 @@ class JrrpPlugin {
             .select('jrrp')
             .where({
                 userId,
+                channelId,
                 date: { $gte: sevenDaysAgoStr, $lt: today }
             })
             .orderBy('date', 'desc')
@@ -118,17 +151,19 @@ class JrrpPlugin {
     }
 
     private async storeLuckRecord(session: Session, date: string, luck: number): Promise<void> {
+        const { userId, channelId } = session;
+
         await this.ctx.database.upsert('jrrp', [{
-            userId: session.userId,
-            channelId: session.channelId,
-            date: date,
-            luck: luck,
-        }], ['userId', 'date']);
+            userId,
+            channelId,
+            date,
+            luck,
+        }], ['userId', 'channelId', 'date']);
     }
 
-    private async formatLuckMessage(userId: string, date: string, luck: number): Promise<string> {
+    private formatLuckMessage(userId: string, date: string, luck: number): string {
         const luckLevel = LUCK_LEVELS.find(level => luck >= level.min);
-        let message = luckLevel.message(luck);
+        let message = luckLevel?.message(luck) || `今日人品值：${luck}`;
 
         const { bonus, description } = this.getFestivalBonus(userId, date);
         if (bonus !== 0) {
@@ -139,6 +174,10 @@ class JrrpPlugin {
     }
 
     private async handleRankCommand(session: Session): Promise<string | void> {
+        if (!session.guildId) {
+            return '请在群聊中使用排行榜命令哦！';
+        }
+
         const today = this.getTodayString();
         const rankings = await this.getRankings(session, today);
 
@@ -146,10 +185,14 @@ class JrrpPlugin {
             return '今日群内暂无人品数据。';
         }
 
-        if (session.onebot && this.config.jrrp.rankUseForwardMsg) {
-            await this.sendForwardMessage(session, rankings);
-        } else {
-            return await this.formatRankingMessage(session, rankings);
+        try {
+            if (session.onebot && this.config.jrrp.rankUseForwardMsg) {
+                await this.sendForwardMessage(session, rankings);
+            } else {
+                return await this.formatRankingMessage(session, rankings);
+            }
+        } catch (error) {
+            return '获取排行榜失败，请稍后重试！';
         }
     }
 
@@ -160,24 +203,25 @@ class JrrpPlugin {
             .orderBy('luck', 'desc');
 
         if (session.onebot && this.config.jrrp.rankUseForwardMsg) {
-            return await query.execute();
+            return await query.limit(50).execute(); // 限制最多50条，避免消息过长
         } else {
-            return await query.limit(this.config.jrrp.rankLimit).execute();
+            return await query.limit(this.config.jrrp.rankLimit || 10).execute();
         }
     }
 
     private async formatRankingMessage(session: Session, rankings: Jrrp[]): Promise<string> {
-        let output = '';
-        for (let i = 0; i < rankings.length; i++) {
-            const rank = rankings[i];
-            const userName = await getUserName(this.ctx, session, rank.userId);
-            output += `${i + 1}. ${h.escape(userName)} - 人品值：${rank.luck}\n`;
-        }
-        return "今日人品排行榜：\n" + output;
+        const rankEntries = await Promise.all(
+            rankings.map(async (rank, index) => {
+                const userName = await getUserName(this.ctx, session, rank.userId);
+                return `${index + 1}. ${h.escape(userName)} - 人品值：${rank.luck}`;
+            })
+        );
+
+        return "今日人品排行榜：\n" + rankEntries.join('\n');
     }
 
     private async sendForwardMessage(session: Session, rankings: Jrrp[]): Promise<void> {
-        const botName = await getUserName(this.ctx, session, session.bot?.userId) || "你";
+        const botName = await getUserName(this.ctx, session, session.bot?.userId) || "Bot";
         const rankingText = await this.formatRankingText(session, rankings);
 
         await session.onebot.sendGroupForwardMsg(session.onebot.group_id, [
@@ -187,18 +231,20 @@ class JrrpPlugin {
     }
 
     private async formatRankingText(session: Session, rankings: Jrrp[]): Promise<string> {
-        let output = '';
-        for (let i = 0; i < rankings.length; i++) {
-            const rank = rankings[i];
-            const userName = await getUserName(this.ctx, session, rank.userId);
-            output += `${i + 1}. ${h.escape(userName)} - 人品值：${rank.luck}\n`;
-        }
-        return output;
+        const rankEntries = await Promise.all(
+            rankings.map(async (rank, index) => {
+                const userName = await getUserName(this.ctx, session, rank.userId);
+                return `${index + 1}. ${h.escape(userName)} - 人品值：${rank.luck}`;
+            })
+        );
+
+        return rankEntries.join('\n');
     }
 
     private async handleHistoryCommand(session: Session): Promise<string> {
+        const { userId, channelId } = session;
         const { startDateStr, todayStr } = this.getHistoryDateRange();
-        const history = await this.getHistoryRecords(session, startDateStr, todayStr);
+        const history = await this.getHistoryRecords(userId, channelId, startDateStr, todayStr);
 
         if (!history.length) {
             return '最近7天内暂无人品记录。';
@@ -217,11 +263,12 @@ class JrrpPlugin {
         };
     }
 
-    private async getHistoryRecords(session: Session, startDate: string, endDate: string): Promise<Jrrp[]> {
+    private async getHistoryRecords(userId: string, channelId: string, startDate: string, endDate: string): Promise<Jrrp[]> {
         return await this.ctx.database
             .select('jrrp')
             .where({
-                userId: session.userId,
+                userId,
+                channelId,
                 date: { $gte: startDate, $lte: endDate },
             })
             .orderBy('date', 'desc')
