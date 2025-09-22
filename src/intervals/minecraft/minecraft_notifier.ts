@@ -56,7 +56,6 @@ export function minecraft_notifier(ctx: Context, cfg: Config) {
             } catch (error) {
                 retries++;
                 if (retries <= 3) {
-                    ctx.logger('minecraft-notifier').info('获取 Minecraft 版本信息失败，正在重试... (尝试次数:', retries, ')');
                     // 简单的指数退避
                     await new Promise(resolve => setTimeout(resolve, Math.pow(2, retries) * 1000));
                 }
@@ -68,8 +67,6 @@ export function minecraft_notifier(ctx: Context, cfg: Config) {
         try {
             await loadData();
             const latest = await getLatestVersions();
-            ctx.logger('minecraft-notifier').info(`当前最新版本 - 正式版: ${latest.release}, 快照版: ${latest.snapshot}`);
-            ctx.logger('minecraft-notifier').info(`上次记录版本 - 正式版: ${lastRelease}, 快照版: ${lastSnapshot}`);
 
             const bot = ctx.bots.find(bot => bot.platform === 'onebot');
             if (lastRelease !== latest.release) {
@@ -81,7 +78,6 @@ export function minecraft_notifier(ctx: Context, cfg: Config) {
 
             if (lastSnapshot !== latest.snapshot) {
                 for (const channel of cfg.minecraft.notifyChannel) {
-                    ctx.logger('minecraft-notifier').info(`通知频道 ${channel} 有新的快照版 ${latest.snapshot}`);
                     await bot.sendMessage(channel, `Minecraft 新快照版发布了：${latest.snapshot}`);
                 }
                 lastSnapshot = latest.snapshot;
