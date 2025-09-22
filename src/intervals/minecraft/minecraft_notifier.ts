@@ -43,12 +43,25 @@ export function minecraft_notifier(ctx: Context) {
     };
 
     const getLatestVersions = async () => {
-        const response = await axios.get('https://launchermeta.mojang.com/mc/game/version_manifest.json');
-        const data = response.data;
-        return {
-            release: data.latest.release,
-            snapshot: data.latest.snapshot,
-        };
+        let retries = 0;
+        while (retries <= 3) {
+            try {
+                const response = await axios.get('https://launchermeta.mojang.com/mc/game/version_manifest.json', {
+                    timeout: 10000
+                });
+                const data = response.data;
+                return {
+                    release: data.latest.release,
+                    snapshot: data.latest.snapshot,
+                };
+            } catch (error) {
+                retries++;
+                if (retries <= 3) {
+                    // 简单的指数退避
+                    await new Promise(resolve => setTimeout(resolve, Math.pow(2, retries) * 1000));
+                }
+            }
+        }
     };
 
     ctx.on('ready', async () => {

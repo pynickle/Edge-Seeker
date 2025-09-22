@@ -5,8 +5,6 @@ import {} from 'koishi-plugin-puppeteer';
 import axios from "axios";
 import {getRandomElement} from "../../utils/utils";
 import {stickEmoji} from "../../utils/msg_emoji/emoji_helper";
-import {getAssetPath, getFontBase64} from "../../utils/asset_helper";
-import {readFile} from "node:fs/promises";
 
 // 定义运势数据接口
 export interface FortuneData {
@@ -166,7 +164,6 @@ class JrysPlugin {
 
     private async buildHtmlContent(fortuneData: FortuneData, userId: string): Promise<string> {
         const luckyColorValue = this.getColorValue(fortuneData.luckyColor);
-        const mapleMono = await getFontBase64('MapleMono-NF-CN-Regular.ttf');
         return `
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -174,21 +171,15 @@ class JrysPlugin {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=400, initial-scale=1.0">
     <title>今日运势</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.0.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <link href="https://cdn.bootcdn.net/ajax/libs/bulma/1.0.4/css/bulma.min.css" rel="stylesheet">
     <style>
-        ${await readFile(getAssetPath('bulma.min.css'))}
-        @font-face {
-            font-family: 'Maple Mono NF CN';
-            src: url(data:font/woff2;base64,${mapleMono}) format('woff2');
-            font-weight: normal;
-            font-style: normal;
-        }
         body {
             width: 400px;
             margin: 0 auto;
             background: #f8f8f8;
             font-size: 14px;
-            font-family: "Maple Mono NF CN", serif;
+            font-family: "Maple Mono NF CN",serif;
             font-weight: normal;
         }
         .content blockquote:not(:last-child), .content dl:not(:last-child), .content ol:not(:last-child), .content p:not(:last-child), .content pre:not(:last-child), .content table:not(:last-child), .content ul:not(:last-child) {
