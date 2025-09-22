@@ -1,4 +1,4 @@
-﻿import * as emoji from 'node-emoji';
+import * as emoji from 'node-emoji';
 import {Context} from "koishi";
 
 export const name = "emoticon";
