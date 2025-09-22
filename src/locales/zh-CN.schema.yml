@@ -10,3 +10,9 @@ github:
     timeout: 图片获取超时时间（毫秒）
     maxRetries: 最大重试次数
     enableShortName: 识别仓库短名称（owner/repo）
+
+minecraft:
+  $desc: Minecraft 配置
+  $inner:
+    checkInterval: 在线状态检查间隔（分钟）
+    notifyGroup: 用于接收更新通知的频道 ID 列表

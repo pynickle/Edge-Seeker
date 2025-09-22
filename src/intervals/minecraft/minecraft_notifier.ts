@@ -1,5 +1,6 @@
 ﻿import {Context} from 'koishi';
 import axios from 'axios';
+import {Config} from "../../index";
 
 export const name = 'minecraft_notifier';
 
@@ -15,24 +16,22 @@ declare module 'koishi' {
     }
 }
 
-export function minecraft_notifier(ctx: Context) {
+export function minecraft_notifier(ctx: Context, cfg: Config) {
+    ctx.database.extend('minecraft_notifier', {
+        id: 'integer',
+        lastRelease: 'string',
+        lastSnapshot: 'string',
+    }, {primary: 'id'});
+
     let lastRelease = '';
     let lastSnapshot = '';
 
     // 如果有数据库，加载持久化数据
     const loadData = async () => {
-        if (ctx.database) {
-            ctx.database.extend('minecraft_notifier', {
-                id: 'integer',
-                lastRelease: 'string',
-                lastSnapshot: 'string',
-            }, { primary: 'id' });
-
-            const record = (await ctx.database.get('minecraft_notifier', 1))[0];
-            if (record) {
-                lastRelease = record.lastRelease;
-                lastSnapshot = record.lastSnapshot;
-            }
+        const record = (await ctx.database.get('minecraft_notifier', 1))[0];
+        if (record) {
+            lastRelease = record.lastRelease;
+            lastSnapshot = record.lastSnapshot;
         }
     };
 
@@ -57,6 +56,7 @@ export function minecraft_notifier(ctx: Context) {
             } catch (error) {
                 retries++;
                 if (retries <= 3) {
+                    ctx.logger('minecraft-notifier').info('获取 Minecraft 版本信息失败，正在重试... (尝试次数:', retries, ')');
                     // 简单的指数退避
                     await new Promise(resolve => setTimeout(resolve, Math.pow(2, retries) * 1000));
                 }
@@ -64,31 +64,32 @@ export function minecraft_notifier(ctx: Context) {
         }
     };
 
-    ctx.on('ready', async () => {
-        await loadData();
-        ctx.setInterval(async () => {
-            try {
-                const latest = await getLatestVersions();
-                const messages = [];
+    ctx.setInterval(async () => {
+        try {
+            await loadData();
+            const latest = await getLatestVersions();
+            ctx.logger('minecraft-notifier').info(`当前最新版本 - 正式版: ${latest.release}, 快照版: ${latest.snapshot}`);
+            ctx.logger('minecraft-notifier').info(`上次记录版本 - 正式版: ${lastRelease}, 快照版: ${lastSnapshot}`);
 
-                if (lastRelease !== latest.release) {
-                    messages.push(`Minecraft 新正式版发布了：${latest.release}`);
-                    lastRelease = latest.release;
+            const bot = ctx.bots.find(bot => bot.platform === 'onebot');
+            if (lastRelease !== latest.release) {
+                for (const channel of cfg.minecraft.notifyChannel) {
+                    await bot.sendMessage(channel, `Minecraft 新正式版发布了：${latest.release}`);
                 }
-
-                if (lastSnapshot !== latest.snapshot) {
-                    messages.push(`Minecraft 新快照版发布了：${latest.snapshot}`);
-                    lastSnapshot = latest.snapshot;
-                }
-
-                if (messages.length > 0) {
-                    await saveData();
-
-                    return messages.join('\n');
-                }
-            } catch (error) {
-                ctx.logger('minecraft-notifier').error('检查 Minecraft 版本时出错：', error);
+                lastRelease = latest.release;
             }
-        }, 600000); // 每 10 分钟检查一次
-    });
+
+            if (lastSnapshot !== latest.snapshot) {
+                for (const channel of cfg.minecraft.notifyChannel) {
+                    ctx.logger('minecraft-notifier').info(`通知频道 ${channel} 有新的快照版 ${latest.snapshot}`);
+                    await bot.sendMessage(channel, `Minecraft 新快照版发布了：${latest.snapshot}`);
+                }
+                lastSnapshot = latest.snapshot;
+            }
+
+            await saveData();
+        } catch (error) {
+            ctx.logger('minecraft-notifier').error('检查 Minecraft 版本时出错：', error);
+        }
+    }, 60000 * cfg.minecraft.checkInterval); // 默认每 10 分钟检查一次
 }

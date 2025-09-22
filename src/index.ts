@@ -25,6 +25,10 @@ export interface Config {
         timeout: number
         maxRetries: number
         enableShortName: boolean
+    },
+    minecraft: {
+        checkInterval: number
+        notifyChannel: string[]
     }
 }
 
@@ -38,6 +42,10 @@ export const Config: Schema<Config> = Schema.object({
         timeout: Schema.number().min(1000).max(30000).default(10000),
         maxRetries: Schema.number().min(0).max(5).default(2),
         enableShortName: Schema.boolean().default(false)
+    }),
+    minecraft: Schema.object({
+        checkInterval: Schema.number().min(1).default(10),
+        notifyChannel: Schema.array(String).default([])
     })
 }).i18n({
     'zh-CN': require('./locales/zh-CN.schema.yml'),
