@@ -121,17 +121,17 @@ class StarCoinPlugin {
             .action(this.handleRank.bind(this));
 
         // 设置用户星币命令（需要管理员权限）
-        this.ctx.command('starcoin.set <userId> <amount:number>', '设置指定用户的星币数量（需要管理员权限）',
+        this.ctx.command('starcoin.set <userId> <amount:number>', '设置指定用户的星币数量 (需要 Authority 4 权限)',
             { authority: 4 })
             .action(this.handleSetStarCoin.bind(this));
 
         // 增加用户星币命令（需要管理员权限）
-        this.ctx.command('starcoin.add <userId> <amount:number>', '增加指定用户的星币数量（需要管理员权限）',
+        this.ctx.command('starcoin.add <userId> <amount:number>', '增加指定用户的星币数量 (需要 Authority 4 权限)',
             { authority: 4 })
             .action(this.handleAddStarCoin.bind(this));
 
         // 减少用户星币命令（需要管理员权限）
-        this.ctx.command('starcoin.remove <userId> <amount:number>', '减少指定用户的星币数量（需要管理员权限）',
+        this.ctx.command('starcoin.remove <userId> <amount:number>', '减少指定用户的星币数量 (需要 Authority 4 权限)',
             { authority: 4 })
             .action(this.handleRemoveStarCoin.bind(this));
     }
