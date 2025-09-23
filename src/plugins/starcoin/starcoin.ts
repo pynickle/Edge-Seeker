@@ -1,4 +1,4 @@
-﻿import { Context, Time } from 'koishi';
+import { Context, Time } from 'koishi';
 import * as emoji from 'node-emoji';
 import { createTextMsgNode, getUserName } from "../../utils/onebot_helper";
 
@@ -119,6 +119,21 @@ class StarCoinPlugin {
         // 星币排行榜命令
         this.ctx.command('starcoin.rank', '查看群内星币排行')
             .action(this.handleRank.bind(this));
+
+        // 设置用户星币命令（需要管理员权限）
+        this.ctx.command('starcoin.set <userId> <amount:number>', '设置指定用户的星币数量（需要管理员权限）',
+            { authority: 4 })
+            .action(this.handleSetStarCoin.bind(this));
+
+        // 增加用户星币命令（需要管理员权限）
+        this.ctx.command('starcoin.add <userId> <amount:number>', '增加指定用户的星币数量（需要管理员权限）',
+            { authority: 4 })
+            .action(this.handleAddStarCoin.bind(this));
+
+        // 减少用户星币命令（需要管理员权限）
+        this.ctx.command('starcoin.remove <userId> <amount:number>', '减少指定用户的星币数量（需要管理员权限）',
+            { authority: 4 })
+            .action(this.handleRemoveStarCoin.bind(this));
     }
 
     private async handleSignIn({ session }: { session: any }): Promise<string> {
@@ -240,6 +255,127 @@ class StarCoinPlugin {
             `连续签到：${consecutiveDays} 天`,
             consecutiveDays >= 7 ? '你已经是个签到达人啦！🎉' : '继续签到，7 天有额外奖励哦！',
         ].join('\n');
+    }
+
+    /**
+     * 设置用户星币数量
+     */
+    private async handleSetStarCoin({ session }: { session: any }, userId: string, amount: number): Promise<string> {
+        // 检查权限
+        if (!session.guildId) {
+            return '❌ 请在群聊中使用该命令！';
+        }
+
+        // 验证星币数量
+        if (amount < 0 || !Number.isInteger(amount)) {
+            return '❌ 请输入有效的非负整数！';
+        }
+
+        const channelId = session.channelId;
+        const now = new Date().getTime();
+
+        try {
+            // 更新或创建用户记录
+            await this.ctx.database.upsert('sign_in', [{
+                userId,
+                channelId,
+                starCoin: amount,
+                consecutiveDays: 0,
+                lastSignIn: now,
+            }], ['userId', 'channelId']);
+
+            const targetUserName = await getUserName(this.ctx, session, userId);
+            return `✅ 成功将 ${targetUserName} 的星币数量设置为 ${amount}！`;
+        } catch (error) {
+            console.error('设置星币失败:', error);
+            return '❌ 设置星币失败，请稍后重试！';
+        }
+    }
+
+    /**
+     * 增加用户星币数量
+     */
+    private async handleAddStarCoin({ session }: { session: any }, userId: string, amount: number): Promise<string> {
+        // 检查权限
+        if (!session.guildId) {
+            return '❌ 请在群聊中使用该命令！';
+        }
+
+        // 验证星币数量
+        if (amount <= 0 || !Number.isInteger(amount)) {
+            return '❌ 请输入有效的正整数！';
+        }
+
+        const channelId = session.channelId;
+
+        try {
+            // 获取用户记录
+            const userRecord = await this.getUserRecord(userId, channelId);
+            const now = new Date().getTime();
+
+            if (userRecord) {
+                // 用户已存在，更新星币数量
+                const newStarCoin = userRecord.starCoin + amount;
+                await this.ctx.database.set('sign_in', 
+                    { userId, channelId }, 
+                    { starCoin: newStarCoin }
+                );
+            } else {
+                // 用户不存在，创建新记录
+                await this.ctx.database.upsert('sign_in', [{
+                    userId,
+                    channelId,
+                    starCoin: amount,
+                    consecutiveDays: 0,
+                    lastSignIn: now,
+                }], ['userId', 'channelId']);
+            }
+
+            const targetUserName = await getUserName(this.ctx, session, userId);
+            return `✅ 成功为 ${targetUserName} 增加 ${amount} 星币！`;
+        } catch (error) {
+            console.error('增加星币失败:', error);
+            return '❌ 增加星币失败，请稍后重试！';
+        }
+    }
+
+    /**
+     * 减少用户星币数量
+     */
+    private async handleRemoveStarCoin({ session }: { session: any }, userId: string, amount: number): Promise<string> {
+        // 检查权限
+        if (!session.guildId) {
+            return '❌ 请在群聊中使用该命令！';
+        }
+
+        // 验证星币数量
+        if (amount <= 0 || !Number.isInteger(amount)) {
+            return '❌ 请输入有效的正整数！';
+        }
+
+        const channelId = session.channelId;
+
+        try {
+            // 获取用户记录
+            const userRecord = await this.getUserRecord(userId, channelId);
+
+            if (!userRecord) {
+                return '❌ 该用户没有星币记录！';
+            }
+
+            // 确保星币数量不为负
+            const newStarCoin = Math.max(0, userRecord.starCoin - amount);
+            await this.ctx.database.set('sign_in', 
+                { userId, channelId }, 
+                { starCoin: newStarCoin }
+            );
+
+            const targetUserName = await getUserName(this.ctx, session, userId);
+            return `✅ 成功为 ${targetUserName} 减少 ${amount} 星币，剩余 ${newStarCoin} 星币！`;
+        } catch (error) {
+            console.error('减少星币失败:', error);
+            return '❌ 减少星币失败，请稍后重试！';
+        }
     }
 }
 

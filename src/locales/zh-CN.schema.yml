@@ -25,5 +25,4 @@ guess_number:
     maxSkips: 最大连续跳过次数
     defaultStarCoin: 默认初始星币数
     entryFee: 游戏报名费（星币）
-    useDynamicReward: 是否使用报名费动态计算获得星币
-    dynamicRewardBonus: 动态计算后额外添加的星币值（可为负数）
+    defaultDynamicBonus: guess命令默认的动态星币加法值

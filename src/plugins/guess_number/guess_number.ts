@@ -21,6 +21,7 @@ interface GameData {
     signUpTimer: NodeJS.Timeout | null;
     guessTimer: NodeJS.Timeout | null;
     rewardCoins: number; // 获胜者获得的星币数量
+    dynamicBonus?: number; // 动态星币加法值
 }
 
 export function guess_number(ctx: Context, config: Config) {
@@ -45,8 +46,8 @@ export function guess_number(ctx: Context, config: Config) {
         }
     }
 
-    ctx.command('guess <rewardCoins:number>', '开启猜数字游戏')
-        .action(async ({ session }, rewardCoins: number) => {
+    ctx.command('guess [dynamicBonus:number]', '开启动态计算星币的猜数字游戏')
+        .action(async ({ session }, dynamicBonus?: number) => {
             if (!session.guildId) {
                 return "请在群聊中使用 guess 命令哦！";
             }
@@ -58,7 +59,59 @@ export function guess_number(ctx: Context, config: Config) {
                 return '当前频道已有进行中的游戏！'
             }
 
-            // 解析星币奖励数量，默认100
+            // 检查用户权限，只有authority5的用户才能指定数值
+            const user = await ctx.database.getUser(session.platform, session.userId);
+            const userAuthority = user.authority;
+            
+            // 确定动态奖励加法值
+            let bonus = config.guess_number.defaultDynamicBonus;
+            if (dynamicBonus) {
+                if (userAuthority < 5) {
+                    // 非authority5用户，限制在-15到15之间
+                    if (dynamicBonus < -15 || dynamicBonus > 15) {
+                        return '❌ 非最高权限用户只能指定 -15 到 15 之间的数值！';
+                    }
+                }
+                bonus = dynamicBonus;
+            }
+
+            // 保存乘数信息到游戏数据中
+            const game = createGame(channelId, session.userId, config.guess_number.defaultStarCoin)
+            game.platform = platform
+            games.set(channelId, game)
+            game.dynamicBonus = bonus; // 保存动态乘数
+
+            // 设置报名倒计时
+            game.signUpTimer = setTimeout(() => {
+                startGame(channelId)
+            }, config.guess_number.signUpTime * 1000)
+
+            return [
+                '🎮 动态奖励猜数字游戏开始报名！',
+                `📝 报名时间：${config.guess_number.signUpTime}秒`,
+                '🎯 游戏规则：系统会在 2-99 (包含两边的数字) 之间随机选择一个数字',
+                '💡 发送"参加游戏"来参加比赛',
+                `⏰ 每轮限时 ${config.guess_number.guessTimeout} 秒，连续 ${config.guess_number.maxSkips} 次超时将被踢出`,
+                bonus >= 0 ? `💰 获胜奖励：动态计算（报名费总和 + ${bonus} 星币）` : `💰 获胜奖励：动态计算（报名费总和 - ${Math.abs(bonus)} 星币）`,
+                `💸 报名费用：${config.guess_number.entryFee} 星币`,
+
+            ].join('\n')
+        })
+
+    ctx.command('guess.party [rewardCoins:number]', '开启固定星币奖励的猜数字游戏派对')
+        .action(async ({ session }, rewardCoins?: number) => {
+            if (!session.guildId) {
+                return "请在群聊中使用 guess.party 命令哦！";
+            }
+
+            const channelId = session.channelId
+            const platform = session.platform
+
+            if (games.has(channelId)) {
+                return '当前频道已有进行中的游戏！'
+            }
+            
+            // 确定奖励星币数量
             if (rewardCoins) {
                 // 验证奖励数量是否为有效数字且合理
                 if (rewardCoins <= 0 || rewardCoins > 1000) {
@@ -77,26 +130,13 @@ export function guess_number(ctx: Context, config: Config) {
                 startGame(channelId)
             }, config.guess_number.signUpTime * 1000)
 
-            // 根据奖励类型显示不同的消息
-            let rewardMessage = '';
-            if (rewardCoins !== config.guess_number.defaultStarCoin) {
-                // 用户指定了固定奖励
-                rewardMessage = `💰 获胜奖励：${rewardCoins} 星币！`;
-            } else if (config.guess_number.useDynamicReward) {
-                // 开启动态计算
-                rewardMessage = `💰 获胜奖励：动态计算（报名费总和 + ${config.guess_number.dynamicRewardBonus} 星币）`;
-            } else {
-                // 使用默认奖励
-                rewardMessage = `💰 获胜奖励：${rewardCoins} 星币！`;
-            }
-
             return [
-                '🎮 猜数字游戏开始报名！',
+                '🎉 固定奖励猜数字游戏派对开始报名！',
                 `📝 报名时间：${config.guess_number.signUpTime}秒`,
                 '🎯 游戏规则：系统会在 2-99 (包含两边的数字) 之间随机选择一个数字',
                 '💡 发送"参加游戏"来参加比赛',
                 `⏰ 每轮限时 ${config.guess_number.guessTimeout} 秒，连续 ${config.guess_number.maxSkips} 次超时将被踢出`,
-                rewardMessage,
+                `💰 获胜奖励：${rewardCoins} 星币！`,
                 `💸 报名费用：${config.guess_number.entryFee} 星币`,
             ].join('\n')
         })
@@ -222,12 +262,12 @@ export function guess_number(ctx: Context, config: Config) {
             return
         }
 
-        // 动态计算星币奖励
-        if (config.guess_number.useDynamicReward && game.rewardCoins === config.guess_number.defaultStarCoin) {
+        // 动态计算星币奖励（如果是动态游戏）
+        if (game.dynamicBonus) {
             // 计算所有报名费的总和
             const totalEntryFee = game.participants.size * config.guess_number.entryFee;
-            // 加上额外奖励
-            game.rewardCoins = totalEntryFee + config.guess_number.dynamicRewardBonus;
+            // 应用加法值
+            game.rewardCoins = totalEntryFee + game.dynamicBonus;
             // 确保奖励不为负数
             if (game.rewardCoins < 0) game.rewardCoins = 0;
         }

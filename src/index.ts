@@ -37,8 +37,7 @@ export interface Config {
         maxSkips: number
         defaultStarCoin: number
         entryFee: number
-        useDynamicReward: boolean
-        dynamicRewardBonus: number
+        defaultDynamicBonus: number
     }
 }
 
@@ -63,8 +62,7 @@ export const Config: Schema<Config> = Schema.object({
         maxSkips: Schema.number().default(3),
         defaultStarCoin: Schema.number().default(30),
         entryFee: Schema.number().default(10),
-        useDynamicReward: Schema.boolean().default(false),
-        dynamicRewardBonus: Schema.number().default(0)
+        defaultDynamicBonus: Schema.number().default(5)
     })
 }).i18n({
     'zh-CN': require('./locales/zh-CN.schema.yml'),

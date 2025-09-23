@@ -1,5 +1,5 @@
-import { Context } from 'koishi';
-import { getRandomElement } from '../../utils/utils';
+import {Context} from 'koishi';
+import {getRandomElement} from '../../utils/utils';
 
 export const name = 'choose';
 
@@ -66,15 +66,19 @@ export function choose(ctx: Context) {
     ctx.command('choose <...options:string>', '从多个选项中随机选择一个')
         .usage('用法：choose 选项1 选项2 选项3 ...\n示例：choose 吃饭 睡觉 打游戏')
         .action(async (_, ...options: string[]) => {
-            const validOptions = validateOptions(options);
+                if (options.some(option => option.includes('茉莉'))) {
+                    return '选项中包含不当内容，请重新输入。';
+                }
+                const validOptions = validateOptions(options);
 
-            if (validOptions.length < 2) {
-                return getRandomElement(RESPONSE_TEMPLATES.error);
+                if (validOptions.length < 2) {
+                    return getRandomElement(RESPONSE_TEMPLATES.error);
+                }
+
+                const selectedOption = getRandomElement(validOptions);
+                return generateChooseResponse(selectedOption);
             }
-
-            const selectedOption = getRandomElement(validOptions);
-            return generateChooseResponse(selectedOption);
-        });
+        )
 
     ctx.command('coin', '掷硬币决定')
         .action(() => generateCoinResponse());

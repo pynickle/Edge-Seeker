@@ -90,10 +90,7 @@ class JrysPlugin {
         let sentence: string, sentenceFrom: string;
         try {
             const res = await axios.get("https://v1.hitokoto.cn", {
-                timeout: 10000,
-                params: {
-                    max_length: 30
-                }
+                timeout: 10000
             });
             sentence = res.data.hitokoto;
             sentenceFrom = res.data.from;
