@@ -10,6 +10,7 @@ import StarCoinPlugin from "./plugins/starcoin/starcoin";
 import {waifu} from "./plugins/waifu/waifu";
 import JrysPlugin from "./plugins/jrys/jrys";
 import {choose} from "./plugins/choose/choose";
+import {guess_number} from "./plugins/guess_number/guess_number";
 
 export const inject = ['database', 'puppeteer']
 
@@ -29,6 +30,15 @@ export interface Config {
     minecraft: {
         checkInterval: number
         notifyChannel: string[]
+    },
+    guess_number: {
+        signUpTime: number
+        guessTimeout: number
+        maxSkips: number
+        defaultStarCoin: number
+        entryFee: number
+        useDynamicReward: boolean
+        dynamicRewardBonus: number
     }
 }
 
@@ -46,6 +56,15 @@ export const Config: Schema<Config> = Schema.object({
     minecraft: Schema.object({
         checkInterval: Schema.number().min(1).default(10),
         notifyChannel: Schema.array(String).default([])
+    }),
+    guess_number: Schema.object({
+        signUpTime: Schema.number().default(30),
+        guessTimeout: Schema.number().default(15),
+        maxSkips: Schema.number().default(3),
+        defaultStarCoin: Schema.number().default(30),
+        entryFee: Schema.number().default(10),
+        useDynamicReward: Schema.boolean().default(false),
+        dynamicRewardBonus: Schema.number().default(0)
     })
 }).i18n({
     'zh-CN': require('./locales/zh-CN.schema.yml'),
@@ -56,6 +75,8 @@ export function apply(ctx: Context, cfg: Config) {
     ctx.plugin(JrrpPlugin, cfg);
     ctx.plugin(JrysPlugin, cfg);
     ctx.plugin(StarCoinPlugin, cfg);
+
+    ctx.plugin(guess_number, cfg);
     ctx.plugin(zanwo, cfg);
     ctx.plugin(cat, cfg);
     ctx.plugin(whois, cfg);

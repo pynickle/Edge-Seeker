@@ -1,4 +1,4 @@
-﻿jrrp:
+jrrp:
   $desc: JRRP 配置
   $inner:
     cleanupDays: 人品记录保留天数，过期将自动清理
@@ -16,3 +16,14 @@ minecraft:
   $inner:
     checkInterval: 在线状态检查间隔（分钟）
     notifyGroup: 用于接收更新通知的频道 ID 列表
+
+guess_number:
+  $desc: 猜数字游戏配置
+  $inner:
+    signUpTime: 报名时间（秒）
+    guessTimeout: 猜数字超时时间（秒）
+    maxSkips: 最大连续跳过次数
+    defaultStarCoin: 默认初始星币数
+    entryFee: 游戏报名费（星币）
+    useDynamicReward: 是否使用报名费动态计算获得星币
+    dynamicRewardBonus: 动态计算后额外添加的星币值（可为负数）

@@ -4,7 +4,7 @@ import {Context} from "koishi";
 export const name = "emoticon";
 
 export function emoji_gen(ctx: Context) {
-    ctx.command('emoji [keyword:string]', '根据关键词查询对应 Emoji，无关键词则输出随机 Emoji')
+    ctx.command('emoji [keyword:string]', '根据关键词查询对应 Emoji 或随机返回一个 Emoji')
         .action(async ({}, keyword: string) => {
             if (!keyword) {
                 return emoji.random().emoji;
