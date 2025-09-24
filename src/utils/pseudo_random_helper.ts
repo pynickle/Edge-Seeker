@@ -1,0 +1,160 @@
+﻿import { createHash } from 'crypto';
+
+export type RandomAlgorithm = 'xoshiro256pp' | 'pcg64';
+export type BiasType = 'none' | 'slight_up' | 'moderate_up';
+
+export interface RandomOptions {
+    algorithm?: RandomAlgorithm;
+    bias?: BiasType | number; // BiasType 或自定义偏移值 (0-0.2)
+    seed?: string;
+}
+
+/**
+ * 生成单个随机数 [0, 1)
+ */
+export function random(seed: string, options: RandomOptions = {}): number {
+    const generator = createGenerator(seed, options);
+    return generator();
+}
+
+/**
+ * 生成指定范围的随机整数 [min, max]
+ */
+export function randomInt(seed: string, min: number, max: number, options: RandomOptions = {}): number {
+    const value = random(seed, options);
+    return Math.floor(value * (max - min + 1)) + min;
+}
+
+/**
+ * 生成指定范围的随机浮点数 [min, max)
+ */
+export function randomFloat(seed: string, min: number, max: number, options: RandomOptions = {}): number {
+    const value = random(seed, options);
+    return value * (max - min) + min;
+}
+
+/**
+ * 生成随机布尔值
+ */
+export function randomBool(seed: string, probability: number = 0.5, options: RandomOptions = {}): boolean {
+    return random(seed, options) < probability;
+}
+
+/**
+ * 从数组中随机选择元素
+ */
+export function randomChoice<T>(array: T[] | readonly T[], seed: string = '', options: RandomOptions = {}): T {
+    if (array.length == 0) throw new Error('Cannot choose from empty array');
+    const index = Math.floor(seed.length > 0 ? random(seed, options) : Math.random() * array.length);
+    return array[index];
+}
+
+/**
+ * 创建随机数生成器
+ */
+export function createGenerator(seed: string, options: RandomOptions): () => number {
+    const { algorithm = 'xoshiro256pp', bias = 'none' } = options;
+    const finalSeed = options.seed ? `${seed}:${options.seed}` : seed;
+
+    let baseGenerator: () => number;
+
+    switch (algorithm) {
+        case 'pcg64':
+            baseGenerator = createPcg64Generator(finalSeed);
+            break;
+        case 'xoshiro256pp':
+            baseGenerator = createXoshiro256ppGenerator(finalSeed);
+            break;
+        default:
+            throw new Error(`Unknown algorithm: ${algorithm}`);
+    }
+
+    return applyBias(baseGenerator, bias);
+}
+
+// ===== 辅助函数 =====
+
+function createXoshiro256ppGenerator(seed: string): () => number {
+    const hash = createHash('sha256').update(seed).digest();
+    let s0 = BigInt(hash.readBigUInt64BE(0));
+    let s1 = BigInt(hash.readBigUInt64BE(8));
+    let s2 = BigInt(hash.readBigUInt64BE(16));
+    let s3 = BigInt(hash.readBigUInt64BE(24));
+
+    if (s0 === 0n && s1 === 0n && s2 === 0n && s3 === 0n) {
+        s0 = 1n;
+    }
+
+    const rotl = (x: bigint, k: number): bigint => {
+        return (x << BigInt(k)) | (x >> BigInt(64 - k));
+    };
+
+    return () => {
+        const result = rotl(s0 + s3, 23) + s0;
+        const t = s1 << 17n;
+
+        s2 ^= s0;
+        s3 ^= s1;
+        s1 ^= s2;
+        s0 ^= s3;
+
+        s2 ^= t;
+
+        s3 = rotl(s3, 45);
+
+        return Number(result & ((1n << 64n) - 1n)) / Number(1n << 64n);  // 归一化到 [0, 1)
+    };
+}
+
+// 目前有问题，先用 xoshiro256pp 代替
+function createPcg64Generator(seed: string): () => number {
+    const hash = createHash('sha256').update(seed).digest();
+    let state: bigint = (BigInt(hash.readBigUInt64BE(0)) << 64n) | BigInt(hash.readBigUInt64BE(8));
+    let inc: bigint = (BigInt(hash.readBigUInt64BE(16)) << 1n) | 1n;  // 确保奇数
+
+    if (state === 0n) {
+        state = 1n;
+    }
+
+    const PCG_DEFAULT_MULTIPLIER_128 = 2549297995355413924n * 4865540591571396615n;
+    const PCG_DEFAULT_INCREMENT_128 = inc;
+
+    const rotr = (value: bigint, rot: bigint): bigint => {
+        const mask = (1n << 64n) - 1n;
+        return (((value >> rot) | (value << ((-rot) & 63n))) & mask);
+    };
+
+    return () => {
+        const oldstate = state;
+        state = (oldstate * PCG_DEFAULT_MULTIPLIER_128 + PCG_DEFAULT_INCREMENT_128) & ((1n << 128n) - 1n);
+        const word = ((oldstate >> 64n) ^ oldstate) & ((1n << 64n) - 1n);
+        const rot = oldstate >> 122n;
+        const result = rotr(word, rot);
+
+        // 修复归一化：使用高 53 位，避免精度丢失
+        return Number(result >> 11n) / (1 << 21);
+    };
+}
+
+function applyBias(generator: () => number, bias: BiasType | number): () => number {
+    let biasValue: number;
+
+    if (typeof bias === 'number') {
+        biasValue = Math.max(0, Math.min(0.2, bias)); // 限制在 0-0.2 之间
+    } else {
+        switch (bias) {
+            case 'slight_up': biasValue = 0.03; break;
+            case 'moderate_up': biasValue = 0.08; break;
+            case 'none':
+            default: biasValue = 0; break;
+        }
+    }
+
+    if (biasValue === 0) return generator;
+
+    return () => {
+        const value = generator();
+        // 使用幂函数实现向上偏移
+        return Math.pow(value, 1 - biasValue);
+    };
+}

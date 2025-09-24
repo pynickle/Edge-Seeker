@@ -1,10 +1,9 @@
 import { Context, Session } from 'koishi';
 import { Solar } from 'lunar-typescript';
-import crypto from 'crypto';
 import {} from 'koishi-plugin-puppeteer';
 import axios from "axios";
-import {getRandomElement} from "../../utils/utils";
 import {stickEmoji} from "../../utils/msg_emoji/emoji_helper";
+import {random, randomChoice, randomInt} from "../../utils/pseudo_random_helper";
 
 // 定义运势数据接口
 export interface FortuneData {
@@ -63,22 +62,21 @@ class JrysPlugin {
         const solar = Solar.fromDate(today);
         const lunar = solar.getLunar();
 
-        const seed = `${userId}${today.getFullYear()}${today.getMonth() + 1}${today.getDate()}`;
-        const random = this.getPseudoLcgRandomGenerator(seed);
-        const randomXorshift = this.getPseudoXorshiftRandomGenerator(seed);
+        const seed1 = `${userId}${today.getFullYear()}${today.getMonth()}${today.getDate()}`;
+        const seed2 = `${seed1}_;Y?hv7P.aFLf[w]?O"}MBsc')V=)hD(?`;
 
-        const randomNum = random();
-        const randomNumXorshift = randomXorshift();
+        // 计算每日固定随机数
+        const randomNum = random(seed1);
 
         // 计算运势分数（1-100）
-        const score = Math.floor(randomNum * 100) + 1;
+        const score = randomInt(seed1, 1, 100);
 
         // 计算幸运颜色
         const luckyColors : string[] = Object.keys(COLORMAP) as Array<string>;
-        const luckyColor : string = getRandomElement<string>(luckyColors, random);
+        const luckyColor : string = randomChoice<string>(luckyColors);
 
         // 计算幸运数字（1-100）
-        const luckyNumber = Math.floor(randomNumXorshift * 100) + 1;
+        const luckyNumber = randomInt(seed2, 1, 100);
 
         // 获取阳历日期字符串
         const solarDate = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
@@ -89,7 +87,7 @@ class JrysPlugin {
 
         let sentence: string, sentenceFrom: string;
         try {
-            const res = await axios.get("https://v1.hitokoto.cn", {
+            const res = await axios.get("http://hitokoto_api:8000", {
                 timeout: 10000
             });
             sentence = res.data.hitokoto;
@@ -118,33 +116,6 @@ class JrysPlugin {
             solarDate,
             sentence,
             sentenceFrom
-        };
-    }
-
-    private getPseudoLcgRandomGenerator(seed: string): () => number {
-        const hash = crypto.createHash('md5').update(seed).digest('hex');
-        let state = parseInt(hash.substring(0, 8), 16);
-
-        return () => {
-            state = (state * 1664525 + 1013904223) % 4294967296;
-            return state / 4294967296;
-        };
-    }
-
-    private getPseudoXorshiftRandomGenerator(seed: string): () => number {
-        // 使用 MD5 将种子转换为 32 位整数
-        const hash = crypto.createHash('md5').update(seed).digest('hex');
-        let state = parseInt(hash.substring(0, 8), 16) >>> 0; // 无符号 32 位整数
-
-        return () => {
-            // Xorshift32 算法
-            state ^= state << 13;
-            state ^= state >> 17;
-            state ^= state << 5;
-            // 确保 state 是无符号 32 位整数
-            state = state >>> 0;
-            // 归一化到 [0, 1)
-            return state / 4294967296;
         };
     }
 

@@ -1,14 +1,13 @@
 ﻿import { Context, h, Session } from 'koishi';
-import * as crypto from 'crypto';
 import { getFestivalBonus, getFestivals } from "./festival";
 import {} from '@koishijs/plugin-adapter-onebot'
 import { Config } from "../../index";
 import { createTextMsgNode, getUserName } from "../../utils/onebot_helper";
+import {randomInt} from "../../utils/pseudo_random_helper";
 
 export interface Jrrp {
     id: number; // 自增主键
     userId: string;
-    channelId: string;
     date: string;
     luck: number;
 }
@@ -36,12 +35,12 @@ class JrrpPlugin {
     }
 
     /**
-     * 获取用户在特定群组的人品记录
+     * 获取用户的人品记录
      */
-    private async getUserLuckRecord(userId: string, channelId: string, date: string): Promise<Jrrp | null> {
+    private async getUserLuckRecord(userId: string, date: string): Promise<Jrrp | null> {
         const records = await this.ctx.database
             .select('jrrp')
-            .where({ userId, channelId, date })
+            .where({ userId, date })
             .execute();
         return records.length > 0 ? records[0] : null;
     }
@@ -50,14 +49,13 @@ class JrrpPlugin {
         this.ctx.model.extend('jrrp', {
             id: 'unsigned',
             userId: 'string',
-            channelId: 'string',
             date: 'string',
             luck: 'integer',
         }, {
             primary: 'id',
             autoInc: true,
             // 添加唯一约束以防止重复记录
-            unique: [['userId', 'channelId', 'date']]
+            unique: [['userId', 'date']]
         });
     }
 
@@ -85,10 +83,10 @@ class JrrpPlugin {
 
     private async handleJrrpCommand(session: Session): Promise<string> {
         const today = this.getTodayString();
-        const { userId, channelId } = session;
+        const { userId } = session;
 
         // 检查今日是否已经查询过
-        const existingRecord = await this.getUserLuckRecord(userId, channelId, today);
+        const existingRecord = await this.getUserLuckRecord(userId, today);
         if (existingRecord) {
             return this.formatLuckMessage(userId, today, existingRecord.luck);
         }
@@ -99,49 +97,13 @@ class JrrpPlugin {
     }
 
     private async calculateAndStoreLuck(session: Session, today: string): Promise<number> {
-        const { userId, channelId } = session;
-        const baseLuck = this.calculateBaseLuck(userId, today);
+        const { userId} = session;
+        const baseLuck = randomInt(Date.now().toString(), 1, 100);
         const { bonus } = this.getFestivalBonus(userId, today);
         let finalLuck = baseLuck + bonus;
 
-        // 检查用户前两次人品记录（在当前群组中）
-        const recentRecords = await this.getRecentLuckRecords(userId, channelId, 2);
-
-        // 如果前两次人品都低于20，则本次确保不低于50
-        if (recentRecords.length === 2 && recentRecords.every(record => record.luck < 20)) {
-            finalLuck = Math.max(finalLuck, 50 + Math.floor(Math.random() * 50));
-        }
-
-        // 确保人品值在0-100范围内
-        finalLuck = Math.min(Math.max(finalLuck, 0), 100);
-
         await this.storeLuckRecord(session, today, finalLuck);
         return finalLuck;
-    }
-
-    private async getRecentLuckRecords(userId: string, channelId: string, count: number): Promise<Jrrp[]> {
-        // 获取用户在特定群组中最近的几条人品记录，排除今天的记录
-        const today = this.getTodayString();
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        const sevenDaysAgoStr = this.formatDate(sevenDaysAgo);
-
-        return await this.ctx.database
-            .select('jrrp')
-            .where({
-                userId,
-                channelId,
-                date: { $gte: sevenDaysAgoStr, $lt: today }
-            })
-            .orderBy('date', 'desc')
-            .limit(count)
-            .execute();
-    }
-
-    private calculateBaseLuck(userId: string, date: string): number {
-        const seed = `${userId}${date}`;
-        const hash = crypto.createHash('md5').update(seed).digest('hex');
-        return parseInt(hash.substring(0, 8), 16) % 101;
     }
 
     private getFestivalBonus(userId: string, date: string) {
@@ -151,14 +113,13 @@ class JrrpPlugin {
     }
 
     private async storeLuckRecord(session: Session, date: string, luck: number): Promise<void> {
-        const { userId, channelId } = session;
+        const { userId } = session;
 
         await this.ctx.database.upsert('jrrp', [{
             userId,
-            channelId,
             date,
             luck,
-        }], ['userId', 'channelId', 'date']);
+        }], ['userId', 'date']);
     }
 
     private formatLuckMessage(userId: string, date: string, luck: number): string {
@@ -197,9 +158,25 @@ class JrrpPlugin {
     }
 
     private async getRankings(session: Session, date: string): Promise<Jrrp[]> {
+        // 获取当前群内所有用户
+        let groupMembers = [];
+        if (session.onebot && session.guildId) {
+            try {
+                // 获取群成员列表
+                const members = await session.onebot.getGroupMemberList(session.onebot.group_id);
+                groupMembers = members.map(member => member.user_id);
+            } catch (error) {
+                console.error('获取群成员列表失败:', error);
+            }
+        }
+
+        // 查询这些用户的今日人品记录
         const query = this.ctx.database
             .select('jrrp')
-            .where({ channelId: session.channelId, date })
+            .where({
+                userId: { $in: groupMembers },
+                date
+            })
             .orderBy('luck', 'desc');
 
         if (session.onebot && this.config.jrrp.rankUseForwardMsg) {
@@ -242,9 +219,9 @@ class JrrpPlugin {
     }
 
     private async handleHistoryCommand(session: Session): Promise<string> {
-        const { userId, channelId } = session;
+        const { userId } = session;
         const { startDateStr, todayStr } = this.getHistoryDateRange();
-        const history = await this.getHistoryRecords(userId, channelId, startDateStr, todayStr);
+        const history = await this.getHistoryRecords(userId, startDateStr, todayStr);
 
         if (!history.length) {
             return '最近7天内暂无人品记录。';
@@ -263,12 +240,11 @@ class JrrpPlugin {
         };
     }
 
-    private async getHistoryRecords(userId: string, channelId: string, startDate: string, endDate: string): Promise<Jrrp[]> {
+    private async getHistoryRecords(userId: string, startDate: string, endDate: string): Promise<Jrrp[]> {
         return await this.ctx.database
             .select('jrrp')
             .where({
                 userId,
-                channelId,
                 date: { $gte: startDate, $lte: endDate },
             })
             .orderBy('date', 'desc')

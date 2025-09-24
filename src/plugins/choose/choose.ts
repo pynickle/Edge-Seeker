@@ -1,5 +1,5 @@
 import {Context} from 'koishi';
-import {getRandomElement} from '../../utils/utils';
+import {randomChoice} from "../../utils/pseudo_random_helper";
 
 export const name = 'choose';
 
@@ -42,7 +42,7 @@ function formatResponse(template: string, result: string): string {
  * 生成随机选择响应
  */
 function generateChooseResponse(result: string): string {
-    const template = getRandomElement(RESPONSE_TEMPLATES.choose);
+    const template = randomChoice<string>(RESPONSE_TEMPLATES.choose);
     return formatResponse(template, result);
 }
 
@@ -50,8 +50,8 @@ function generateChooseResponse(result: string): string {
  * 生成掷硬币响应
  */
 function generateCoinResponse(): string {
-    const result = getRandomElement(COIN_SIDES);
-    const template = getRandomElement(RESPONSE_TEMPLATES.coin);
+    const result = randomChoice(COIN_SIDES);
+    const template = randomChoice(RESPONSE_TEMPLATES.coin);
     return formatResponse(template, result);
 }
 
@@ -72,10 +72,10 @@ export function choose(ctx: Context) {
                 const validOptions = validateOptions(options);
 
                 if (validOptions.length < 2) {
-                    return getRandomElement(RESPONSE_TEMPLATES.error);
+                    return randomChoice(RESPONSE_TEMPLATES.error);
                 }
 
-                const selectedOption = getRandomElement(validOptions);
+                const selectedOption = randomChoice(validOptions);
                 return generateChooseResponse(selectedOption);
             }
         )

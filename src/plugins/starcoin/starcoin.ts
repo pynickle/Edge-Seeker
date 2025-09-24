@@ -1,6 +1,7 @@
 import { Context, Time } from 'koishi';
 import * as emoji from 'node-emoji';
 import { createTextMsgNode, getUserName } from "../../utils/onebot_helper";
+import { randomInt } from "../../utils/pseudo_random_helper";
 
 // 定义数据库表结构
 export interface SignIn {
@@ -12,11 +13,19 @@ export interface SignIn {
     lastSignIn: number; // 最后签到时间（时间戳）
 }
 
+export interface GameLimit {
+    id: number; // 自增主键
+    userId: string; // 用户 QQ 号
+    date: string; // 日期（YYYY-MM-DD格式）
+    count: number; // 当天已开启的游戏次数
+}
+
 export const name = 'sign_in';
 
 declare module 'koishi' {
     interface Tables {
         sign_in: SignIn;
+        game_limit: GameLimit
     }
 }
 
@@ -44,6 +53,18 @@ class StarCoinPlugin {
             unique: [['userId', 'channelId']]
         });
 
+        // 扩展数据库，创建 game_limit 表用于记录游戏次数限制
+        ctx.model.extend('game_limit', {
+            id: 'unsigned',
+            userId: 'string',
+            date: 'string',
+            count: 'integer',
+        }, {
+            primary: 'id',
+            autoInc: true,
+            unique: [['userId', 'date']]
+        });
+
         this.registerCommands();
     }
 
@@ -56,6 +77,63 @@ class StarCoinPlugin {
             .where({ userId, channelId })
             .execute();
         return records.length > 0 ? records[0] : null;
+    }
+
+    /**
+     * 获取今天的日期字符串（YYYY-MM-DD格式）
+     */
+    private getTodayString(): string {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    /**
+     * 检查用户当天的游戏次数
+     */
+    private async getUserGameLimit(userId: string): Promise<{ canPlay: boolean; remaining: number; total: number }> {
+        const today = this.getTodayString();
+        const records = await this.ctx.database
+            .select('game_limit')
+            .where({ userId, date: today })
+            .execute();
+
+        const count = records.length > 0 ? records[0].count : 0;
+        const maxGames = 2; // 每个用户每天最多开启两次
+
+        return {
+            canPlay: count < maxGames,
+            remaining: maxGames - count,
+            total: maxGames
+        };
+    }
+
+    /**
+     * 增加用户的游戏次数
+     */
+    private async incrementGameCount(userId: string): Promise<void> {
+        const today = this.getTodayString();
+        const records = await this.ctx.database
+            .select('game_limit')
+            .where({ userId, date: today })
+            .execute();
+
+        if (records.length > 0) {
+            // 用户今天已经玩过，增加次数
+            await this.ctx.database.set('game_limit', 
+                { userId, date: today }, 
+                { count: records[0].count + 1 }
+            );
+        } else {
+            // 用户今天第一次玩，创建记录
+            await this.ctx.database.create('game_limit', {
+                userId,
+                date: today,
+                count: 1
+            });
+        }
     }
 
     /**
@@ -124,6 +202,10 @@ class StarCoinPlugin {
         this.ctx.command('starcoin.set <userId> <amount:number>', '设置指定用户的星币数量 (需要 Authority 4 权限)',
             { authority: 4 })
             .action(this.handleSetStarCoin.bind(this));
+
+        // 动态计算星币游戏命令
+        this.ctx.command('starcoin.game [amount:number]', '开启一场动态计算星币的游戏')
+            .action(this.handleDynamicStarCoinGame.bind(this));
 
         // 增加用户星币命令（需要管理员权限）
         this.ctx.command('starcoin.add <userId> <amount:number>', '增加指定用户的星币数量 (需要 Authority 4 权限)',
@@ -375,6 +457,155 @@ class StarCoinPlugin {
         } catch (error) {
             console.error('减少星币失败:', error);
             return '❌ 减少星币失败，请稍后重试！';
+        }
+    }
+}
+
+    /**
+     * 处理动态星币游戏命令
+     */
+    private async handleDynamicStarCoinGame({ session }: { session: any }, amount?: number): Promise<string | void> {
+        if (!session.guildId) {
+            return '❌ 请在群聊中使用该命令！';
+        }
+
+        const { userId, channelId, username, authority } = session;
+        const userRecord = await this.getUserRecord(userId, channelId);
+
+        // 对于authority大于3的用户，权限最高，可以任意指定数值且不受次数限制
+        if (authority > 3) {
+            if (amount !== undefined && (!Number.isInteger(amount))) {
+                return '❌ 请输入有效的整数！';
+            }
+            
+            const dynamicBonus = amount !== undefined ? amount : randomInt(userId + channelId, -50, 50);
+            await this.incrementStarCoin(userId, channelId, dynamicBonus);
+            
+            const targetUserName = await getUserName(this.ctx, session, userId);
+            return `✅ 管理员特权！${targetUserName} ${dynamicBonus > 0 ? '获得' : '扣除'} ${Math.abs(dynamicBonus)} 星币！`;
+        }
+
+        // 对于authority等于3的用户，可以指定动态计算星币的数值为-30到30
+        if (authority === 3) {
+            const { canPlay, remaining } = await this.getUserGameLimit(userId);
+            if (!canPlay) {
+                return `❌ 你今天的游戏次数已用完，明天再来吧！`;
+            }
+
+            if (amount !== undefined) {
+                if (!Number.isInteger(amount) || amount < -30 || amount > 30) {
+                    return '❌ 你只能指定 -30 到 30 之间的整数！';
+                }
+            }
+
+            const dynamicBonus = amount !== undefined ? amount : randomInt(userId + channelId, -30, 30);
+            await this.incrementStarCoin(userId, channelId, dynamicBonus);
+            await this.incrementGameCount(userId);
+
+            const targetUserName = await getUserName(this.ctx, session, userId);
+            return `✅ ${targetUserName} ${dynamicBonus > 0 ? '获得' : '扣除'} ${Math.abs(dynamicBonus)} 星币！你今天还可以玩 ${remaining - 1} 次。`;
+        }
+
+        // 对于authority小于3的用户，需要扣除10个星币开启一场比赛
+        if (authority < 3) {
+            const { canPlay, remaining } = await this.getUserGameLimit(userId);
+            if (!canPlay) {
+                return `❌ 你今天的游戏次数已用完，明天再来吧！`;
+            }
+
+            // 检查用户是否有足够的星币
+            if (!userRecord || userRecord.starCoin < 10) {
+                return '❌ 你的星币不足10个，无法开启游戏！';
+            }
+
+            // 如果用户指定了值，提醒这是不被允许的
+            if (amount !== undefined) {
+                return '❌ 你没有权限指定数值！游戏将自动随机生成数值。';
+            }
+
+            // 发送确认提示
+            await session.send(`💸 开启游戏需要扣除10个星币，是否继续？请在15秒内回复「确认」继续。`);
+
+            // 等待用户确认
+            const confirmed = await this.waitForConfirmation(session, 15000);
+            
+            if (!confirmed) {
+                return '✅ 游戏已取消。';
+            }
+
+            // 扣除星币并开启游戏
+            await this.decrementStarCoin(userId, channelId, 10);
+            const dynamicBonus = 20; // 固定为20
+            await this.incrementStarCoin(userId, channelId, dynamicBonus);
+            await this.incrementGameCount(userId);
+
+            const targetUserName = await getUserName(this.ctx, session, userId);
+            return `✅ ${targetUserName} 扣除了10个星币，获得了 ${dynamicBonus} 星币！净赚 ${dynamicBonus - 10} 星币！你今天还可以玩 ${remaining - 1} 次。`;
+        }
+    }
+
+    /**
+     * 等待用户确认
+     */
+    private async waitForConfirmation(session: any, timeout: number): Promise<boolean> {
+        return new Promise((resolve) => {
+            let timer: ReturnType<typeof setTimeout>;
+            
+            const listener = (msg: any) => {
+                if (msg.userId === session.userId && 
+                    msg.channelId === session.channelId && 
+                    /^确认$/.test(msg.content)) {
+                    clearTimeout(timer);
+                    this.ctx.off('message', listener);
+                    resolve(true);
+                }
+            };
+
+            this.ctx.on('message', listener);
+            
+            timer = setTimeout(() => {
+                this.ctx.off('message', listener);
+                resolve(false);
+            }, timeout);
+        });
+    }
+
+    /**
+     * 增加用户星币
+     */
+    private async incrementStarCoin(userId: string, channelId: string, amount: number): Promise<void> {
+        const userRecord = await this.getUserRecord(userId, channelId);
+        const now = new Date().getTime();
+
+        if (userRecord) {
+            const newStarCoin = Math.max(0, userRecord.starCoin + amount);
+            await this.ctx.database.set('sign_in', 
+                { userId, channelId }, 
+                { starCoin: newStarCoin }
+            );
+        } else {
+            await this.ctx.database.upsert('sign_in', [{ 
+                userId, 
+                channelId, 
+                starCoin: Math.max(0, amount), 
+                consecutiveDays: 0, 
+                lastSignIn: now 
+            }], ['userId', 'channelId']);
+        }
+    }
+
+    /**
+     * 减少用户星币
+     */
+    private async decrementStarCoin(userId: string, channelId: string, amount: number): Promise<void> {
+        const userRecord = await this.getUserRecord(userId, channelId);
+        
+        if (userRecord) {
+            const newStarCoin = Math.max(0, userRecord.starCoin - amount);
+            await this.ctx.database.set('sign_in', 
+                { userId, channelId }, 
+                { starCoin: newStarCoin }
+            );
         }
     }
 }

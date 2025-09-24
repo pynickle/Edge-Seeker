@@ -57,12 +57,12 @@ export const Config: Schema<Config> = Schema.object({
         notifyChannel: Schema.array(String).default([])
     }),
     guess_number: Schema.object({
-        signUpTime: Schema.number().default(30),
-        guessTimeout: Schema.number().default(15),
+        signUpTime: Schema.number().default(45),
+        guessTimeout: Schema.number().default(20),
         maxSkips: Schema.number().default(3),
         defaultStarCoin: Schema.number().default(30),
-        entryFee: Schema.number().default(10),
-        defaultDynamicBonus: Schema.number().default(5)
+        entryFee: Schema.number().default(20),
+        defaultDynamicBonus: Schema.number().default(10)
     })
 }).i18n({
     'zh-CN': require('./locales/zh-CN.schema.yml'),

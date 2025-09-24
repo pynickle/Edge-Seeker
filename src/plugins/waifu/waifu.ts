@@ -1,6 +1,6 @@
 import { Context, h, Session } from 'koishi';
-import { getRandomElement } from '../../utils/utils';
 import { stickEmoji } from '../../utils/msg_emoji/emoji_helper';
+import {randomChoice} from "../../utils/pseudo_random_helper";
 
 export const name = 'waifu';
 
@@ -103,7 +103,7 @@ async function handleImageRequest(
     // 确定最终类别
     const finalCategory: CategoryType = category
         ? category.toLowerCase() as CategoryType
-        : getRandomElement(CATEGORIES);
+        : randomChoice(CATEGORIES);
 
     // 获取图片并发送
     const result = await fetchImageUrl(ctx, finalCategory);
