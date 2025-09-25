@@ -41,6 +41,10 @@ export interface Config {
         defaultStarCoin: number
         entryFee: number
         defaultDynamicBonus: number
+        firstDailyAttempts: number
+        firstBonus: number
+        extraDailyAttempts: number
+        extraBonus: number
     },
     baike_quiz: {
         apiKey: string
@@ -59,12 +63,12 @@ export const Config: Schema<Config> = Schema.object({
         rankUseForwardMsg: Schema.boolean().default(true),
     }),
     github: Schema.object({
-        timeout: Schema.number().min(1000).max(30000).default(10000),
-        maxRetries: Schema.number().min(0).max(5).default(2),
+        timeout: Schema.number().default(10000),
+        maxRetries: Schema.number().default(2),
         enableShortName: Schema.boolean().default(false)
     }),
     minecraft: Schema.object({
-        checkInterval: Schema.number().min(1).default(10),
+        checkInterval: Schema.number().default(10),
         notifyChannel: Schema.array(String).default([])
     }),
     guess_number: Schema.object({
@@ -73,15 +77,19 @@ export const Config: Schema<Config> = Schema.object({
         maxSkips: Schema.number().default(3),
         defaultStarCoin: Schema.number().default(30),
         entryFee: Schema.number().default(20),
-        defaultDynamicBonus: Schema.number().default(10)
+        defaultDynamicBonus: Schema.number().default(10),
+        firstDailyAttempts: Schema.number().default(5),
+        firstBonus: Schema.number().default(20),
+        extraDailyAttempts: Schema.number().default(5),
+        extraBonus: Schema.number().default(-10)
     }),
     baike_quiz: Schema.object({
         apiKey: Schema.string().default(''),
-        questionTimeout: Schema.number().min(5).max(120).default(15),
-        rewardStarCoin: Schema.number().min(1).default(10),
-        penaltyStarCoin: Schema.number().min(1).default(5),
+        questionTimeout: Schema.number().default(15),
+        rewardStarCoin: Schema.number().default(10),
+        penaltyStarCoin: Schema.number().default(5),
         adminQQs: Schema.array(String).default([]),
-        maxDailyAttempts: Schema.number().min(1).max(20).default(5)
+        maxDailyAttempts: Schema.number().default(5)
     })
 }).i18n({
     'zh-CN': require('./locales/zh-CN.schema.yml'),

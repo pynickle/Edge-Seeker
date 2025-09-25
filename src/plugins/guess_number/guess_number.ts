@@ -115,9 +115,6 @@ export function guess_number(ctx: Context, config: Config) {
         return records.reduce((total, record) => total + record.gameCount, 0);
     }
 
-    // 频道每日游戏次数上限
-    const MAX_CHANNEL_GAMES_PER_DAY = 5;
-
     // 增加用户当天的游戏次数
     async function incrementGameCount(userId: string, channelId: string): Promise<void> {
         const today = getTodayString();
@@ -193,10 +190,14 @@ export function guess_number(ctx: Context, config: Config) {
             let maxGamesPerDay = 0; // 默认为无限制
             let todayGameCount = 0;
 
+            const channelGameCount = await getChannelGameCount(channelId);
+
             // 只有非特权用户才受限制
             if (!isAuthorizedUser) {
+                // 计算频道每日游戏次数上限 - 使用配置的前五次和额外五次
+                const MAX_CHANNEL_GAMES_PER_DAY = config.guess_number.firstDailyAttempts + config.guess_number.extraDailyAttempts;
+                
                 // 检查频道当日游戏次数是否达到上限
-                const channelGameCount = await getChannelGameCount(channelId);
                 if (channelGameCount >= MAX_CHANNEL_GAMES_PER_DAY) {
                     return `❌ 本频道今日游戏次数已达上限(${MAX_CHANNEL_GAMES_PER_DAY}次)，请明天再来！`;
                 }
@@ -227,8 +228,11 @@ export function guess_number(ctx: Context, config: Config) {
                     return '❌ 权限不足，您不能指定数值！'
                 }
 
-                // 固定bonus为20
-                bonus = 20;
+                if (channelGameCount > config.guess_number.firstDailyAttempts) {
+                    bonus = config.guess_number.extraBonus;
+                } else {
+                    bonus = config.guess_number.firstBonus;
+                }
 
                 // 检查用户是否有足够的星币支付10星币
                 const userRecord = await ctx.database.get('sign_in', {
@@ -299,6 +303,7 @@ export function guess_number(ctx: Context, config: Config) {
 
             // 获取并显示频道剩余游戏次数
             const currentChannelGameCount = await getChannelGameCount(channelId);
+            const MAX_CHANNEL_GAMES_PER_DAY = config.guess_number.firstDailyAttempts + config.guess_number.extraDailyAttempts;
             const remainingChannelGames = MAX_CHANNEL_GAMES_PER_DAY - currentChannelGameCount;
 
             // 保存乘数信息到游戏数据中
@@ -349,9 +354,10 @@ export function guess_number(ctx: Context, config: Config) {
             const isAuthorizedUser = userAuthority > 3;
 
             // 只有非特权用户才受限制
+            const channelGameCount = await getChannelGameCount(channelId);
+            const MAX_CHANNEL_GAMES_PER_DAY = config.guess_number.firstDailyAttempts + config.guess_number.extraDailyAttempts;
             if (!isAuthorizedUser) {
                 // 检查频道当日游戏次数是否达到上限
-                const channelGameCount = await getChannelGameCount(channelId);
                 if (channelGameCount >= MAX_CHANNEL_GAMES_PER_DAY) {
                     return `❌ 本频道今日游戏次数已达上限(${MAX_CHANNEL_GAMES_PER_DAY}次)，请明天再来！`;
                 }
@@ -394,7 +400,7 @@ export function guess_number(ctx: Context, config: Config) {
             }
 
             // 获取并显示频道剩余游戏次数
-            const currentChannelGameCount = await getChannelGameCount(channelId);
+            const currentChannelGameCount = channelGameCount + 1; // 包括当前游戏
             const remainingChannelGames = MAX_CHANNEL_GAMES_PER_DAY - currentChannelGameCount;
 
             return [

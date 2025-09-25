@@ -26,6 +26,10 @@ guess_number:
     defaultStarCoin: 默认初始星币数
     entryFee: 游戏报名费（星币）
     defaultDynamicBonus: guess命令默认的动态星币加法值
+    firstDailyAttempts: 每日前几次游戏
+    firstBonus: 每日前几次游戏的固定动态星币加法值
+    extraDailyAttempts: 额外游戏次数
+    extraBonus: 额外游戏次数的固定动态星币加法值
 
 baike_quiz:
   $desc: 百科问答配置
