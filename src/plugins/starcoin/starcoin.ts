@@ -111,7 +111,8 @@ class StarCoinPlugin {
 
     private registerCommands(): void {
         // 签到命令
-        this.ctx.command('签到', '每日签到，获取星币')
+        this.ctx.command('sign', '每日签到，获取星币')
+            .alias('签到')
             .action(this.handleSignIn.bind(this));
 
         // 查询个人星币命令
