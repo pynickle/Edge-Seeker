@@ -73,7 +73,7 @@ export const Config: Schema<Config> = Schema.object({
     }),
     baike_quiz: Schema.object({
         apiKey: Schema.string().default(''),
-        questionTimeout: Schema.number().min(5).max(120).default(20)
+        questionTimeout: Schema.number().min(5).max(120).default(15)
     })
 }).i18n({
     'zh-CN': require('./locales/zh-CN.schema.yml'),

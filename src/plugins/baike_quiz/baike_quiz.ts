@@ -15,7 +15,6 @@ export interface BaikeQuizRecord {
 }
 
 export interface BaikeQuizState {
-    id: number; // 自增主键
     channelId: string; // 频道ID（群号）
     currentQuestion: string; // 当前问题
     answerA: string; // 答案A
@@ -48,7 +47,6 @@ type QuizResult = {
 declare module 'koishi' {
     interface Tables {
         baike_quiz_record: BaikeQuizRecord;
-        baike_quiz_state: BaikeQuizState;
     }
 }
 
@@ -77,25 +75,6 @@ class BaikeQuizPlugin {
             primary: 'id',
             autoInc: true,
             unique: [['userId', 'channelId']]
-        });
-
-        // 扩展数据库，创建baike_quiz_state表
-        ctx.model.extend('baike_quiz_state', {
-            id: 'unsigned',
-            channelId: 'string',
-            currentQuestion: 'string',
-            answerA: 'string',
-            answerB: 'string',
-            answerC: 'string',
-            answerD: 'string',
-            correctAnswer: 'string',
-            analytic: 'string',
-            questionerId: 'string',
-            createTime: 'unsigned',
-        }, {
-            primary: 'id',
-            autoInc: true,
-            unique: ['channelId']
         });
 
         this.registerCommands();
@@ -131,7 +110,6 @@ class BaikeQuizPlugin {
             
             // 检查是否是开启问答的用户在回答
             if (userId !== quizState.questionerId) {
-                console.log(`用户${userId}尝试回答用户${quizState.questionerId}开启的问题，已拒绝`);
                 return;
             }
             
@@ -158,15 +136,20 @@ class BaikeQuizPlugin {
         return records.length > 0 ? records[0] : null;
     }
 
+    // 内存存储当前活跃的问答状态
+    private activeQuizStates: Map<string, BaikeQuizState> = new Map();
+
     /**
      * 获取当前群的问答状态
      */
-    private async getQuizState(channelId: string): Promise<BaikeQuizState | null> {
-        const states = await this.ctx.database
-            .select('baike_quiz_state')
-            .where({ channelId })
-            .execute();
-        return states.length > 0 ? states[0] : null;
+    private getQuizState(channelId: string): BaikeQuizState | null {
+        const state = this.activeQuizStates.get(channelId);
+        // 检查是否已过期（10分钟）
+        if (state && state.createTime < Date.now() - 10 * 60 * 1000) {
+            this.activeQuizStates.delete(channelId);
+            return null;
+        }
+        return state || null;
     }
 
     /**
@@ -230,7 +213,7 @@ class BaikeQuizPlugin {
      */
     private async fetchQuizQuestion(): Promise<QuizResult | null> {
         if (!this.apiKey) {
-            console.error('百科题库API密钥未配置，请在配置文件中设置baike_quiz.apiKey');
+            console.error('百科题库 API 密钥未配置，请在配置文件中设置 baike_quiz.apiKey');
             return null;
         }
 
@@ -242,7 +225,7 @@ class BaikeQuizPlugin {
             });
             return response.data;
         } catch (error) {
-            console.error('Error fetching quiz question:', error);
+            console.error('获取题库信息失败', error);
             return null;
         }
     }
@@ -265,7 +248,7 @@ class BaikeQuizPlugin {
     /**
      * 设置问题超时处理
      */
-    private setupQuestionTimeout(channelId: string): void {
+    private setupQuestionTimeout(platform: string, channelId: string): void {
         // 清除之前的超时计时器
         if (this.activeTimeouts.has(channelId)) {
             clearTimeout(this.activeTimeouts.get(channelId)!);
@@ -274,15 +257,15 @@ class BaikeQuizPlugin {
         // 设置新的计时器
         const timeout = setTimeout(async () => {
             try {
-                const quizState = await this.getQuizState(channelId);
+                const quizState = this.getQuizState(channelId);
                 if (quizState) {
                     // 通知用户问题已超时
-                    await this.ctx.broadcast([channelId],
+                    await this.ctx.broadcast([`${platform}:${channelId}`],
                         `⏰ 百科问答题目已超时！正确答案是：${quizState.correctAnswer}`
                     );
                     
                     // 删除当前问答状态
-                    await this.ctx.database.remove('baike_quiz_state', { channelId });
+                    this.activeQuizStates.delete(channelId);
                 }
                 
                 // 移除超时计时器
@@ -306,7 +289,7 @@ class BaikeQuizPlugin {
         }
 
         // 获取当前问答状态
-        const quizState = await this.getQuizState(channelId);
+        const quizState = this.getQuizState(channelId);
         if (!quizState) {
             return null;
         }
@@ -327,7 +310,7 @@ class BaikeQuizPlugin {
         await this.updateStarCoin(userId, channelId, starCoinAmount);
 
         // 删除当前问答状态
-        await this.ctx.database.remove('baike_quiz_state', { channelId });
+        this.activeQuizStates.delete(channelId);
         
         // 清除超时计时器
         if (this.activeTimeouts.has(channelId)) {
@@ -344,7 +327,7 @@ class BaikeQuizPlugin {
             return [
                 `🎉 恭喜 @${username} 回答正确！`,
                 `获得 ${this.REWARD_STAR_COIN} 星币奖励！`,
-                `📝 解析：${analytic}`,
+                `📝 解析：${analytic || '暂无解析信息'}`,
                 `你今日还剩 ${remainingAttempts} 次答题机会。`
             ].join('\n');
         } else {
@@ -352,7 +335,7 @@ class BaikeQuizPlugin {
                 `😔 很遗憾 @${username} 回答错误！`,
                 `扣除 ${this.PENALTY_STAR_COIN} 星币...`,
                 `正确答案是：${correctAnswer}`,
-                `📝 解析：${analytic}`,
+                `📝 解析：${analytic || '暂无解析信息'}`,
                 `你今日还剩 ${remainingAttempts} 次答题机会。`
             ].join('\n');
         }
@@ -375,24 +358,13 @@ class BaikeQuizPlugin {
         }
 
         // 检查是否已有活跃的问答
-        const currentState = await this.getQuizState(channelId);
+        const currentState = this.getQuizState(channelId);
         if (currentState) {
-            // 检查问答是否已过期（10分钟）
-            const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
-            if (currentState.createTime > tenMinutesAgo) {
-                // 检查是否是自己开启的问答
-                if (currentState.questionerId === userId) {
-                    return `你当前已有活跃的问答题目，请先回答完再继续！\n问题：${currentState.currentQuestion}`;
-                } else {
-                    return `当前已有其他用户开启的活跃问答题目，请等待其完成或超时后再继续！`;
-                }
+            // 检查是否是自己开启的问答
+            if (currentState.questionerId === userId) {
+                return `你当前已有活跃的问答题目，请先回答完再继续！\n问题：${currentState.currentQuestion}`;
             } else {
-                // 清理过期的问答状态
-                await this.ctx.database.remove('baike_quiz_state', { channelId });
-                if (this.activeTimeouts.has(channelId)) {
-                    clearTimeout(this.activeTimeouts.get(channelId)!);
-                    this.activeTimeouts.delete(channelId);
-                }
+                return `当前已有其他用户开启的活跃问答题目，请等待其完成或超时后再继续！`;
             }
         }
 
@@ -403,24 +375,24 @@ class BaikeQuizPlugin {
             return `❌ 获取百科题目失败：${errorMsg}`;
         }
 
-        const { title, answerA, answerB, answerC, answerD, answer, analytic } = quizResult.result;
+        const { title, answerA, answerB, answerC, answerD, answer: correctAnswer, analytic } = quizResult.result;
 
-        // 保存问答状态
-        await this.ctx.database.upsert('baike_quiz_state', [{
+        // 保存问答状态到内存
+        this.activeQuizStates.set(channelId, {
             channelId,
             currentQuestion: title,
             answerA,
             answerB,
             answerC,
             answerD,
-            correctAnswer: answer,
+            correctAnswer,
             analytic,
             questionerId: userId,
             createTime: Date.now()
-        }], ['channelId']);
+        });
 
         // 设置问题超时处理
-        this.setupQuestionTimeout(channelId);
+        this.setupQuestionTimeout(session.platform, channelId);
 
         // 格式化问题和选项
         return [
@@ -430,6 +402,7 @@ class BaikeQuizPlugin {
             `B. ${answerB}`,
             `C. ${answerC}`,
             `D. ${answerD}`,
+            `⏰ 答题时间：${this.questionTimeout} 秒`,
             `请直接输入 A/B/C/D 来回答问题！（只有你能回答哦）`
         ].join('\n');
     }
