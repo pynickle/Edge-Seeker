@@ -14,6 +14,7 @@ import {guess_number} from "./plugins/guess_number/guess_number";
 import MarketPlugin from "./plugins/prop/market/market";
 import InventoryPlugin from "./plugins/prop/inventory/inventory";
 import BaikeQuizPlugin from "./plugins/baike_quiz/baike_quiz";
+import {red_packet} from "./plugins/red_packet/red_packet";
 
 export const inject = ['database', 'puppeteer']
 
@@ -53,6 +54,11 @@ export interface Config {
         penaltyStarCoin: number
         adminQQs: string[]
         maxDailyAttempts: number
+    },
+    red_packet: {
+        smallPacketFee: number
+        confirmationTimeout: number
+        packetExpiryTime: number
     }
 }
 
@@ -90,6 +96,11 @@ export const Config: Schema<Config> = Schema.object({
         penaltyStarCoin: Schema.number().default(5),
         adminQQs: Schema.array(String).default([]),
         maxDailyAttempts: Schema.number().default(5)
+    }),
+    red_packet: Schema.object({
+        smallPacketFee: Schema.number().default(10),
+        confirmationTimeout: Schema.number().default(30),
+        packetExpiryTime: Schema.number().default(24)
     })
 }).i18n({
     'zh-CN': require('./locales/zh-CN.schema.yml'),
@@ -107,6 +118,7 @@ export function apply(ctx: Context, cfg: Config) {
     ctx.plugin(JrysPlugin, cfg);
 
     ctx.plugin(guess_number, cfg);
+    ctx.plugin(red_packet, cfg);
 
     ctx.plugin(zanwo, cfg);
     ctx.plugin(cat, cfg);

@@ -1,6 +1,7 @@
 import {Config} from "../../index";
 import {Context, Session} from "koishi";
 import {StarCoinHelper} from '../../utils/starcoin_helper';
+import {useConfirmationHelper} from '../../utils/confirmation_helper';
 
 export const name = 'guess-number'
 
@@ -55,10 +56,9 @@ export function guess_number(ctx: Context, config: Config) {
 
     // 游戏状态管理
     const games = new Map<string, GameData>() // channelId -> gameData
-    const pendingConfirmations = new Map<string, {
-        resolve: (value: boolean) => void,
-        timer: ReturnType<typeof setTimeout>
-    }>()
+    
+    // 使用确认辅助函数
+    const confirmationManager = useConfirmationHelper(ctx);
 
     // 游戏数据结构
     function createGame(channelId: string, creatorId: string, rewardCoins: number = 100): GameData {
@@ -141,24 +141,7 @@ export function guess_number(ctx: Context, config: Config) {
 
     // 等待用户确认
     function waitForConfirmation(session: Session): Promise<boolean> {
-        return new Promise((resolve) => {
-            const key = `${session.platform}:${session.userId}`;
-
-            // 清除之前的确认（如果有）
-            const previous = pendingConfirmations.get(key);
-            if (previous) {
-                clearTimeout(previous.timer);
-                previous.resolve(false);
-            }
-
-            // 设置15秒超时
-            const timer = setTimeout(() => {
-                pendingConfirmations.delete(key);
-                resolve(false);
-            }, 15000);
-
-            pendingConfirmations.set(key, {resolve, timer});
-        });
+        return confirmationManager.createConfirmation(ctx, session, 15);
     }
 
     ctx.command('guess [dynamicBonus:number]', '开启动态计算星币的猜数字游戏')
@@ -482,21 +465,6 @@ export function guess_number(ctx: Context, config: Config) {
             await endGame(channelId, '游戏被创建者终止', true)
             return '游戏已终止，已退还所有报名者的报名费';
         })
-
-    // 监听确认消息
-    ctx.middleware(async (session, next) => {
-        const key = `${session.platform}:${session.userId}`;
-        const confirmation = pendingConfirmations.get(key);
-
-        if (confirmation && /^(确认|取消)$/.test(session.content?.trim() || '')) {
-            clearTimeout(confirmation.timer);
-            pendingConfirmations.delete(key);
-            confirmation.resolve(session.content.trim() === '确认');
-            return;
-        }
-
-        return next();
-    }, true);
 
     // 监听数字输入
     ctx.middleware(async (session, next) => {

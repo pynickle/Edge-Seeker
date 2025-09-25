@@ -40,3 +40,10 @@ baike_quiz:
     penaltyStarCoin: 回答错误时扣除的星币数量
     adminQQs: 用于接收申诉通知的管理员QQ列表
     maxDailyAttempts: 用户每日最大答题次数（1-20）
+
+red_packet:
+  $desc: 红包功能配置
+  $inner:
+    smallPacketFee: 红包的手续费（星币）
+    confirmationTimeout: 发送红包确认超时时间（秒）
+    packetExpiryTime: 红包过期时间（小时）

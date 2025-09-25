@@ -1,4 +1,4 @@
-﻿import { createHash } from 'crypto';
+import { createHash } from 'crypto';
 
 export type RandomAlgorithm = 'xoshiro256pp' | 'pcg64';
 export type BiasType = 'slight_up' | 'moderate_up' | 'none' | 'slight_down' | 'moderate_down';
@@ -47,6 +47,27 @@ export function randomChoice<T>(array: T[] | readonly T[], seed: string = '', op
     if (array.length == 0) throw new Error('Cannot choose from empty array');
     const index = Math.floor(seed.length > 0 ? random(seed, options) : Math.random() * array.length);
     return array[index];
+}
+
+/**
+ * 生成正态分布随机数
+ * @param seed 种子
+ * @param mean 均值
+ * @param stdDev 标准差
+ * @param options 随机数选项
+ * @returns 服从正态分布的随机数
+ */
+export function normalRandom(seed: string, mean: number, stdDev: number, options: RandomOptions = {}): number {
+    // 使用Box-Muller变换生成正态分布随机数
+    // 生成两个均匀分布的随机数
+    const u1 = random(seed, options);
+    const u2 = random(seed + 'second', options);
+    
+    // Box-Muller变换
+    const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+    
+    // 应用均值和标准差
+    return z0 * stdDev + mean;
 }
 
 /**
@@ -134,7 +155,6 @@ function createPcg64Generator(seed: string): () => number {
         return Number(result >> 11n) / (1 << 21);
     };
 }
-
 
 export function applyBias(generator: () => number, bias: BiasType | number): () => number {
     let power: number;
