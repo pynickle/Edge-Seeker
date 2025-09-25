@@ -45,6 +45,10 @@ export interface Config {
     baike_quiz: {
         apiKey: string
         questionTimeout: number
+        rewardStarCoin: number
+        penaltyStarCoin: number
+        adminQQs: string[]
+        maxDailyAttempts: number
     }
 }
 
@@ -73,7 +77,11 @@ export const Config: Schema<Config> = Schema.object({
     }),
     baike_quiz: Schema.object({
         apiKey: Schema.string().default(''),
-        questionTimeout: Schema.number().min(5).max(120).default(15)
+        questionTimeout: Schema.number().min(5).max(120).default(15),
+        rewardStarCoin: Schema.number().min(1).default(10),
+        penaltyStarCoin: Schema.number().min(1).default(5),
+        adminQQs: Schema.array(String).default([]),
+        maxDailyAttempts: Schema.number().min(1).max(20).default(5)
     })
 }).i18n({
     'zh-CN': require('./locales/zh-CN.schema.yml'),

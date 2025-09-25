@@ -26,3 +26,13 @@ guess_number:
     defaultStarCoin: 默认初始星币数
     entryFee: 游戏报名费（星币）
     defaultDynamicBonus: guess命令默认的动态星币加法值
+
+baike_quiz:
+  $desc: 百科问答配置
+  $inner:
+    apiKey: 百科题库 API 密钥
+    questionTimeout: 问答超时时间（秒）
+    rewardStarCoin: 回答正确时奖励的星币数量
+    penaltyStarCoin: 回答错误时扣除的星币数量
+    adminQQs: 用于接收申诉通知的管理员QQ列表
+    maxDailyAttempts: 用户每日最大答题次数（1-20）

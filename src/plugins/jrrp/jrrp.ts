@@ -68,7 +68,7 @@ class JrrpPlugin {
 
             // 删除过期记录
             await this.ctx.database.remove('jrrp', { date: { $lt: thresholdDateStr } });
-        }, 24 * 60 * 60 * 1000);
+        }, 7 * 24 * 60 * 60 * 1000);
     }
 
     private registerCommands(): void {
