@@ -4,6 +4,7 @@ import {} from '@koishijs/plugin-adapter-onebot'
 import { Config } from "../../index";
 import { createTextMsgNode, getUserName } from "../../utils/onebot_helper";
 import {randomInt} from "../../utils/pseudo_random_helper";
+import {formatDate, getTodayString} from "../../utils/time_helper";
 
 export interface Jrrp {
     id: number; // 自增主键
@@ -63,7 +64,7 @@ class JrrpPlugin {
         this.ctx.setInterval(async () => {
             const thresholdDate = new Date();
             thresholdDate.setDate(thresholdDate.getDate() - this.config.jrrp.cleanupDays);
-            const thresholdDateStr = this.formatDate(thresholdDate);
+            const thresholdDateStr = formatDate(thresholdDate);
 
             // 删除过期记录
             await this.ctx.database.remove('jrrp', { date: { $lt: thresholdDateStr } });
@@ -82,7 +83,7 @@ class JrrpPlugin {
     }
 
     private async handleJrrpCommand(session: Session): Promise<string> {
-        const today = this.getTodayString();
+        const today = getTodayString();
         const { userId } = session;
 
         // 检查今日是否已经查询过
@@ -139,7 +140,7 @@ class JrrpPlugin {
             return '请在群聊中使用排行榜命令哦！';
         }
 
-        const today = this.getTodayString();
+        const today = getTodayString();
         const rankings = await this.getRankings(session, today);
 
         if (!rankings.length) {
@@ -235,8 +236,8 @@ class JrrpPlugin {
         const startDate = new Date();
         startDate.setDate(today.getDate() - 6);
         return {
-            startDateStr: this.formatDate(startDate),
-            todayStr: this.formatDate(today)
+            startDateStr: formatDate(startDate),
+            todayStr: formatDate(today)
         };
     }
 
@@ -260,15 +261,6 @@ class JrrpPlugin {
         }
 
         return output;
-    }
-
-    // 工具方法
-    private getTodayString(): string {
-        return this.formatDate(new Date());
-    }
-
-    private formatDate(date: Date): string {
-        return date.toISOString().split('T')[0];
     }
 }
 

@@ -11,6 +11,8 @@ import {waifu} from "./plugins/waifu/waifu";
 import JrysPlugin from "./plugins/jrys/jrys";
 import {choose} from "./plugins/choose/choose";
 import {guess_number} from "./plugins/guess_number/guess_number";
+import MarketPlugin from "./plugins/prop/market/market";
+import InventoryPlugin from "./plugins/prop/inventory/inventory";
 
 export const inject = ['database', 'puppeteer']
 
@@ -70,11 +72,16 @@ export const Config: Schema<Config> = Schema.object({
 })
 
 export function apply(ctx: Context, cfg: Config) {
-    ctx.plugin(JrrpPlugin, cfg);
-    ctx.plugin(JrysPlugin, cfg);
     ctx.plugin(StarCoinPlugin, cfg);
 
+    ctx.plugin(InventoryPlugin, cfg);
+    ctx.plugin(MarketPlugin, cfg);
+
+    ctx.plugin(JrrpPlugin, cfg);
+    ctx.plugin(JrysPlugin, cfg);
+
     ctx.plugin(guess_number, cfg);
+
     ctx.plugin(zanwo, cfg);
     ctx.plugin(cat, cfg);
     ctx.plugin(whois, cfg);

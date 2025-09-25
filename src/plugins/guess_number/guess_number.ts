@@ -177,31 +177,39 @@ export function guess_number(ctx: Context, config: Config) {
                     return '当前频道已有进行中的游戏！';
                 }
             }
-            
-            // 检查频道当日游戏次数是否达到上限
-            const channelGameCount = await getChannelGameCount(channelId);
-            if (channelGameCount >= MAX_CHANNEL_GAMES_PER_DAY) {
-                return `❌ 本频道今日游戏次数已达上限(${MAX_CHANNEL_GAMES_PER_DAY}次)，请明天再来！`;
-            }
 
             // 检查用户权限
             const user = await ctx.database.getUser(session.platform, session.userId);
             const userAuthority = user.authority;
             
+            // 特权用户标记（authority>3）
+            const isAuthorizedUser = userAuthority > 3;
+            
             // 确定用户每日游戏次数限制
             let maxGamesPerDay = 0; // 默认为无限制
-            if (userAuthority === 3) {
-                maxGamesPerDay = 5;
-            } else if (userAuthority < 3) {
-                maxGamesPerDay = 2;
-            }
+            let todayGameCount = 0;
             
-            let todayGameCount: number;
-            // 检查每日游戏次数限制
-            if (maxGamesPerDay > 0) {
-                todayGameCount = await getUserGameCount(session.userId, channelId);
-                if (todayGameCount >= maxGamesPerDay) {
-                    return `❌ 您今天的游戏次数已达上限(${maxGamesPerDay}次)，请明天再来！`;
+            // 只有非特权用户才受限制
+            if (!isAuthorizedUser) {
+                // 检查频道当日游戏次数是否达到上限
+                const channelGameCount = await getChannelGameCount(channelId);
+                if (channelGameCount >= MAX_CHANNEL_GAMES_PER_DAY) {
+                    return `❌ 本频道今日游戏次数已达上限(${MAX_CHANNEL_GAMES_PER_DAY}次)，请明天再来！`;
+                }
+                
+                // 确定用户每日游戏次数限制
+                if (userAuthority === 3) {
+                    maxGamesPerDay = 5;
+                } else if (userAuthority < 3) {
+                    maxGamesPerDay = 2;
+                }
+                
+                // 检查每日游戏次数限制
+                if (maxGamesPerDay > 0) {
+                    todayGameCount = await getUserGameCount(session.userId, channelId);
+                    if (todayGameCount >= maxGamesPerDay) {
+                        return `❌ 您今天的游戏次数已达上限(${maxGamesPerDay}次)，请明天再来！`;
+                    }
                 }
             }
             
@@ -278,9 +286,9 @@ export function guess_number(ctx: Context, config: Config) {
                 }
             }
 
-            // 增加用户当天的游戏次数
+            // 增加用户当天的游戏次数（特权用户不计入）
             let updatedGameCount = 0;
-            if (maxGamesPerDay > 0) {
+            if (!isAuthorizedUser && maxGamesPerDay > 0) {
                 await incrementGameCount(session.userId, channelId);
                 updatedGameCount = todayGameCount + 1;
             }
@@ -329,10 +337,20 @@ export function guess_number(ctx: Context, config: Config) {
                 return '当前频道已有进行中的游戏！'
             }
             
-            // 检查频道当日游戏次数是否达到上限
-            const channelGameCount = await getChannelGameCount(channelId);
-            if (channelGameCount >= MAX_CHANNEL_GAMES_PER_DAY) {
-                return `❌ 本频道今日游戏次数已达上限(${MAX_CHANNEL_GAMES_PER_DAY}次)，请明天再来！`;
+            // 检查用户权限
+            const user = await ctx.database.getUser(session.platform, session.userId);
+            const userAuthority = user.authority;
+            
+            // 特权用户标记（authority>3）
+            const isAuthorizedUser = userAuthority > 3;
+            
+            // 只有非特权用户才受限制
+            if (!isAuthorizedUser) {
+                // 检查频道当日游戏次数是否达到上限
+                const channelGameCount = await getChannelGameCount(channelId);
+                if (channelGameCount >= MAX_CHANNEL_GAMES_PER_DAY) {
+                    return `❌ 本频道今日游戏次数已达上限(${MAX_CHANNEL_GAMES_PER_DAY}次)，请明天再来！`;
+                }
             }
             
             // 确定奖励星币数量
@@ -354,20 +372,20 @@ export function guess_number(ctx: Context, config: Config) {
                 startGame(channelId)
             }, config.guess_number.signUpTime * 1000)
 
-            // 增加用户当天的游戏次数
-            const user = await ctx.database.getUser(session.platform, session.userId);
-            const userAuthority = user.authority;
-            let maxGamesPerDay = 0; // 默认为无限制
-            if (userAuthority === 3) {
-                maxGamesPerDay = 5;
-            } else if (userAuthority < 3) {
-                maxGamesPerDay = 2;
-            }
-            
-            if (maxGamesPerDay > 0) {
-                const todayGameCount = await getUserGameCount(session.userId, channelId);
-                if (todayGameCount < maxGamesPerDay) {
-                    await incrementGameCount(session.userId, channelId);
+            // 增加用户当天的游戏次数（特权用户不计入）
+            if (!isAuthorizedUser) {
+                let maxGamesPerDay = 0; // 默认为无限制
+                if (userAuthority === 3) {
+                    maxGamesPerDay = 5;
+                } else if (userAuthority < 3) {
+                    maxGamesPerDay = 2;
+                }
+                
+                if (maxGamesPerDay > 0) {
+                    const todayGameCount = await getUserGameCount(session.userId, channelId);
+                    if (todayGameCount < maxGamesPerDay) {
+                        await incrementGameCount(session.userId, channelId);
+                    }
                 }
             }
             

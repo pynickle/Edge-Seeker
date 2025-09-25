@@ -1,7 +1,7 @@
 ﻿import { createHash } from 'crypto';
 
 export type RandomAlgorithm = 'xoshiro256pp' | 'pcg64';
-export type BiasType = 'none' | 'slight_up' | 'moderate_up';
+export type BiasType = 'slight_up' | 'moderate_up' | 'none' | 'slight_down' | 'moderate_down';
 
 export interface RandomOptions {
     algorithm?: RandomAlgorithm;
@@ -54,16 +54,15 @@ export function randomChoice<T>(array: T[] | readonly T[], seed: string = '', op
  */
 export function createGenerator(seed: string, options: RandomOptions): () => number {
     const { algorithm = 'xoshiro256pp', bias = 'none' } = options;
-    const finalSeed = options.seed ? `${seed}:${options.seed}` : seed;
 
     let baseGenerator: () => number;
 
     switch (algorithm) {
         case 'pcg64':
-            baseGenerator = createPcg64Generator(finalSeed);
+            baseGenerator = createPcg64Generator(seed);
             break;
         case 'xoshiro256pp':
-            baseGenerator = createXoshiro256ppGenerator(finalSeed);
+            baseGenerator = createXoshiro256ppGenerator(seed);
             break;
         default:
             throw new Error(`Unknown algorithm: ${algorithm}`);
@@ -125,10 +124,10 @@ function createPcg64Generator(seed: string): () => number {
     };
 
     return () => {
-        const oldstate = state;
-        state = (oldstate * PCG_DEFAULT_MULTIPLIER_128 + PCG_DEFAULT_INCREMENT_128) & ((1n << 128n) - 1n);
-        const word = ((oldstate >> 64n) ^ oldstate) & ((1n << 64n) - 1n);
-        const rot = oldstate >> 122n;
+        const oldState = state;
+        state = (oldState * PCG_DEFAULT_MULTIPLIER_128 + PCG_DEFAULT_INCREMENT_128) & ((1n << 128n) - 1n);
+        const word = ((oldState >> 64n) ^ oldState) & ((1n << 64n) - 1n);
+        const rot = oldState >> 122n;
         const result = rotr(word, rot);
 
         // 修复归一化：使用高 53 位，避免精度丢失
@@ -136,25 +135,29 @@ function createPcg64Generator(seed: string): () => number {
     };
 }
 
-function applyBias(generator: () => number, bias: BiasType | number): () => number {
-    let biasValue: number;
+
+export function applyBias(generator: () => number, bias: BiasType | number): () => number {
+    let power: number;
 
     if (typeof bias === 'number') {
-        biasValue = Math.max(0, Math.min(0.2, bias)); // 限制在 0-0.2 之间
+        // 映射 bias 到 [0, 2]，1 表示无偏置
+        power = 1 + Math.max(-1, Math.min(1, bias));
     } else {
         switch (bias) {
-            case 'slight_up': biasValue = 0.03; break;
-            case 'moderate_up': biasValue = 0.08; break;
+            case 'slight_up': power = 0.7; break; // 轻微向上
+            case 'moderate_up': power = 0.5; break; // 中等向上
+            case 'slight_down': power = 1.3; break; // 轻微向下
+            case 'moderate_down': power = 1.5; break; // 中等向下
             case 'none':
-            default: biasValue = 0; break;
+            default: power = 1; break; // 无偏置
         }
     }
 
-    if (biasValue === 0) return generator;
+    if (power === 1) return generator; // 无偏置时返回原生成器
 
     return () => {
-        const value = generator();
-        // 使用幂函数实现向上偏移
-        return Math.pow(value, 1 - biasValue);
+        const x = generator(); // 使用提供的 generator
+        // 使用幂函数调整偏置
+        return power < 1 ? Math.pow(x, power) : 1 - Math.pow(1 - x, 1 / power);
     };
 }

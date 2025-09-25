@@ -3,7 +3,9 @@ import { Solar } from 'lunar-typescript';
 import {} from 'koishi-plugin-puppeteer';
 import axios from "axios";
 import {stickEmoji} from "../../utils/msg_emoji/emoji_helper";
-import {random, randomChoice, randomInt} from "../../utils/pseudo_random_helper";
+import {BiasType, random, randomChoice, randomInt} from "../../utils/pseudo_random_helper";
+import {hasActiveBuff} from "../prop/prop_helper";
+import {BuffType} from "../prop/inventory/inventory";
 
 // 定义运势数据接口
 export interface FortuneData {
@@ -46,11 +48,11 @@ class JrysPlugin {
     }
 
     private async handleJrysCommand(session: Session): Promise<string> {
+        const fortuneData = await this.calculateFortune(session.userId);
         try {
             if (session.onebot) {
                 await stickEmoji(session, ['棒棒糖']);
             }
-            const fortuneData = await this.calculateFortune(session.userId);
             return await this.renderToImage(fortuneData, session.userId);
         } catch (error) {
             return '生成今日运势图片失败: ' + error.message;
@@ -63,13 +65,20 @@ class JrysPlugin {
         const lunar = solar.getLunar();
 
         const seed1 = `${userId}${today.getFullYear()}${today.getMonth()}${today.getDate()}`;
-        const seed2 = `${seed1}_;Y?hv7P.aFLf[w]?O"}MBsc')V=)hD(?`;
+        const seed2 = `${seed1}_;Y?hv7P.aFLf[w]?O"}MBsc')V=)hD(?)`;
+        let bias: BiasType = 'none';
+        const hasLuckyCard = await hasActiveBuff(this.ctx, userId, BuffType.LUCKY_CARD);
+        if (hasLuckyCard) {
+            bias = 'slight_up';
+        }
 
         // 计算每日固定随机数
         const randomNum = random(seed1);
 
         // 计算运势分数（1-100）
-        const score = randomInt(seed1, 1, 100);
+        const score = randomInt(seed1, 1, 100, { bias: bias });
+
+        console.log(score)
 
         // 计算幸运颜色
         const luckyColors : string[] = Object.keys(COLORMAP) as Array<string>;

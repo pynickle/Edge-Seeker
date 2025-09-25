@@ -1,6 +1,7 @@
 import { Context, Time } from 'koishi';
 import * as emoji from 'node-emoji';
 import { createTextMsgNode, getUserName } from "../../utils/onebot_helper";
+import {randomInt} from "../../utils/pseudo_random_helper";
 
 // 定义数据库表结构
 export interface SignIn {
@@ -168,7 +169,7 @@ class StarCoinPlugin {
         }
 
         // 计算基础星币（10-50）
-        const baseCoin = Math.floor(Math.random() * 41) + 10;
+        const baseCoin = randomInt(Date.now().toString(), 10, 50);
 
         // 随机事件
         const { earnedCoin, eventMessage } = this.calculateRandomEvent(baseCoin);
