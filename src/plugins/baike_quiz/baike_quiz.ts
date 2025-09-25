@@ -1,7 +1,7 @@
 import {formatDate} from '../../utils/time_helper';
 import {StarCoinHelper} from '../../utils/starcoin_helper';
 import axios from 'axios';
-import {Context} from "koishi";
+import {Context, Session} from "koishi";
 
 // 定义数据库表结构
 export interface BaikeQuizRecord {
@@ -616,7 +616,7 @@ class BaikeQuizPlugin {
         });
         
         // 向管理员发送通知
-        await this.notifyAdminsAboutAppeal(session.platform, userId, username, channelId,
+        await this.notifyAdminsAboutAppeal(session, userId, username, channelId,
             recentQuizState.currentQuestion, userAnswer, recentQuizState.correctAnswer, reason.trim());
         
         return '✅ 申诉已提交！管理员将尽快处理你的申诉，请耐心等待。';
@@ -666,7 +666,7 @@ class BaikeQuizPlugin {
     /**
      * 向管理员发送申诉通知
      */
-    private async notifyAdminsAboutAppeal(platform: string, userId: string, username: string, 
+    private async notifyAdminsAboutAppeal(session: Session, userId: string, username: string,
                                        channelId: string, question: string, userAnswer: string, 
                                        correctAnswer: string, reason: string): Promise<void> {
         if (this.config.baike_quiz.adminQQs.length === 0) {
@@ -688,8 +688,10 @@ class BaikeQuizPlugin {
         
         try {
             // 向每个管理员发送私信
-            for (const adminQQ of this.config.baike_quiz.adminQQs) {
-                await this.ctx.broadcast([`${platform}:${adminQQ}`], notification);
+            if (session.onebot) {
+                for (const adminQQ of this.config.baike_quiz.adminQQs) {
+                    await session.onebot.sendPrivateMsg(adminQQ, notification);
+                }
             }
         } catch (error) {
             console.error('发送申诉通知失败:', error);
@@ -815,11 +817,23 @@ class BaikeQuizPlugin {
              // 退还用户扣除的星币加上赢得的星币（默认5+10）
              const refundAmount = this.config.baike_quiz.penaltyStarCoin + this.config.baike_quiz.rewardStarCoin;
              await this.updateStarCoin(appeal.userId, appeal.channelId, refundAmount);
-              
-             // 通知用户申诉已通过
-             await this.ctx.broadcast([`${session.platform}:${appeal.channelId}`],
-                 `🎉 @${await this.getUserName(appeal.userId)}，你的申诉已通过！\n已退还你 ${refundAmount} 星币！`
-             );
+
+             if (session.onebot) {
+                 await session.onebot.sendGroupMsg(appeal.channelId, [
+                     {
+                         "type": "at",
+                         "data": {
+                             "qq": appeal.userId
+                         }
+                     },
+                     `，你的申诉已通过！\n已退还你 ${refundAmount} 星币！`
+                 ]);
+             } else {
+                 // 通知用户申诉已通过
+                 await this.ctx.broadcast([`${session.platform}:${appeal.channelId}`],
+                     `🎉 @${await this.getUserName(appeal.userId)}，你的申诉已通过！\n已退还你 ${refundAmount} 星币！`
+                 );
+             }
               
              return `✅ 已批准ID为 ${appealId} 的申诉，并退还用户 ${refundAmount} 星币！`;
          } catch (error) {
