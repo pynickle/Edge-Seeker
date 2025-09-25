@@ -1,5 +1,6 @@
 import { Context, Session } from 'koishi';
 import {ITEMS} from "../item_mapping";
+import { StarCoinHelper } from '../../../utils/starcoin_helper';
 
 // 商店会话状态接口
 interface MarketSession {
@@ -103,21 +104,21 @@ class MarketPlugin {
         const sessionKey = `${channelId}:${userId}`;
         const item = ITEMS[itemIndex];
 
-        // 获取用户星币数量
-        const userRecord = await this.ctx.database.select('sign_in')
-            .where({ userId, channelId })
-            .execute();
-
-        if (userRecord.length === 0 || userRecord[0].starCoin < item.price) {
-            await session.send(`@${username}，星币不足，无法购买 ${item.name}！`);
+        // 检查用户星币是否足够
+        const hasEnough = await StarCoinHelper.hasEnoughStarCoin(this.ctx, userId, channelId, item.price);
+        if (!hasEnough) {
+            const currentStarCoin = await StarCoinHelper.getUserStarCoin(this.ctx, userId, channelId);
+            await session.send(`@${username}，星币不足，无法购买 ${item.name}！当前星币: ${currentStarCoin}，需要: ${item.price}`);
             return;
         }
 
         // 扣除星币
-        await this.ctx.database.set('sign_in',
-            { userId, channelId },
-            { starCoin: userRecord[0].starCoin - item.price }
-        );
+        const success = await StarCoinHelper.removeUserStarCoin(this.ctx, userId, channelId, item.price);
+        
+        if (!success) {
+            await session.send(`@${username}，星币扣除失败，请稍后再试！`);
+            return;
+        }
 
         // 添加道具到用户道具库
         const existingItem = await this.ctx.database.select('market_user_items')
@@ -155,11 +156,7 @@ class MarketPlugin {
     }
 
     private async getUserStarCoins(userId: string, channelId: string): Promise<number> {
-        const userRecord = await this.ctx.database.select('sign_in')
-            .where({ userId, channelId })
-            .execute();
-
-        return userRecord.length > 0 ? userRecord[0].starCoin : 0;
+        return await StarCoinHelper.getUserStarCoin(this.ctx, userId, channelId);
     }
 }
 

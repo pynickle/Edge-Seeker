@@ -13,6 +13,7 @@ import {choose} from "./plugins/choose/choose";
 import {guess_number} from "./plugins/guess_number/guess_number";
 import MarketPlugin from "./plugins/prop/market/market";
 import InventoryPlugin from "./plugins/prop/inventory/inventory";
+import BaikeQuizPlugin from "./plugins/baike_quiz/baike_quiz";
 
 export const inject = ['database', 'puppeteer']
 
@@ -40,6 +41,10 @@ export interface Config {
         defaultStarCoin: number
         entryFee: number
         defaultDynamicBonus: number
+    },
+    baike_quiz: {
+        apiKey: string
+        questionTimeout: number
     }
 }
 
@@ -65,6 +70,10 @@ export const Config: Schema<Config> = Schema.object({
         defaultStarCoin: Schema.number().default(30),
         entryFee: Schema.number().default(20),
         defaultDynamicBonus: Schema.number().default(10)
+    }),
+    baike_quiz: Schema.object({
+        apiKey: Schema.string().default(''),
+        questionTimeout: Schema.number().min(5).max(120).default(20)
     })
 }).i18n({
     'zh-CN': require('./locales/zh-CN.schema.yml'),
@@ -73,6 +82,7 @@ export const Config: Schema<Config> = Schema.object({
 
 export function apply(ctx: Context, cfg: Config) {
     ctx.plugin(StarCoinPlugin, cfg);
+    ctx.plugin(BaikeQuizPlugin, cfg);
 
     ctx.plugin(InventoryPlugin, cfg);
     ctx.plugin(MarketPlugin, cfg);

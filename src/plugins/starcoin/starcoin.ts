@@ -2,6 +2,7 @@ import { Context, Time } from 'koishi';
 import * as emoji from 'node-emoji';
 import { createTextMsgNode, getUserName } from "../../utils/onebot_helper";
 import {randomInt} from "../../utils/pseudo_random_helper";
+import { StarCoinHelper } from '../../utils/starcoin_helper';
 
 // 定义数据库表结构
 export interface SignIn {
@@ -181,14 +182,14 @@ class StarCoinPlugin {
         const { bonus, bonusMessage } = this.calculateConsecutiveBonus(consecutiveDays);
         starCoin += bonus;
 
-        // 更新数据库
-        await this.ctx.database.upsert('sign_in', [{
-            userId,
-            channelId,
-            starCoin,
-            consecutiveDays,
-            lastSignIn: nowTimestamp,
-        }], ['userId', 'channelId']);
+        // 更新数据库 - 先更新星币数量
+        await StarCoinHelper.setUserStarCoin(this.ctx, userId, channelId, starCoin);
+        
+        // 更新连续签到天数和最后签到时间
+        await this.ctx.database.set('sign_in', 
+            { userId, channelId }, 
+            { consecutiveDays, lastSignIn: nowTimestamp }
+        );
 
         // 生成响应
         const randomEmoji = emoji.random().emoji;
@@ -273,17 +274,14 @@ class StarCoinPlugin {
         }
 
         const channelId = session.channelId;
-        const now = new Date().getTime();
 
         try {
             // 更新或创建用户记录
-            await this.ctx.database.upsert('sign_in', [{
-                userId,
-                channelId,
-                starCoin: amount,
-                consecutiveDays: 0,
-                lastSignIn: now,
-            }], ['userId', 'channelId']);
+            const success = await StarCoinHelper.setUserStarCoin(this.ctx, userId, channelId, amount);
+            
+            if (!success) {
+                return '❌ 设置星币失败，请稍后重试！';
+            }
 
             const targetUserName = await getUserName(this.ctx, session, userId);
             return `✅ 成功将 ${targetUserName} 的星币数量设置为 ${amount}！`;
@@ -310,26 +308,11 @@ class StarCoinPlugin {
         const channelId = session.channelId;
 
         try {
-            // 获取用户记录
-            const userRecord = await this.getUserRecord(userId, channelId);
-            const now = new Date().getTime();
-
-            if (userRecord) {
-                // 用户已存在，更新星币数量
-                const newStarCoin = userRecord.starCoin + amount;
-                await this.ctx.database.set('sign_in', 
-                    { userId, channelId }, 
-                    { starCoin: newStarCoin }
-                );
-            } else {
-                // 用户不存在，创建新记录
-                await this.ctx.database.upsert('sign_in', [{
-                    userId,
-                    channelId,
-                    starCoin: amount,
-                    consecutiveDays: 0,
-                    lastSignIn: now,
-                }], ['userId', 'channelId']);
+            // 增加用户星币数量
+            const success = await StarCoinHelper.addUserStarCoin(this.ctx, userId, channelId, amount);
+            
+            if (!success) {
+                return '❌ 增加星币失败，请稍后重试！';
             }
 
             const targetUserName = await getUserName(this.ctx, session, userId);
@@ -357,22 +340,22 @@ class StarCoinPlugin {
         const channelId = session.channelId;
 
         try {
-            // 获取用户记录
-            const userRecord = await this.getUserRecord(userId, channelId);
-
-            if (!userRecord) {
-                return '❌ 该用户没有星币记录！';
+            // 减少用户星币数量
+            const success = await StarCoinHelper.removeUserStarCoin(this.ctx, userId, channelId, amount);
+            
+            if (!success) {
+                const userRecord = await this.getUserRecord(userId, channelId);
+                if (!userRecord) {
+                    return '❌ 该用户没有星币记录！';
+                }
+                return '❌ 减少星币失败，请稍后重试！';
             }
-
-            // 确保星币数量不为负
-            const newStarCoin = Math.max(0, userRecord.starCoin - amount);
-            await this.ctx.database.set('sign_in', 
-                { userId, channelId }, 
-                { starCoin: newStarCoin }
-            );
+            
+            // 获取用户最新星币数量
+            const currentStarCoin = await StarCoinHelper.getUserStarCoin(this.ctx, userId, channelId);
 
             const targetUserName = await getUserName(this.ctx, session, userId);
-            return `✅ 成功为 ${targetUserName} 减少 ${amount} 星币，剩余 ${newStarCoin} 星币！`;
+            return `✅ 成功为 ${targetUserName} 减少 ${amount} 星币，剩余 ${currentStarCoin} 星币！`;
         } catch (error) {
             console.error('减少星币失败:', error);
             return '❌ 减少星币失败，请稍后重试！';
