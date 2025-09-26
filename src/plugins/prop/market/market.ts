@@ -91,10 +91,37 @@ class MarketPlugin {
             `📋 请输入道具编号进行购买：`
         ];
 
-        // 添加道具列表
+        // 按道具类型分组
+        const itemsByType: Record<string, Array<{index: number; item: typeof ITEMS[0]}>> = {
+            'buff': [],
+            'other': [],
+            'consumable': []
+        };
+
+        // 将道具按类型分组
         ITEMS.forEach((item, index) => {
-            marketMessage.push(`${index + 1}. ${item.name} - ${item.price}星币`);
-            marketMessage.push(`   ${item.description}`);
+            if (itemsByType[item.type]) {
+                itemsByType[item.type].push({index: index + 1, item});
+            }
+        });
+
+        // 类型名称映射
+        const typeNames: Record<string, string> = {
+            'buff': '✨ 增益道具',
+            'consumable': '🎯 消耗道具',
+            'other': '🔮 其他道具'
+        };
+
+        // 按类型添加道具到消息中
+        ['buff', 'consumable', 'other'].forEach(type => {
+            const items = itemsByType[type];
+            if (items && items.length > 0) {
+                marketMessage.push(`\n${typeNames[type]}：`);
+                items.forEach(({index, item}) => {
+                    marketMessage.push(`${index}. ${item.name} - ${item.price}星币`);
+                    marketMessage.push(`   ${item.description}`);
+                });
+            }
         });
 
         return marketMessage.join('\n');

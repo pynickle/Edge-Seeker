@@ -1,6 +1,6 @@
 ﻿import {Context} from 'koishi';
 import axios from 'axios';
-import {createFileMsg, createTextMsg, getUserName} from "../../utils/onebot_helper";
+import {createFileMsg, createTextMsg} from "../../utils/onebot_helper";
 
 export const name = 'cat';
 

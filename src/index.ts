@@ -17,7 +17,7 @@ import ForeseePlugin from "./plugins/foresee/foresee";
 import BaikeQuizPlugin from "./plugins/baike_quiz/baike_quiz";
 import {red_packet} from "./plugins/red_packet/red_packet";
 
-export const inject = ['database', 'puppeteer']
+export const inject = ['database', 'puppeteer', 'cron']
 
 export const name = 'edge-seeker'
 
@@ -60,6 +60,9 @@ export interface Config {
         smallPacketFee: number
         confirmationTimeout: number
         packetExpiryTime: number
+    },
+    auto_sign: {
+        groupIds: number[]  // 群 ID 数组，用于指定多个打卡的目标群
     }
 }
 
@@ -102,6 +105,9 @@ export const Config: Schema<Config> = Schema.object({
         smallPacketFee: Schema.number().default(10),
         confirmationTimeout: Schema.number().default(30),
         packetExpiryTime: Schema.number().default(24)
+    }),
+    auto_sign: Schema.object({
+        groupIds: Schema.array(Schema.number()),
     })
 }).i18n({
     'zh-CN': require('./locales/zh-CN.schema.yml'),

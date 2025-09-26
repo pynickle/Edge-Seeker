@@ -54,7 +54,8 @@ class ForeseePlugin {
         }
 
         // 发送确认请求
-        await session.send(`⚠️ 查看明日${session.content.includes('mrrp') ? '人品' : '运势'}需要消耗1个预知水晶，您确定要继续吗？\n请发送「确认」继续，「取消」放弃操作（20秒后自动取消）`);
+        await session.send(`⚠️ 查看明日 ${session.content.includes('mrrp') ? '人品' : '运势'} 需要消耗1个预知水晶，您确定要继续吗？
+请发送「确认」继续，「取消」放弃操作（20 秒后自动取消）`);
 
         // 创建确认 Promise
         const confirmed = await this.confirmationManager.createConfirmation(this.ctx, session, 20);

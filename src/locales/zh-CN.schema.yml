@@ -47,3 +47,8 @@ red_packet:
     smallPacketFee: 红包的手续费（星币）
     confirmationTimeout: 发送红包确认超时时间（秒）
     packetExpiryTime: 红包过期时间（小时）
+
+auto_sign:
+  $desc: 自动签到配置
+  $inner:
+    groupIds: 用于接收签到通知的频道 ID 列表

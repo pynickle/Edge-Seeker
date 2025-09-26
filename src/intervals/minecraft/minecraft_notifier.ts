@@ -68,7 +68,7 @@ export function minecraft_notifier(ctx: Context, cfg: Config) {
             await loadData();
             const latest = await getLatestVersions();
 
-            const bot = ctx.bots.find(bot => bot.platform === 'onebot');
+            const bot = ctx.bots[0];
             if (lastRelease !== latest.release) {
                 for (const channel of cfg.minecraft.notifyChannel) {
                     await bot.sendMessage(channel, `Minecraft 新正式版发布了：${latest.release}`);
