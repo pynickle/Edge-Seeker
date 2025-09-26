@@ -17,6 +17,7 @@ import ForeseePlugin from "./plugins/foresee/foresee";
 import BaikeQuizPlugin from "./plugins/baike_quiz/baike_quiz";
 import {red_packet} from "./plugins/red_packet/red_packet";
 import {friend_code} from "./plugins/friend_code/friend_code";
+import UserMarketPlugin from "./plugins/user_market/user_market";
 
 export const inject = ['database', 'puppeteer', 'cron']
 
@@ -137,6 +138,7 @@ export function apply(ctx: Context, cfg: Config) {
     ctx.plugin(choose, cfg);
 
     ctx.plugin(friend_code, cfg);
+    ctx.plugin(UserMarketPlugin, cfg);
 
     // message
     ctx.plugin(gh_url, cfg);

@@ -25,8 +25,11 @@ export function friend_code(ctx: Context) {
 
             const storedCode = userVerificationCodes.get(userId)!;
 
+            ctx.logger.warn(`用户 ${userId} 提交的验证码: ${code}, 存储的验证码: ${storedCode}`);
+            userVerificationCodes.forEach((user, code) => ctx.logger.warn(`存储的验证码 - 用户: ${user}, 验证码: ${code}`));
+
             // 检查验证码是否匹配
-            if (storedCode !== code) {
+            if (storedCode != code) {
                 return false;
             }
 
@@ -65,7 +68,10 @@ export function friend_code(ctx: Context) {
                 
                 // 存储新的验证码
                 userVerificationCodes.set(userId, code);
-                
+
+                userVerificationCodes.forEach((user, code) => ctx.logger.warn(`存储的验证码222 - 用户: ${user}, 验证码: ${code}`));
+
+
                 // 设置1分钟后自动清理验证码的定时器
                 const timerId = setTimeout(() => {
                     if (userVerificationCodes.has(userId)) {
@@ -74,11 +80,13 @@ export function friend_code(ctx: Context) {
                         ctx.logger.debug(`已自动清理用户 ${userId} 的过期验证码`);
                     }
                 }, 60000); // 1分钟 = 60000毫秒
-                
+
+                userVerificationCodes.forEach((user, code) => ctx.logger.warn(`存储的验证码333 - 用户: ${user}, 验证码: ${code}`));
+
                 // 保存定时器ID
                 userTimers.set(userId, timerId);
 
-                // 发送验证码到用户私信
+                // 发送验证码
                 return `${await getUserName(ctx, session, userId)}，您的加好友验证码是：${code}\n有效期1分钟，请在添加机器人好友时将此验证码作为验证信息发送。`
             } catch (error) {
                 ctx.logger.error('生成验证码失败:', error);
@@ -86,7 +94,7 @@ export function friend_code(ctx: Context) {
             }
         });
 
-    // 处理好友请求，整合friend_request.ts的功能
+    // 处理好友请求
     ctx.on('friend-request', async (session) => {
         const eventData = session.event?._data || {};
         const flag = eventData.flag;
@@ -110,6 +118,4 @@ export function friend_code(ctx: Context) {
         await session.onebot.setFriendAddRequest(flag, false);  // 拒绝
         ctx.logger.info(`拒绝了 ${userId} 的请求（无效或过期的验证码）`);
     });
-
-    ctx.logger.info('好友验证码插件已加载');
 }
