@@ -52,3 +52,9 @@ auto_sign:
   $desc: 自动签到配置
   $inner:
     groupIds: 用于接收签到通知的频道 ID 列表
+
+auto_red_packet:
+  $desc: 自动发红包配置
+  $inner:
+    enable: 是否启用自动发红包功能
+    channels: 用于发送自动红包的频道 ID 列表

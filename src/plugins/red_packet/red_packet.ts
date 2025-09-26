@@ -225,25 +225,24 @@ export function red_packet(ctx: Context, config: Config) {
             // 增加用户星币
             await StarCoinHelper.addUserStarCoin(ctx, userId, channelId, claimAmount);
 
-            // 获取领取后的星币数量
-            const remainingStarCoin = await StarCoinHelper.getUserStarCoin(ctx, userId, channelId);
-
             // 通知发送者
             const creatorName = session.bot ? await getUserName(ctx, session, packet.creatorId) : packet.creatorId;
             const receiverName = session.username || userId;
             
-            // 发送系统通知
+            // 获取领取后的星币数量
+            const remainingStarCoin = await StarCoinHelper.getUserStarCoin(ctx, userId, channelId);
+            
+            // 构建合并后的通知消息
+            let notificationMessage = '';
             if (isLastPacket) {
                 // 最后一个红包被领取，通知红包已被领完
-                await ctx.broadcast([`${packet.platform}:${channelId}`], [
-                    `🎉 ${receiverName} 领取了 ${creatorName} 发的红包 ${packet.id} 的最后一份，获得 ${claimAmount} 星币！\n🎊 本轮红包已被全部领完！`
-                ]);
+                notificationMessage = `🎉 ${receiverName} 领取了 ${creatorName} 发的红包 ${packet.id} 的最后一份，获得 ${claimAmount} 星币！\n🎊 本轮红包已被全部领完！\n💰 您当前星币：${remainingStarCoin}`;
             } else {
                 // 普通领取通知
-                await ctx.broadcast([`${packet.platform}:${channelId}`], [`🎊 ${receiverName} 领取了 ${creatorName} 发的红包，获得 ${claimAmount} 星币！`]);
+                notificationMessage = `🎊 ${receiverName} 领取了 ${creatorName} 发的红包，获得 ${claimAmount} 星币！\n💰 您当前星币：${remainingStarCoin}`;
             }
-
-            return `🎉 恭喜您领取了 ${claimAmount} 星币！当前星币：${remainingStarCoin}`;
+            
+            return notificationMessage;
         });
 
     // 查询红包状态命令

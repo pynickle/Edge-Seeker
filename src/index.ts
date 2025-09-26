@@ -5,6 +5,7 @@ import {cat} from "./plugins/cat/cat";
 import {gh_url} from "./message/github/gh_url";
 import {whois} from "./plugins/whois/whois";
 import {minecraft_notifier} from "./intervals/minecraft/minecraft_notifier";
+import {auto_red_packet} from "./intervals/auto_red_packet/auto_red_packet";
 import {emoji_gen} from "./plugins/emoji/emoji";
 import StarCoinPlugin from "./plugins/starcoin/starcoin";
 import {waifu} from "./plugins/waifu/waifu";
@@ -65,6 +66,10 @@ export interface Config {
     },
     auto_sign: {
         groupIds: number[]  // 群 ID 数组，用于指定多个打卡的目标群
+    },
+    auto_red_packet: {
+        enable: boolean
+        channels: string[]
     }
 }
 
@@ -110,6 +115,10 @@ export const Config: Schema<Config> = Schema.object({
     }),
     auto_sign: Schema.object({
         groupIds: Schema.array(Schema.number()),
+    }),
+    auto_red_packet: Schema.object({
+        enable: Schema.boolean().default(true),
+        channels: Schema.array(String).default([])
     })
 }).i18n({
     'zh-CN': require('./locales/zh-CN.schema.yml'),
@@ -145,4 +154,5 @@ export function apply(ctx: Context, cfg: Config) {
 
     // intervals
     ctx.plugin(minecraft_notifier, cfg)
+    ctx.plugin(auto_red_packet, cfg)
 }
