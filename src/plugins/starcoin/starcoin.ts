@@ -98,12 +98,17 @@ class StarCoinPlugin {
         if (consecutiveDays === 7) {
             return {
                 bonus: 200,
-                bonusMessage: '🎊 连续签到 7 天，额外获得 200 星币！'
+                bonusMessage: '🌟 连续签到 7 天，额外获得 200 星币！'
             };
         } else if (consecutiveDays === 15) {
             return {
                 bonus: 500,
                 bonusMessage: '🏆 连续签到 15 天，获得 500 星币大奖！'
+            };
+        } else if (consecutiveDays === 30) {
+            return {
+                bonus: 1000,
+                bonusMessage: '🎉 连续签到 30 天，获得 1000 星币大奖！'
             };
         }
         return { bonus: 0, bonusMessage: '' };

@@ -1,4 +1,4 @@
-﻿// 通用方法：使用buff类型道具
+// 通用方法：使用buff类型道具
 import {BuffType} from "./inventory/inventory";
 import {Item} from "./item_mapping";
 import {formatDate} from "../../utils/time_helper";
@@ -47,7 +47,14 @@ export async function useBuffItem(session: Session, ctx: Context, item: Item): P
     const endDateStr = formatDate(newEndDate);
     const totalDays = Math.ceil((newEndDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
-    return `✨ @${username} 使用了${itemName}！效果将持续到${endDateStr}，总计${totalDays}天！${item.effect || '获得特殊效果'}`;
+    // 检查是否是过期后重新使用
+    const hadExpired = currentRemainingDays === 0;
+    
+    if (hadExpired) {
+        return `✨ @${username} 使用了${itemName}！效果已重置，将持续到${endDateStr}，总计${totalDays}天！${item.effect || '获得特殊效果'}`;
+    } else {
+        return `✨ @${username} 使用了${itemName}！效果将持续到${endDateStr}，总计${totalDays}天！${item.effect || '获得特殊效果'}`;
+    }
 }
 
 // 通用方法：减少用户道具数量
