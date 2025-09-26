@@ -388,49 +388,52 @@ export function guess_number(ctx: Context, config: Config) {
             ].join('\n')
         })
 
-    ctx.command('参加游戏', '参加猜数字游戏')
-        .action(async ({session}) => {
-            const channelId = session.channelId
-            const game = games.get(channelId)
+    // 监听参加游戏的消息
+    ctx.middleware(async (session, next) => {
+        const channelId = session.channelId
+        const game = games.get(channelId)
+        const content = session.content?.trim()
 
-            if (!game) {
-                return '当前没有进行中的游戏，发送 "guess" 开启新游戏'
-            }
+        // 只有当消息包含'参加游戏'且存在进行中的报名阶段游戏时才处理
+        if (!content || !content.includes('参加游戏') || !game || game.gameState !== 'signup') {
+            return next()
+        }
 
-            if (game.gameState !== 'signup') {
-                return '游戏已开始，无法再报名'
-            }
+        // 检查用户是否已经参加
+        if (game.participants.has(session.userId)) {
+            await session.send('你已经参加过了！')
+            return
+        }
 
-            if (game.participants.has(session.userId)) {
-                return '你已经参加过了！'
-            }
+        // 检查用户是否有足够星币支付报名费
+        const entryFee = config.guess_number.entryFee;
 
-            // 检查用户是否有足够星币支付报名费
-            const entryFee = config.guess_number.entryFee;
+        const hasEnough = await StarCoinHelper.hasEnoughStarCoin(ctx, session.userId, channelId, entryFee);
+        if (!hasEnough) {
+            const currentStarCoin = await StarCoinHelper.getUserStarCoin(ctx, session.userId, channelId);
+            await session.send(`❌ 您的星币不足，需要 ${entryFee} 星币才能参加游戏！当前星币: ${currentStarCoin}`);
+            return
+        }
 
-            const hasEnough = await StarCoinHelper.hasEnoughStarCoin(ctx, session.userId, channelId, entryFee);
-            if (!hasEnough) {
-                const currentStarCoin = await StarCoinHelper.getUserStarCoin(ctx, session.userId, channelId);
-                return `❌ 您的星币不足，需要 ${entryFee} 星币才能参加游戏！当前星币: ${currentStarCoin}`;
-            }
+        // 扣除报名费
+        const success = await StarCoinHelper.removeUserStarCoin(ctx, session.userId, channelId, entryFee);
 
-            // 扣除报名费
-            const success = await StarCoinHelper.removeUserStarCoin(ctx, session.userId, channelId, entryFee);
+        if (!success) {
+            await session.send('❌ 报名费扣除失败，请稍后再试');
+            return
+        }
 
-            if (!success) {
-                return '❌ 报名费扣除失败，请稍后再试';
-            }
+        // 获取扣除后的星币数量
+        const remainingStarCoin = await StarCoinHelper.getUserStarCoin(ctx, session.userId, channelId);
 
-            // 获取扣除后的星币数量
-            const remainingStarCoin = await StarCoinHelper.getUserStarCoin(ctx, session.userId, channelId);
-
-            game.participants.set(session.userId, {
-                name: session.username || session.userId,
-                skipCount: 0,
-            })
-
-            return `✅ ${session.username || session.userId} 成功报名！当前参赛人数：${game.participants.size}\n💸 已扣除报名费 ${entryFee} 星币，剩余星币：${remainingStarCoin}`;
+        game.participants.set(session.userId, {
+            name: session.username || session.userId,
+            skipCount: 0,
         })
+
+        await session.send(`✅ ${session.username || session.userId} 成功报名！当前参赛人数：${game.participants.size}\n💸 已扣除报名费 ${entryFee} 星币，剩余星币：${remainingStarCoin}`);
+        return
+    })
 
     ctx.command('guess.quit', '终止游戏（仅限创建者）')
         .action(async ({session}) => {

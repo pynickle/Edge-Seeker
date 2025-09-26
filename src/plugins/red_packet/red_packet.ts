@@ -150,7 +150,8 @@ export function red_packet(ctx: Context, config: Config) {
         });
 
     // 抢红包命令
-    ctx.command('抢红包 <packetId:number>', '领取红包')
+    ctx.command('grab <packetId:number>', '领取红包')
+        .alias('抢红包')
         .action(async ({session}, packetId: number) => {
             const channelId = session.channelId;
             const userId = session.userId;
