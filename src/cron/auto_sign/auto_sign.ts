@@ -13,9 +13,9 @@ export function auto_sign(ctx: Context, config: Config) {
             for (const groupId of config.auto_sign.groupIds) {
                 try {
                     await bot.internal.sendGroupSign(groupId)
-                    console.log(`已在群 ${groupId} 发送打卡请求`)
+                    ctx.logger.info(`已在群 ${groupId} 发送打卡请求`)
                 } catch (error) {
-                    console.error(`自动打卡失败（群 ${groupId}）: ${error}`)
+                    ctx.logger.warn(`自动打卡失败（群 ${groupId}）: ${error}`)
                 }
             }
         }

@@ -71,20 +71,6 @@ async function fetchImageUrl(ctx: Context, category: CategoryType): Promise<{ su
 }
 
 /**
- * 处理 OneBot 特效
- */
-async function handleOneBotEffect(session: Session): Promise<void> {
-    if (session.onebot) {
-        try {
-            await stickEmoji(session, ['戳一戳']);
-        } catch (error) {
-            // 静默处理特效失败，不影响主要功能
-            console.warn('OneBot effect failed:', error);
-        }
-    }
-}
-
-/**
  * 处理图片获取和发送
  */
 async function handleImageRequest(
@@ -98,7 +84,9 @@ async function handleImageRequest(
     }
 
     // 处理特效
-    await handleOneBotEffect(session);
+    if (session.onebot) {
+        await stickEmoji(ctx, session, ['戳一戳']);
+    }
 
     // 确定最终类别
     const finalCategory: CategoryType = category

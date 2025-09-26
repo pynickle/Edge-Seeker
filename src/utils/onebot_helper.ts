@@ -7,7 +7,7 @@ export async function getUserName(ctx: Context, session: Session, userId: string
             const memberInfo = await session.onebot.getGroupMemberInfo(session.channelId, userId);
             userName = memberInfo.card || memberInfo.nickname || userId; // 优先群名片，其次昵称，最后 QQ 号
         } catch (error) {
-            console.warn(`获取群成员信息失败（userId: ${userId}）：`, error);
+            ctx.logger.warn(`获取群成员信息失败（userId: ${userId}）：`, error);
             userName = userId; // 降级使用 QQ 号
         }
     } else {

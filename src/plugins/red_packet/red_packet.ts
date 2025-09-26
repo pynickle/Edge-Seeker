@@ -406,7 +406,7 @@ export function red_packet(ctx: Context, config: Config) {
             // 如果红包还有剩余金额，可以选择退还，但当前需求没有明确要求，所以这里暂时不处理
             if (packet.remainingAmount > 0) {
                 // 记录日志，但不实际退还
-                console.log(`红包 ${packet.id} 已过期，剩余 ${packet.remainingAmount} 星币未领取`);
+                ctx.logger.info(`红包 ${packet.id} 已过期，剩余 ${packet.remainingAmount} 星币未领取`);
             }
         }
     }, 60 * 60 * 1000);

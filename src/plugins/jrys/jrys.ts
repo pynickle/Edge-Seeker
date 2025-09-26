@@ -17,7 +17,7 @@ class JrysPlugin {
         const fortuneData = await calculateFortune(this.ctx, session.userId, new Date());
         try {
             if (session.onebot) {
-                await stickEmoji(session, ['棒棒糖']);
+                await stickEmoji(this.ctx, session, ['棒棒糖']);
             }
             return await this.renderToImage(fortuneData, session.userId);
         } catch (error) {

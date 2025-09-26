@@ -16,6 +16,7 @@ import InventoryPlugin from "./plugins/prop/inventory/inventory";
 import ForeseePlugin from "./plugins/foresee/foresee";
 import BaikeQuizPlugin from "./plugins/baike_quiz/baike_quiz";
 import {red_packet} from "./plugins/red_packet/red_packet";
+import {friend_request} from "./private/friend_request/friend_request";
 
 export const inject = ['database', 'puppeteer', 'cron']
 
@@ -135,7 +136,12 @@ export function apply(ctx: Context, cfg: Config) {
     ctx.plugin(waifu, cfg);
     ctx.plugin(choose, cfg);
 
+    // message
     ctx.plugin(gh_url, cfg);
 
+    // intervals
     ctx.plugin(minecraft_notifier, cfg)
+
+    // private
+    ctx.plugin(friend_request, cfg);
 }

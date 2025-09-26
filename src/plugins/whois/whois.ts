@@ -26,7 +26,7 @@ export function whois(ctx: Context) {
                 }
 
                 if (session.onebot) {
-                    await stickEmoji(session, ["元宝"]);
+                    await stickEmoji(ctx, session, ["元宝"]);
                 }
                 // 使用 whoiser 查询域名信息
                 const result = await whoiser(domain); // follow: 2 表示查询注册局和注册商

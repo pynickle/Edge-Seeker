@@ -246,17 +246,7 @@ export function guess_number(ctx: Context, config: Config) {
                 }
 
                 // 扣除10星币
-                try {
-                    await ctx.database.set('sign_in',
-                        {userId: session.userId, channelId: channelId},
-                        {starCoin: userRecord[0].starCoin - 10}
-                    );
-                } catch (error) {
-                    console.error('扣除星币失败:', error);
-                    // 扣除失败，删除临时游戏标记
-                    games.delete(channelId);
-                    return '❌ 扣除星币失败，请稍后再试！';
-                }
+                await StarCoinHelper.removeUserStarCoin(ctx, session.userId, channelId, 10);
 
                 // 确认成功，删除临时游戏标记（会在后面重新创建正式游戏）
                 games.delete(channelId);
@@ -270,7 +260,7 @@ export function guess_number(ctx: Context, config: Config) {
                     bonus = dynamicBonus;
                 }
             }
-            // 处理 authority>3 的用户
+            // 处理 authority > 3 的用户
             else if (userAuthority > 3) {
                 if (dynamicBonus) {
                     bonus = dynamicBonus;
@@ -416,36 +406,30 @@ export function guess_number(ctx: Context, config: Config) {
             }
 
             // 检查用户是否有足够星币支付报名费
-            try {
-                const entryFee = config.guess_number.entryFee;
+            const entryFee = config.guess_number.entryFee;
 
-                const hasEnough = await StarCoinHelper.hasEnoughStarCoin(ctx, session.userId, channelId, entryFee);
-                if (!hasEnough) {
-                    const currentStarCoin = await StarCoinHelper.getUserStarCoin(ctx, session.userId, channelId);
-                    return `❌ 您的星币不足，需要 ${entryFee} 星币才能参加游戏！当前星币: ${currentStarCoin}`;
-                }
+            const hasEnough = await StarCoinHelper.hasEnoughStarCoin(ctx, session.userId, channelId, entryFee);
+            if (!hasEnough) {
+                const currentStarCoin = await StarCoinHelper.getUserStarCoin(ctx, session.userId, channelId);
+                return `❌ 您的星币不足，需要 ${entryFee} 星币才能参加游戏！当前星币: ${currentStarCoin}`;
+            }
 
-                // 扣除报名费
-                const success = await StarCoinHelper.removeUserStarCoin(ctx, session.userId, channelId, entryFee);
+            // 扣除报名费
+            const success = await StarCoinHelper.removeUserStarCoin(ctx, session.userId, channelId, entryFee);
 
-                if (!success) {
-                    console.error('扣除报名费失败');
-                    return '❌ 报名费扣除失败，请稍后再试';
-                }
-
-                // 获取扣除后的星币数量
-                const remainingStarCoin = await StarCoinHelper.getUserStarCoin(ctx, session.userId, channelId);
-
-                game.participants.set(session.userId, {
-                    name: session.username || session.userId,
-                    skipCount: 0,
-                })
-
-                return `✅ ${session.username || session.userId} 成功报名！当前参赛人数：${game.participants.size}\n💸 已扣除报名费 ${entryFee} 星币，剩余星币：${remainingStarCoin}`;
-            } catch (error) {
-                console.error('扣除报名费失败:', error);
+            if (!success) {
                 return '❌ 报名费扣除失败，请稍后再试';
             }
+
+            // 获取扣除后的星币数量
+            const remainingStarCoin = await StarCoinHelper.getUserStarCoin(ctx, session.userId, channelId);
+
+            game.participants.set(session.userId, {
+                name: session.username || session.userId,
+                skipCount: 0,
+            })
+
+            return `✅ ${session.username || session.userId} 成功报名！当前参赛人数：${game.participants.size}\n💸 已扣除报名费 ${entryFee} 星币，剩余星币：${remainingStarCoin}`;
         })
 
     ctx.command('guess.quit', '终止游戏（仅限创建者）')
@@ -584,23 +568,17 @@ export function guess_number(ctx: Context, config: Config) {
         // 检查是否猜中
         if (guess === game.targetNumber) {
             // 给予星币奖励
-            try {
-                // 增加用户星币
-                const success = await StarCoinHelper.addUserStarCoin(ctx, session.userId, game.channelId, game.rewardCoins);
+            const success = await StarCoinHelper.addUserStarCoin(ctx, session.userId, game.channelId, game.rewardCoins);
 
-                if (success) {
-                    // 获取更新后的星币数量
-                    const updatedStarCoin = await StarCoinHelper.getUserStarCoin(ctx, session.userId, game.channelId);
+            if (success) {
+                // 获取更新后的星币数量
+                const updatedStarCoin = await StarCoinHelper.getUserStarCoin(ctx, session.userId, game.channelId);
 
-                    await endGame(game.channelId, `🎉 恭喜 ${session.username || session.userId} 猜中了！答案是 ${game.targetNumber}\n💰 获得奖励：${game.rewardCoins} 星币\n💎 当前星币：${updatedStarCoin}`)
-                } else {
-                    console.error('增加星币失败');
-                    await endGame(game.channelId, `🎉 恭喜 ${session.username || session.userId} 猜中了！答案是 ${game.targetNumber}\n⚠️ 星币奖励发放失败，请联系管理员`)
-                }
-            } catch (error) {
-                console.error('发放星币奖励失败:', error);
+                await endGame(game.channelId, `🎉 恭喜 ${session.username || session.userId} 猜中了！答案是 ${game.targetNumber}\n💰 获得奖励：${game.rewardCoins} 星币\n💎 当前星币：${updatedStarCoin}`)
+            } else {
                 await endGame(game.channelId, `🎉 恭喜 ${session.username || session.userId} 猜中了！答案是 ${game.targetNumber}\n⚠️ 星币奖励发放失败，请联系管理员`)
             }
+
             return
         }
 
@@ -676,7 +654,6 @@ export function guess_number(ctx: Context, config: Config) {
                 for (const [userId] of game.participants.entries()) {
                     refundPromises.push(
                         StarCoinHelper.addUserStarCoin(ctx, userId, channelId, entryFee)
-                            .catch(error => console.error('退还报名费失败:', error))
                     );
                 }
             }
@@ -688,11 +665,10 @@ export function guess_number(ctx: Context, config: Config) {
                     // 退还10个星币开启费用
                     refundPromises.push(
                         StarCoinHelper.addUserStarCoin(ctx, game.creatorId, channelId, 10)
-                            .catch(error => console.error('退还创建者开启费用失败:', error))
                     );
                 }
             } catch (error) {
-                console.error('检查创建者权限失败:', error);
+                this.ctx.logger.warn('检查创建者权限失败:', error);
             }
 
             await Promise.all(refundPromises);

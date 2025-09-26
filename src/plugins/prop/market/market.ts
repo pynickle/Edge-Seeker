@@ -73,8 +73,8 @@ class MarketPlugin {
         // 创建商店会话
         const timer = setTimeout(() => {
             this.closeMarketSession(sessionKey);
-            session.send(`@${username}，商店已自动关闭。`).catch(console.error);
-        }, 30000); // 30秒后自动关闭
+            session.send(`@${username}，商店已自动关闭。`);
+        }, 30000); // 30 秒后自动关闭
 
         this.activeSessions.set(sessionKey, {
             userId,

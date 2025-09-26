@@ -112,7 +112,7 @@ class ForeseePlugin {
             
             // 添加表情
             if (session.onebot) {
-                await stickEmoji(session, ['棒棒糖']);
+                await stickEmoji(this.ctx, session, ['棒棒糖']);
             }
             
             // 渲染为图片输出

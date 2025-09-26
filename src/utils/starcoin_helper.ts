@@ -38,7 +38,7 @@ export class StarCoinHelper {
             
             return true;
         } catch (error) {
-            console.error('设置星币失败:', error);
+            ctx.logger.warn('设置星币失败:', error);
             return false;
         }
     }
@@ -82,7 +82,7 @@ export class StarCoinHelper {
             
             return true;
         } catch (error) {
-            console.error('增加星币失败:', error);
+            ctx.logger.warn('增加星币失败:', error);
             return false;
         }
     }
@@ -119,7 +119,7 @@ export class StarCoinHelper {
             
             return true;
         } catch (error) {
-            console.error('减少星币失败:', error);
+            ctx.logger.warn('减少星币失败:', error);
             return false;
         }
     }
@@ -136,5 +136,3 @@ export class StarCoinHelper {
         return userStarCoin >= amount;
     }
 }
-
-export default StarCoinHelper;

@@ -1,4 +1,4 @@
-﻿import {Session} from 'koishi'
+﻿import {Session, Context} from 'koishi'
 import {EMOJI_MAP} from "./emoji_mapping";
 
 function resolveEmojiId(input: string): string | null {
@@ -9,7 +9,7 @@ async function addReaction(session: Session, messageId: number | string, emojiId
     await session.onebot._request('set_msg_emoji_like', {message_id: messageId, emoji_id: emojiId});
 }
 
-export async function stickEmoji(session: Session, emojis: string[]) {
+export async function stickEmoji(ctx: Context, session: Session, emojis: string[]) {
     try {
         const targetId = session.messageId;
 
@@ -19,6 +19,6 @@ export async function stickEmoji(session: Session, emojis: string[]) {
             await new Promise(r => setTimeout(r, 500));
         }
     } catch (e) {
-        throw Error("表情回应失败: " + e);
+        ctx.logger.warn("表情回应失败: " + e);
     }
 }

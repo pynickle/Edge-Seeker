@@ -292,7 +292,7 @@ class StarCoinPlugin {
             const targetUserName = await getUserName(this.ctx, session, userId);
             return `✅ 成功将 ${targetUserName} 的星币数量设置为 ${amount}！`;
         } catch (error) {
-            console.error('设置星币失败:', error);
+            this.ctx.logger.warn('设置星币失败:', error);
             return '❌ 设置星币失败，请稍后重试！';
         }
     }
@@ -324,7 +324,7 @@ class StarCoinPlugin {
             const targetUserName = await getUserName(this.ctx, session, userId);
             return `✅ 成功为 ${targetUserName} 增加 ${amount} 星币！`;
         } catch (error) {
-            console.error('增加星币失败:', error);
+            this.ctx.logger.warn('增加星币失败:', error);
             return '❌ 增加星币失败，请稍后重试！';
         }
     }
@@ -363,7 +363,7 @@ class StarCoinPlugin {
             const targetUserName = await getUserName(this.ctx, session, userId);
             return `✅ 成功为 ${targetUserName} 减少 ${amount} 星币，剩余 ${currentStarCoin} 星币！`;
         } catch (error) {
-            console.error('减少星币失败:', error);
+            this.ctx.logger.warn('减少星币失败:', error);
             return '❌ 减少星币失败，请稍后重试！';
         }
     }

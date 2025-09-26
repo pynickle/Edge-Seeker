@@ -3,7 +3,7 @@ import {} from '@koishijs/plugin-adapter-onebot'
 import { Config } from "../../index";
 import { createTextMsgNode, getUserName } from "../../utils/onebot_helper";
 import {formatDate, getTodayString} from "../../utils/time_helper";
-import { calculateAndStoreLuck, formatTodayLuckMessage, LuckLevel } from '../../utils/plugins/jrrp/random_luck_helper';
+import { calculateAndStoreLuck, formatTodayLuckMessage } from '../../utils/plugins/jrrp/random_luck_helper';
 
 export interface Jrrp {
     id: number; // 自增主键
@@ -19,14 +19,6 @@ declare module 'koishi' {
 }
 
 // 运势等级配置
-const LUCK_LEVELS: readonly LuckLevel[] = [
-    { min: 90, message: (luck: number) => `今日人品值：${luck}。运势极佳，今天将是大展身手的好日子！` },
-    { min: 70, message: (luck: number) => `今日人品值：${luck}。运势良好，适合尝试新的挑战。` },
-    { min: 50, message: (luck: number) => `今日人品值：${luck}。运势平稳，适合按部就班完成计划。` },
-    { min: 30, message: (luck: number) => `今日人品值：${luck}。运势稍低，建议谨慎行事，避免冒险。` },
-    { min: 0, message: (luck: number) => `今日人品值：${luck}。运势较低，保持乐观，明天会更好！` }
-] as const;
-
 class JrrpPlugin {
     constructor(private ctx: Context, private config: Config) {
         this.setupDatabase();
@@ -96,26 +88,6 @@ class JrrpPlugin {
         return formatTodayLuckMessage(userId, today, luck);
     }
 
-    // 函数已移至工具文件，此处保留函数签名以避免编译错误
-    private async calculateAndStoreLuck(_session: Session, _today: string): Promise<number> {
-        throw new Error('This method is deprecated. Use the utility function instead.');
-    }
-
-    // 函数已移至工具文件，此处保留函数签名以避免编译错误
-    private getFestivalBonus(_userId: string, _date: string) {
-        throw new Error('This method is deprecated. Use the utility function instead.');
-    }
-
-    // 函数已移至工具文件，此处保留函数签名以避免编译错误
-    private async storeLuckRecord(_session: Session, _date: string, _luck: number): Promise<void> {
-        throw new Error('This method is deprecated. Use the utility function instead.');
-    }
-
-    // 函数已移至工具文件，此处保留函数签名以避免编译错误
-    private formatLuckMessage(_userId: string, _date: string, _luck: number): string {
-        throw new Error('This method is deprecated. Use the utility function instead.');
-    }
-
     private async handleRankCommand(session: Session): Promise<string | void> {
         if (!session.guildId) {
             return '请在群聊中使用排行榜命令哦！';
@@ -148,7 +120,7 @@ class JrrpPlugin {
                 const members = await session.onebot.getGroupMemberList(session.onebot.group_id);
                 groupMembers = members.map(member => member.user_id);
             } catch (error) {
-                console.error('获取群成员列表失败:', error);
+                this.ctx.logger.warn('获取群成员列表失败:', error);
             }
         }
 
