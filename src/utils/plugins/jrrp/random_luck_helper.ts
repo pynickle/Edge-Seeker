@@ -29,7 +29,7 @@ export async function calculateAndStoreLuck(
     const { userId } = session;
     // 生成种子，区分今日和明日的计算
     const seed = isTomorrow ? `${date}${userId}` : Date.now().toString();
-    const baseLuck = randomInt(seed, 1, 100);
+    const baseLuck = randomInt(1, 100, seed);
     const { bonus } = getFestivalBonusForLuck(userId, date);
     let finalLuck = baseLuck + bonus;
 

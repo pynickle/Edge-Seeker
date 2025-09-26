@@ -69,7 +69,16 @@ export interface Config {
     },
     auto_red_packet: {
         enable: boolean
-        channels: string[]
+        channelConfigs: Array<{
+            channelId: string
+            minAmount: number
+            maxAmount: number
+            minCount: number
+            maxCount: number
+            minInterval: number
+            maxInterval: number
+            expiryHours: number
+        }>
     }
 }
 
@@ -118,7 +127,16 @@ export const Config: Schema<Config> = Schema.object({
     }),
     auto_red_packet: Schema.object({
         enable: Schema.boolean().default(true),
-        channels: Schema.array(String).default([])
+        channelConfigs: Schema.array(Schema.object({
+            channelId: Schema.string().required(),
+            minAmount: Schema.number().default(30),
+            maxAmount: Schema.number().default(50),
+            minCount: Schema.number().default(3),
+            maxCount: Schema.number().default(5),
+            minInterval: Schema.number().default(24), // 最小发送间隔（小时）
+            maxInterval: Schema.number().default(72), // 最大发送间隔（小时）
+            expiryHours: Schema.number().default(2)
+        })).default([])
     })
 }).i18n({
     'zh-CN': require('./locales/zh-CN.schema.yml'),

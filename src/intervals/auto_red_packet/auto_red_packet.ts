@@ -1,5 +1,6 @@
 import {Config} from '../../index';
 import {Context} from "koishi";
+import {randomInt} from "../../utils/pseudo_random_helper";
 
 // 声明数据表，用于存储上次发送红包的信息
 export interface AutoRedPacketRecord {
@@ -55,32 +56,15 @@ export function auto_red_packet(ctx: Context, cfg: Config) {
         }
     };
 
-    // 生成随机红包金额（30-50星币）
-    const generateRandomAmount = (): number => {
-        return Math.floor(Math.random() * 21) + 30; // 30-50星币
-    };
-
-    // 生成随机红包数量（3-5个）
-    const generateRandomCount = (): number => {
-        return Math.floor(Math.random() * 3) + 3; // 3-5个
-    };
-
-    // 生成随机间隔时间（1-3天）
-    const generateRandomInterval = (): number => {
-        // 1天 = 24小时 = 86400000毫秒
-        // 3天 = 72小时 = 259200000毫秒
-        return Math.floor(Math.random() * 172800000) + 86400000; // 1-3天
-    };
-
-    // 检查当前时间是否在允许的时段内（排除晚上0-6点）
+    // 检查当前时间是否在允许的时段内（排除晚上 0-6 点）
     const isAllowedTime = (): boolean => {
         const now = new Date();
         const hour = now.getHours();
-        return hour >= 6 && hour < 24; // 6点到23点59分允许发送
+        return hour >= 6 && hour < 24; // 6 点到 23 点 59 分允许发送
     };
 
     // 检查是否应该发送红包
-    const shouldSendRedPacket = async (channelId: string): Promise<boolean> => {
+    const shouldSendRedPacket = async (channelId: string, minInterval: number, maxInterval: number): Promise<boolean> => {
         if (!isAllowedTime()) {
             return false;
         }
@@ -90,8 +74,7 @@ export function auto_red_packet(ctx: Context, cfg: Config) {
         const elapsedTime = now - lastSendTime;
 
         // 首次发送或超过随机间隔时间
-        return lastSendTime === 0 || elapsedTime >= generateRandomInterval();
-
+        return lastSendTime === 0 || elapsedTime >= randomInt(minInterval, maxInterval);
     };
 
     // 自动发送红包
@@ -99,27 +82,33 @@ export function auto_red_packet(ctx: Context, cfg: Config) {
         try {
             // 检查自动红包功能是否启用
             if (!cfg.auto_red_packet?.enable) {
-                return;/**/
+                return;
             }
 
-            // 获取所有要发送红包的频道
-            const channels = cfg.auto_red_packet.channels || [];
+            // 获取所有要发送红包的频道配置
+            const channelConfigs = cfg.auto_red_packet.channelConfigs || [];
 
-            for (const channelId of channels) {
-                if (await shouldSendRedPacket(channelId)) {
+            for (const config of channelConfigs) {
+                const {channelId, minAmount, maxAmount, minCount, maxCount, minInterval, maxInterval, expiryHours} = config;
+                
+                if (await shouldSendRedPacket(channelId, minInterval * 3600000, maxInterval * 3600000)) {
                     const bot = ctx.bots[0];
                     if (!bot) continue;
 
-                    const amount = generateRandomAmount();
-                    const count = generateRandomCount();
+                    // 使用配置中的范围生成随机金额和数量
+                    const amount = randomInt(minAmount, maxAmount);
+                    const count = randomInt(minCount, maxCount);
+                    // 将小时转换为毫秒
+                    const intervalMinMs = minInterval * 3600000;
+                    const intervalMaxMs = maxInterval * 3600000;
 
                     // 使用Bot的ID作为创建者
                     const botId = bot.userId;
                     const platform = bot.platform;
                     const now = Date.now();
 
-                    // 计算过期时间（2小时后）
-                    const expiryTime = now + 2 * 60 * 60 * 1000;
+                    // 计算过期时间
+                    const expiryTime = now + expiryHours * 60 * 60 * 1000;
 
                     // 创建红包记录
                     const packet = await ctx.database.create('red_packets', {
@@ -137,7 +126,7 @@ export function auto_red_packet(ctx: Context, cfg: Config) {
                     });
 
                     // 发送红包消息
-                    await bot.sendMessage(channelId, `🎁 系统福利红包来啦！${count}个共${amount}星币的红包！\n发送「抢红包 ${packet.id}」来领取吧~\n有效期：2小时`);
+                    await bot.sendMessage(channelId, `🎁 系统福利红包来啦！${count} 个共 ${amount} 星币的红包！\n发送「抢红包 ${packet.id}」来领取吧~\n有效期：${expiryHours}小时`);
 
                     // 更新上次发送时间
                     await updateLastSendTime(channelId, now);

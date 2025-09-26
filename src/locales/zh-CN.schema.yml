@@ -57,4 +57,14 @@ auto_red_packet:
   $desc: 自动发红包配置
   $inner:
     enable: 是否启用自动发红包功能
-    channels: 用于发送自动红包的频道 ID 列表
+    channelConfigs:
+      $desc: 自动红包频道配置列表
+      $inner:
+        channelId: 频道 ID
+        minAmount: 红包最小金额（星币）
+        maxAmount: 红包最大金额（星币）
+        minCount: 红包最小数量
+        maxCount: 红包最大数量
+        minInterval: 红包最小发送间隔（小时）
+        maxInterval: 红包最大发送间隔（小时）
+        expiryHours: 红包有效期（小时）

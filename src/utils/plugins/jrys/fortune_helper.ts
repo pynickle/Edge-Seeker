@@ -63,14 +63,14 @@ export async function calculateFortune(
     const randomNum = random(seed1);
 
     // 计算运势分数（1-100）
-    const score = randomInt(seed1, 1, 100, { bias });
+    const score = randomInt(1, 100, seed1, { bias });
 
     // 计算幸运颜色
     const luckyColors: string[] = Object.keys(COLORMAP) as Array<string>;
     const luckyColor: string = randomChoice<string>(luckyColors);
 
     // 计算幸运数字（1-100）
-    const luckyNumber = randomInt(seed2, 1, 100);
+    const luckyNumber = randomInt(1, 100, seed2);
 
     // 获取阳历日期字符串
     const solarDate = `${targetDate.getFullYear()}年${targetDate.getMonth() + 1}月${targetDate.getDate()}日`;

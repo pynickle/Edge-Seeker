@@ -20,16 +20,16 @@ export function random(seed: string, options: RandomOptions = {}): number {
 /**
  * 生成指定范围的随机整数 [min, max]
  */
-export function randomInt(seed: string, min: number, max: number, options: RandomOptions = {}): number {
-    const value = random(seed, options);
+export function randomInt(min: number, max: number, seed: string = '', options: RandomOptions = {}): number {
+    const value = seed.length > 0 ? random(seed, options) : Math.random();
     return Math.floor(value * (max - min + 1)) + min;
 }
 
 /**
  * 生成指定范围的随机浮点数 [min, max)
  */
-export function randomFloat(seed: string, min: number, max: number, options: RandomOptions = {}): number {
-    const value = random(seed, options);
+export function randomFloat(min: number, max: number, seed: string = '', options: RandomOptions = {}): number {
+    const value = seed.length > 0 ? random(seed, options) : Math.random();
     return value * (max - min) + min;
 }
 
@@ -37,14 +37,13 @@ export function randomFloat(seed: string, min: number, max: number, options: Ran
  * 生成随机布尔值
  */
 export function randomBool(seed: string, probability: number = 0.5, options: RandomOptions = {}): boolean {
-    return random(seed, options) < probability;
+    return (seed.length > 0 ? random(seed, options) : Math.random()) < probability;
 }
 
 /**
  * 从数组中随机选择元素
  */
 export function randomChoice<T>(array: T[] | readonly T[], seed: string = '', options: RandomOptions = {}): T {
-    if (array.length == 0) throw new Error('Cannot choose from empty array');
     const index = Math.floor(seed.length > 0 ? random(seed, options) : Math.random() * array.length);
     return array[index];
 }
@@ -93,7 +92,6 @@ export function createGenerator(seed: string, options: RandomOptions): () => num
 }
 
 // ===== 辅助函数 =====
-
 function createXoshiro256ppGenerator(seed: string): () => number {
     const hash = createHash('sha256').update(seed).digest();
     let s0 = BigInt(hash.readBigUInt64BE(0));

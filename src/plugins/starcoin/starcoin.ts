@@ -176,7 +176,7 @@ class StarCoinPlugin {
         }
 
         // 计算基础星币（10-50）
-        const baseCoin = randomInt(Date.now().toString(), 10, 50);
+        const baseCoin = randomInt(10, 50, Date.now().toString());
 
         // 随机事件
         const { earnedCoin, eventMessage } = this.calculateRandomEvent(baseCoin);
