@@ -1,20 +1,15 @@
 import { Context, Session } from 'koishi';
 import {} from 'koishi-plugin-puppeteer';
-import { Config } from '../../index';
-import { useConfirmationHelper } from '../../utils/confirmation_helper';
-import { getTomorrowString } from '../../utils/time_helper';
-import { buildFortuneHtml, calculateFortune } from '../../utils/plugins/jrys/fortune_helper';
-import { calculateAndStoreLuck, formatLuckMessage } from '../../utils/plugins/jrrp/random_luck_helper';
+import { ConfirmationManager, useConfirmationHelper} from '../../utils/confirmation_helper';
+import {getTomorrowString} from '../../utils/time_helper';
+import {buildFortuneHtml, calculateFortune} from '../../utils/plugins/jrys/fortune_helper';
+import {calculateAndStoreLuck, formatLuckMessage} from '../../utils/plugins/jrrp/random_luck_helper';
 import {stickEmoji} from "../../utils/msg_emoji/emoji_helper";
 
 class ForeseePlugin {
-    private confirmationManager;
-    private ctx: Context;
-    private config: Config;
+    private confirmationManager: ConfirmationManager;
 
-    constructor(ctx: Context, config: Config) {
-        this.ctx = ctx;
-        this.config = config;
+    constructor(private ctx: Context) {
         this.confirmationManager = useConfirmationHelper(ctx);
         this.setupDatabase();
         this.registerCommands();
@@ -37,7 +32,7 @@ class ForeseePlugin {
     private registerCommands(): void {
         // 明日人品命令
         this.ctx.command('mrrp', '查看明日人品')
-            .action(async ({ session }) => this.handleMrjpCommand(session));
+            .action(async ({ session }) => this.handleMrrpCommand(session));
 
         // 明日运势命令
         this.ctx.command('mrys', '查看明日运势')
@@ -84,7 +79,7 @@ class ForeseePlugin {
     }
 
     // 处理明日人品命令
-    private async handleMrjpCommand(session: Session): Promise<string> {
+    private async handleMrrpCommand(session: Session): Promise<string> {
         // 检查并消耗预知水晶
         const hasCrystal = await this.checkAndConsumeCrystal(session);
         if (!hasCrystal) {
@@ -92,7 +87,6 @@ class ForeseePlugin {
         }
 
         const tomorrow = getTomorrowString();
-        const { userId } = session;
 
         // 计算并存储明日人品值
         const luck = await calculateAndStoreLuck(this.ctx, session, tomorrow);
@@ -122,9 +116,6 @@ class ForeseePlugin {
             
             // 渲染为图片输出
             const { puppeteer } = this.ctx;
-            if (!puppeteer) {
-                throw new Error('puppeteer 插件未启用');
-            }
 
             const html = buildFortuneHtml(fortuneData, session.userId, true);
             return await puppeteer.render(html);

@@ -43,7 +43,6 @@ export async function useBuffItem(session: Session, ctx: Context, item: Item): P
 
     // 获取日期信息用于反馈消息
     const today = new Date();
-    const startDateStr = formatDate(today);
     const endDateStr = formatDate(newEndDate);
     const totalDays = Math.ceil((newEndDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 

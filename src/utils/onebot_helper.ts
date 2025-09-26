@@ -30,7 +30,7 @@ export function createTextMsgNode(userId: string, nickname: string, content: str
     };
 }
 
-export function createTextMsg(userId: string, nickname: string, content: string) {
+export function createTextMsg(content: string) {
     return {
         type: 'text',
         data: {
@@ -39,7 +39,7 @@ export function createTextMsg(userId: string, nickname: string, content: string)
     };
 }
 
-export function createFileMsg(userId: string, nickname: string, content: string, type: string = 'image') {
+export function createFileMsg(content: string, type: string = 'image') {
     return {
         type: type,
         data: {

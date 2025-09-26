@@ -1,4 +1,4 @@
-import { Context, Session } from 'koishi';
+import {Context, Session} from 'koishi';
 
 /**
  * 确认管理器，用于处理用户的确认/取消操作
@@ -25,16 +25,14 @@ export class ConfirmationManager {
         }
 
         // 创建确认 Promise
-        const confirmationPromise = new Promise<boolean>((resolve) => {
+        return new Promise<boolean>((resolve) => {
             const timer = setTimeout(() => {
                 this.pendingConfirmations.delete(key);
                 resolve(false);
             }, timeout * 1000);
 
-            this.pendingConfirmations.set(key, { resolve, timer });
+            this.pendingConfirmations.set(key, {resolve, timer});
         });
-
-        return confirmationPromise;
     }
 
     /**

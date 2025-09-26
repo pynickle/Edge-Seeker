@@ -37,7 +37,7 @@ declare module 'koishi' {
 }
 
 class InventoryPlugin {
-    private ctx: Context;
+    private readonly ctx: Context;
 
     constructor(ctx: Context, config: Config) {
         this.ctx = ctx;

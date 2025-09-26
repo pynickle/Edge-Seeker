@@ -7,7 +7,7 @@ import {Context, Session} from "koishi";
 export interface BaikeQuizRecord {
     id: number; // 自增主键
     userId: string; // 用户 QQ 号
-    channelId: string; // 频道ID（群号）
+    channelId: string; // 频道 ID（群号）
     dailyAttempts: number; // 当日答题次数
     lastAttemptDate: string; // 最后答题日期（格式：YYYY-MM-DD）
     correctAnswers: number; // 正确答案数量
@@ -18,7 +18,7 @@ export interface BaikeQuizRecord {
 export interface BaikeQuizAppeal {
     id: number; // 自增主键
     userId: string; // 用户 QQ 号
-    channelId: string; // 频道ID（群号）
+    channelId: string; // 频道 ID（群号）
     question: string; // 问题内容
     userAnswer: string; // 用户答案
     correctAnswer: string; // 系统正确答案
@@ -30,13 +30,13 @@ export interface BaikeQuizAppeal {
 // 历史问答记录接口
 export interface BaikeQuizHistory {
     id: number; // 自增主键
-    channelId: string; // 频道ID
-    userId: string; // 用户ID
+    channelId: string; // 频道 ID
+    userId: string; // 用户 ID
     question: string; // 问题内容
-    answerA: string; // 答案A
-    answerB: string; // 答案B
-    answerC: string; // 答案C
-    answerD: string; // 答案D
+    answerA: string; // 答案 A
+    answerB: string; // 答案 B
+    answerC: string; // 答案 C
+    answerD: string; // 答案 D
     correctAnswer: string; // 正确答案
     analytic: string; // 答案解析
     createTime: number; // 创建时间戳
@@ -46,12 +46,12 @@ export interface BaikeQuizHistory {
 }
 
 export interface BaikeQuizState {
-    channelId: string; // 频道ID（群号）
+    channelId: string; // 频道 ID（群号）
     currentQuestion: string; // 当前问题
-    answerA: string; // 答案A
-    answerB: string; // 答案B
-    answerC: string; // 答案C
-    answerD: string; // 答案D
+    answerA: string; // 答案 A
+    answerB: string; // 答案 B
+    answerC: string; // 答案 C
+    answerD: string; // 答案 D
     correctAnswer: string; // 正确答案（A/B/C/D）
     analytic: string; // 答案解析
     questionerId: string; // 出题用户ID
@@ -105,7 +105,7 @@ class BaikeQuizPlugin {
             unique: [['userId', 'channelId']]
         });
 
-        // 扩展数据库，创建baike_quiz_history表，用于存储历史问答状态
+        // 扩展数据库，创建 baike_quiz_history 表，用于存储历史问答状态
         ctx.model.extend('baike_quiz_history', {
             id: 'unsigned',
             channelId: 'string',
@@ -126,7 +126,7 @@ class BaikeQuizPlugin {
             autoInc: true
         });
 
-        // 扩展数据库，创建baike_quiz_appeal表
+        // 扩展数据库，创建 baike_quiz_appeal 表
         ctx.model.extend('baike_quiz_appeal', {
             id: 'unsigned',
             userId: 'string',
@@ -145,7 +145,7 @@ class BaikeQuizPlugin {
         this.registerCommands();
         this.registerMessageListener();
 
-        // 设置每7天定时清理30天以前的历史记录
+        // 设置每 7 天定时清理 30 天以前的历史记录
         this.setupCleanupTask();
     }
 
@@ -168,7 +168,7 @@ class BaikeQuizPlugin {
     }
 
     private registerMessageListener(): void {
-        // 监听消息，检测用户直接输入的A/B/C/D回答
+        // 监听消息，检测用户直接输入的 A/B/C/D 回答
         this.ctx.on('message', async (session) => {
             // 只在群聊中处理
             if (!session.guildId) return;
@@ -354,7 +354,7 @@ class BaikeQuizPlugin {
             return appeals.length > 0;
         } catch (error) {
             console.error('检查题目是否在已批准申诉列表中失败:', error);
-            return false; // 出错时默认返回false，避免影响正常使用
+            return false; // 出错时默认返回 false，避免影响正常使用
         }
     }
 

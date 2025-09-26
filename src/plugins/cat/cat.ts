@@ -1,4 +1,4 @@
-import {Context} from 'koishi';
+﻿import {Context} from 'koishi';
 import axios from 'axios';
 import {createFileMsg, createTextMsg, getUserName} from "../../utils/onebot_helper";
 
@@ -10,9 +10,7 @@ export function cat(ctx: Context) {
             try {
                 if (session.onebot) {
                     const loadingMsgNumber = await session.onebot.sendGroupMsg(session.channelId, [
-                        createTextMsg(session.bot?.userId,
-                            await getUserName(this.ctx, session, session.bot?.userId) || "你",
-                            '喵~ 正在为你寻找可爱的猫片...')
+                        createTextMsg('喵~ 正在为你寻找可爱的猫片...')
                     ])
 
                     // 调用 The Cat API 获取随机猫图片
@@ -23,9 +21,7 @@ export function cat(ctx: Context) {
 
                     // 返回图片消息
                     await session.onebot.sendGroupMsg(session.channelId, [
-                        createFileMsg(session.bot?.userId,
-                            await getUserName(this.ctx, session, session.bot?.userId) || "你",
-                            catImageUrl, "image")])
+                        createFileMsg(catImageUrl, "image")])
                     await session.onebot.deleteMsg(loadingMsgNumber);
                 } else {
                     return '喵~ 这个命令只能在 OneBot 平台使用哦！';

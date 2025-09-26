@@ -10,7 +10,7 @@ function getLunarNewYear(year: number): string {
 
 // 愚人节特殊加成逻辑（保持不变，从三种效果随机选择）
 function getAprilFoolsBonus(userId: string, date: string): { bonus: number; description: string } {
-    const seed = `${userId}${date}aprilfools`;
+    const seed = `${userId}${date}april_fools`;
     const hash = crypto.createHash('md5').update(seed).digest('hex');
     const random = parseInt(hash.substring(0, 8), 16) / 0xffffffff; // 0到1的随机数
     const choice = Math.floor(random * 3); // 随机选择0, 1, 2
