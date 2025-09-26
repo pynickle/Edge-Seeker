@@ -13,6 +13,7 @@ import {choose} from "./plugins/choose/choose";
 import {guess_number} from "./plugins/guess_number/guess_number";
 import MarketPlugin from "./plugins/prop/market/market";
 import InventoryPlugin from "./plugins/prop/inventory/inventory";
+import ForeseePlugin from "./plugins/foresee/foresee";
 import BaikeQuizPlugin from "./plugins/baike_quiz/baike_quiz";
 import {red_packet} from "./plugins/red_packet/red_packet";
 
@@ -113,6 +114,7 @@ export function apply(ctx: Context, cfg: Config) {
 
     ctx.plugin(InventoryPlugin, cfg);
     ctx.plugin(MarketPlugin, cfg);
+    ctx.plugin(ForeseePlugin, cfg);
 
     ctx.plugin(JrrpPlugin, cfg);
     ctx.plugin(JrysPlugin, cfg);

@@ -1,10 +1,9 @@
-﻿import { Context, h, Session } from 'koishi';
-import { getFestivalBonus, getFestivals } from "./festival";
+import { Context, h, Session } from 'koishi';
 import {} from '@koishijs/plugin-adapter-onebot'
 import { Config } from "../../index";
 import { createTextMsgNode, getUserName } from "../../utils/onebot_helper";
-import {randomInt} from "../../utils/pseudo_random_helper";
 import {formatDate, getTodayString} from "../../utils/time_helper";
+import { calculateAndStoreLuck, formatTodayLuckMessage, LuckLevel } from '../../utils/random_luck_helper';
 
 export interface Jrrp {
     id: number; // 自增主键
@@ -20,7 +19,7 @@ declare module 'koishi' {
 }
 
 // 运势等级配置
-const LUCK_LEVELS = [
+const LUCK_LEVELS: readonly LuckLevel[] = [
     { min: 90, message: (luck: number) => `今日人品值：${luck}。运势极佳，今天将是大展身手的好日子！` },
     { min: 70, message: (luck: number) => `今日人品值：${luck}。运势良好，适合尝试新的挑战。` },
     { min: 50, message: (luck: number) => `今日人品值：${luck}。运势平稳，适合按部就班完成计划。` },
@@ -89,50 +88,32 @@ class JrrpPlugin {
         // 检查今日是否已经查询过
         const existingRecord = await this.getUserLuckRecord(userId, today);
         if (existingRecord) {
-            return this.formatLuckMessage(userId, today, existingRecord.luck);
+            return formatTodayLuckMessage(userId, today, existingRecord.luck);
         }
 
         // 计算并存储新的人品值
-        const luck = await this.calculateAndStoreLuck(session, today);
-        return this.formatLuckMessage(userId, today, luck);
+        const luck = await calculateAndStoreLuck(this.ctx, session, today);
+        return formatTodayLuckMessage(userId, today, luck);
     }
 
-    private async calculateAndStoreLuck(session: Session, today: string): Promise<number> {
-        const { userId} = session;
-        const baseLuck = randomInt(Date.now().toString(), 1, 100);
-        const { bonus } = this.getFestivalBonus(userId, today);
-        let finalLuck = baseLuck + bonus;
-
-        await this.storeLuckRecord(session, today, finalLuck);
-        return finalLuck;
+    // 函数已移至工具文件，此处保留函数签名以避免编译错误
+    private async calculateAndStoreLuck(_session: Session, _today: string): Promise<number> {
+        throw new Error('This method is deprecated. Use the utility function instead.');
     }
 
-    private getFestivalBonus(userId: string, date: string) {
-        const year = new Date().getFullYear();
-        const festivals = getFestivals(year);
-        return getFestivalBonus(userId, date, festivals);
+    // 函数已移至工具文件，此处保留函数签名以避免编译错误
+    private getFestivalBonus(_userId: string, _date: string) {
+        throw new Error('This method is deprecated. Use the utility function instead.');
     }
 
-    private async storeLuckRecord(session: Session, date: string, luck: number): Promise<void> {
-        const { userId } = session;
-
-        await this.ctx.database.upsert('jrrp', [{
-            userId,
-            date,
-            luck,
-        }], ['userId', 'date']);
+    // 函数已移至工具文件，此处保留函数签名以避免编译错误
+    private async storeLuckRecord(_session: Session, _date: string, _luck: number): Promise<void> {
+        throw new Error('This method is deprecated. Use the utility function instead.');
     }
 
-    private formatLuckMessage(userId: string, date: string, luck: number): string {
-        const luckLevel = LUCK_LEVELS.find(level => luck >= level.min);
-        let message = luckLevel?.message(luck) || `今日人品值：${luck}`;
-
-        const { bonus, description } = this.getFestivalBonus(userId, date);
-        if (bonus !== 0) {
-            message += `\n节日加成：${description}`;
-        }
-
-        return message;
+    // 函数已移至工具文件，此处保留函数签名以避免编译错误
+    private formatLuckMessage(_userId: string, _date: string, _luck: number): string {
+        throw new Error('This method is deprecated. Use the utility function instead.');
     }
 
     private async handleRankCommand(session: Session): Promise<string | void> {

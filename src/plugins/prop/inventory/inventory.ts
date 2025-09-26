@@ -104,10 +104,9 @@ class InventoryPlugin {
         // 获取道具列表
         const items = [...ITEMS];
 
-        // 生成道具库消息
-        const inventoryMessage = [
-            `🎒 @${username} 的道具库：`
-        ];
+        // 按类型分组道具
+        const buffItems: string[] = [];
+        const otherItems: string[] = [];
 
         userItems.forEach(item => {
             const itemInfo = items.find(i => i.id === item.itemId);
@@ -115,9 +114,48 @@ class InventoryPlugin {
                 const expireInfo = item.expireDate ?
                     `（有效期至：${new Date(item.expireDate).toLocaleDateString()}）` :
                     '';
-                inventoryMessage.push(`${itemInfo.name} x${item.quantity} ${expireInfo}`);
+                let itemLine = `${itemInfo.name} x${item.quantity} ${expireInfo}`;
+                
+                // 如果是other类型且有使用说明，添加使用说明标记
+                if (itemInfo.type === 'other' && itemInfo.usageInstructions) {
+                    itemLine += ' 💡';
+                }
+                
+                // 根据道具类型分组
+                if (itemInfo.type === 'buff') {
+                    buffItems.push(itemLine);
+                } else {
+                    otherItems.push(itemLine);
+                }
             }
         });
+
+        // 生成道具库消息
+        const inventoryMessage = [
+            `🎒 @${username} 的道具库：`
+        ];
+
+        // 添加buff类型道具
+        if (buffItems.length > 0) {
+            inventoryMessage.push('\n✨ 增益道具：');
+            inventoryMessage.push(...buffItems);
+        }
+
+        // 添加其他类型道具
+        if (otherItems.length > 0) {
+            inventoryMessage.push('\n📦 其他道具：');
+            inventoryMessage.push(...otherItems);
+            
+            // 查找是否有带使用说明的道具
+            const hasInstructions = userItems.some(item => {
+                const itemInfo = items.find(i => i.id === item.itemId);
+                return itemInfo && itemInfo.type === 'other' && itemInfo.usageInstructions;
+            });
+            
+            if (hasInstructions) {
+                inventoryMessage.push('\n💡 标有💡的道具需使用特定命令，输入 "use 道具名" 查看具体使用方法');
+            }
+        }
 
         inventoryMessage.push('\n输入 "use 道具名" 使用道具，例如 "use 幸运卡"');
 
@@ -149,6 +187,15 @@ class InventoryPlugin {
         // 处理道具使用逻辑
         if (item.type === 'buff' && item.buffConfig) {
             return await useBuffItem(session, this.ctx, item);
+        }
+
+        // 为other类型的道具提供更人性化的提示
+        if (item.type === 'other') {
+            if (item.usageInstructions) {
+                return `@${username}，"${item.name}" 不能通过use命令直接使用。\n${item.usageInstructions}`;
+            }
+            
+            return `@${username}，"${item.name}" 道具不能通过use命令直接使用。\n请查看道具描述了解如何使用。`;
         }
 
         return `@${username}，道具 "${item.name}" 的使用功能还未实现。`;
