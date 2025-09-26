@@ -341,7 +341,7 @@ export function red_packet(ctx: Context, config: Config) {
             const botName = await getUserName(this.ctx, session, session.bot?.userId) || "Bot";
 
             // 抢红包提示文本
-            const claimHint = '💡 发送 [抢红包 红包ID] 来领取红包！';
+            const claimHint = '💡 发送 [抢红包 红包 ID] 来领取红包！';
             
             if (session.onebot) {
                 await session.onebot.sendGroupForwardMsg(channelId, [

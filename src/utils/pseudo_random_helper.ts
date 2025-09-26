@@ -58,12 +58,12 @@ export function randomChoice<T>(array: T[] | readonly T[], seed: string = '', op
  * @returns 服从正态分布的随机数
  */
 export function normalRandom(seed: string, mean: number, stdDev: number, options: RandomOptions = {}): number {
-    // 使用Box-Muller变换生成正态分布随机数
+    // 使用 Box-Muller 变换生成正态分布随机数
     // 生成两个均匀分布的随机数
     const u1 = random(seed, options);
     const u2 = random(seed + 'second', options);
     
-    // Box-Muller变换
+    // Box-Muller 变换
     const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
     
     // 应用均值和标准差

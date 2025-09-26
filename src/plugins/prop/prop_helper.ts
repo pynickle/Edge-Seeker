@@ -1,4 +1,4 @@
-// 通用方法：使用buff类型道具
+// 通用方法：使用 buff 类型道具
 import {BuffType} from "./inventory/inventory";
 import {Item} from "./item_mapping";
 import {formatDate} from "../../utils/time_helper";
@@ -20,16 +20,16 @@ export async function useBuffItem(session: Session, ctx: Context, item: Item): P
         : undefined;
 
     if (!buffTypeEnum) {
-        return `@${username}，道具 "${itemName}" 的Buff类型配置错误。`;
+        return `@${username}，道具 "${itemName}" 的 Buff 类型配置错误。`;
     }
 
-    // 获取当前buff的剩余天数和最大结束日期
+    // 获取当前 buff 的剩余天数和最大结束日期
     const currentRemainingDays = await getBuffRemainingDays(ctx, userId, buffTypeEnum);
     const totalDuration = currentRemainingDays + durationDays;
     
     // 检查是否超过最大叠加天数
     if (totalDuration > maxDurationDays) {
-        return `@${username}，您的${itemName}效果已达到最大叠加天数（${maxDurationDays}天），无法继续使用。`;
+        return `@${username}，您的${itemName}效果已达到最大叠加天数（${maxDurationDays} 天），无法继续使用。`;
     }
 
     // 减少用户道具数量
@@ -38,7 +38,7 @@ export async function useBuffItem(session: Session, ctx: Context, item: Item): P
         return `@${username}，您没有${itemName}。`;
     }
 
-    // 添加或更新buff效果
+    // 添加或更新 buff 效果
     const newEndDate = await addOrUpdateBuffEffect(ctx, userId, buffTypeEnum, durationDays);
 
     // 获取日期信息用于反馈消息
@@ -51,9 +51,9 @@ export async function useBuffItem(session: Session, ctx: Context, item: Item): P
     const hadExpired = currentRemainingDays === 0;
     
     if (hadExpired) {
-        return `✨ @${username} 使用了${itemName}！效果已重置，将持续到${endDateStr}，总计${totalDays}天！${item.effect || '获得特殊效果'}`;
+        return `✨ @${username} 使用了${itemName}！效果已重置，将持续到${endDateStr}，总计 ${totalDays} 天！${item.effect || '获得特殊效果'}`;
     } else {
-        return `✨ @${username} 使用了${itemName}！效果将持续到${endDateStr}，总计${totalDays}天！${item.effect || '获得特殊效果'}`;
+        return `✨ @${username} 使用了${itemName}！效果将持续到${endDateStr}，总计 ${totalDays} 天！${item.effect || '获得特殊效果'}`;
     }
 }
 
@@ -81,12 +81,12 @@ export async function decreaseItemQuantity(ctx: Context, userId: string, channel
     return true;
 }
 
-// 通用方法：添加或更新buff效果（支持叠加）
+// 通用方法：添加或更新 buff 效果（支持叠加）
 export async function addOrUpdateBuffEffect(ctx: Context, userId: string, buffType: BuffType, durationDays: number, data ?: Record<string, any>): Promise<Date> {
     const today = new Date();
     const todayStr = formatDate(today);
     
-    // 查找用户当前有效的buff效果
+    // 查找用户当前有效的 buff 效果
     const activeEffects = await ctx.database.select('user_buff_effects')
         .where({
             userId,
@@ -100,22 +100,22 @@ export async function addOrUpdateBuffEffect(ctx: Context, userId: string, buffTy
     let newEndDate: Date;
     
     if (activeEffects.length > 0) {
-        // 已有活动buff，在结束日期基础上叠加
+        // 已有活动 buff，在结束日期基础上叠加
         const existingEndDate = new Date(activeEffects[0].endDate);
         newEndDate = new Date(existingEndDate);
         newEndDate.setDate(existingEndDate.getDate() + durationDays);
         
-        // 更新现有的buff效果
+        // 更新现有的 buff 效果
         await ctx.database.set('user_buff_effects', 
             { id: activeEffects[0].id }, 
             { endDate: formatDate(newEndDate) }
         );
     } else {
-        // 没有活动buff，创建新的buff效果
+        // 没有活动 buff，创建新的 buff 效果
         newEndDate = new Date(today);
         newEndDate.setDate(today.getDate() + durationDays - 1);
         
-        // 创建新的buff效果
+        // 创建新的 buff 效果
         await ctx.database.create('user_buff_effects', {
             userId,
             buffType,
@@ -128,12 +128,12 @@ export async function addOrUpdateBuffEffect(ctx: Context, userId: string, buffTy
     return newEndDate;
 }
 
-// 计算用户当前buff的剩余天数
+// 计算用户当前 buff 的剩余天数
 export async function getBuffRemainingDays(ctx: Context, userId: string, buffType: BuffType): Promise<number> {
     const today = new Date();
     const todayStr = formatDate(today);
     
-    // 查找用户当前有效的buff效果
+    // 查找用户当前有效的 buff 效果
     const activeEffects = await ctx.database.select('user_buff_effects')
         .where({
             userId,
@@ -156,7 +156,7 @@ export async function getBuffRemainingDays(ctx: Context, userId: string, buffTyp
     return Math.max(0, diffDays);
 }
 
-// 通用方法：检查用户是否有激活的buff
+// 通用方法：检查用户是否有激活的 buff
 export async function hasActiveBuff(ctx: Context, userId: string, buffType: BuffType): Promise<boolean> {
     const today = formatDate(new Date());
     const effects = await ctx.database.select('user_buff_effects')

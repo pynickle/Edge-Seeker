@@ -31,7 +31,7 @@ interface GameData {
     targetNumber: number;
     participants: Map<string, Participant>;
     currentPlayerIndex: number;
-    gameState: 'signup' | 'playing' | 'ended' | 'confirming'; // 新增confirming状态表示正在等待确认
+    gameState: 'signup' | 'playing' | 'ended' | 'confirming'; // 新增 confirming 状态表示正在等待确认
     minRange: number;
     maxRange: number;
     signUpTimer: NodeJS.Timeout | null;
@@ -204,7 +204,7 @@ export function guess_number(ctx: Context, config: Config) {
             // 确定动态奖励加法值
             let bonus = config.guess_number.defaultDynamicBonus;
 
-            // 处理低于authority3的用户
+            // 处理低于 authority3 的用户
             if (userAuthority < 3) {
                 // 如果指定了值，提示不允许
                 if (dynamicBonus) {
@@ -227,7 +227,7 @@ export function guess_number(ctx: Context, config: Config) {
                     return '❌ 您的星币不足10个，无法开启游戏！';
                 }
 
-                // 提示用户扣除10星币前，先在games中创建一个临时标记，防止其他用户同时开启游戏
+                // 提示用户扣除10星币前，先在 games 中创建一个临时标记，防止其他用户同时开启游戏
                 // 创建一个临时游戏对象作为标记
                 const tempGame = createGame(channelId, session.userId, config.guess_number.defaultStarCoin);
                 tempGame.platform = platform;

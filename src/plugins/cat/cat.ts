@@ -1,4 +1,4 @@
-﻿import {Context} from 'koishi';
+import {Context} from 'koishi';
 import axios from 'axios';
 import {createFileMsg, createTextMsg, getUserName} from "../../utils/onebot_helper";
 
@@ -39,7 +39,7 @@ export function cat(ctx: Context) {
                         errorMessage = '请求超时了，网络可能不稳定，再试一次？';
                     } else if (error.response) {
                         // API返回错误（如4xx/5xx）
-                        errorMessage = `API错误：${error.response.status} - ${error.response.statusText}`;
+                        errorMessage = `API 错误：${error.response.status} - ${error.response.statusText}`;
                     } else if (error.request) {
                         // 请求发出但无响应（网络问题）
                         errorMessage = '网络连接问题，无法访问API。';

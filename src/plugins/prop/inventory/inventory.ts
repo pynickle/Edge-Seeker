@@ -13,13 +13,13 @@ export interface UserItem {
     expireDate?: number; // 过期时间戳，可选
 }
 
-// 定义Buff类型枚举
+// 定义 Buff 类型枚举
 export enum BuffType {
     LUCKY_CARD = 'lucky_card',
     // 可以添加更多类型的buff
 }
 
-// 定义通用Buff效果接口
+// 定义通用 Buff 效果接口
 export interface BuffEffect {
     id: number; // 自增主键
     userId: string;
@@ -62,7 +62,7 @@ class InventoryPlugin {
             ]
         });
 
-        // 通用Buff效果表
+        // 通用 Buff 效果表
         this.ctx.model.extend('user_buff_effects', {
             id: 'unsigned',
             userId: 'string',

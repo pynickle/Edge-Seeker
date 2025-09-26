@@ -3,7 +3,7 @@ import {} from '@koishijs/plugin-adapter-onebot'
 import { Config } from "../../index";
 import { createTextMsgNode, getUserName } from "../../utils/onebot_helper";
 import {formatDate, getTodayString} from "../../utils/time_helper";
-import { calculateAndStoreLuck, formatTodayLuckMessage, LuckLevel } from '../../utils/random_luck_helper';
+import { calculateAndStoreLuck, formatTodayLuckMessage, LuckLevel } from '../../utils/plugins/jrrp/random_luck_helper';
 
 export interface Jrrp {
     id: number; // 自增主键

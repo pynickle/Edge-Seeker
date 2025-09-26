@@ -1,7 +1,7 @@
 import { Context, Session } from 'koishi';
 import {} from 'koishi-plugin-puppeteer';
 import {stickEmoji} from "../../utils/msg_emoji/emoji_helper";
-import { FortuneData, buildFortuneHtml, calculateFortune } from '../../utils/fortune_helper';
+import { FortuneData, buildFortuneHtml, calculateFortune } from '../../utils/plugins/jrys/fortune_helper';
 
 class JrysPlugin {
     constructor(private ctx: Context) {
@@ -29,7 +29,7 @@ class JrysPlugin {
         const { puppeteer } = this.ctx;
 
         if (!puppeteer) {
-            throw new Error('puppeteer插件未启用');
+            throw new Error('puppeteer 插件未启用');
         }
 
         const html = buildFortuneHtml(fortuneData, userId);

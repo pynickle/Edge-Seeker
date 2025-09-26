@@ -3,8 +3,8 @@ import {} from 'koishi-plugin-puppeteer';
 import { Config } from '../../index';
 import { useConfirmationHelper } from '../../utils/confirmation_helper';
 import { getTomorrowString } from '../../utils/time_helper';
-import { buildFortuneHtml, calculateFortune } from '../../utils/fortune_helper';
-import { calculateAndStoreLuck, formatLuckMessage } from '../../utils/random_luck_helper';
+import { buildFortuneHtml, calculateFortune } from '../../utils/plugins/jrys/fortune_helper';
+import { calculateAndStoreLuck, formatLuckMessage } from '../../utils/plugins/jrrp/random_luck_helper';
 import {stickEmoji} from "../../utils/msg_emoji/emoji_helper";
 
 class ForeseePlugin {
@@ -21,7 +21,7 @@ class ForeseePlugin {
     }
 
     private setupDatabase(): void {
-        // 复用jrrp的数据库表结构
+        // 复用 jrrp 的数据库表结构
         this.ctx.model.extend('jrrp', {
             id: 'unsigned',
             userId: 'string',
@@ -54,7 +54,7 @@ class ForeseePlugin {
             .execute();
 
         if (userItems.length === 0 || userItems[0].quantity <= 0) {
-            await session.send(`@${username}，您没有预知水晶，无法查看明日运势/人品。\n可以在商城购买预知水晶（10星币）。`);
+            await session.send(`@${username}，您没有预知水晶，无法查看明日运势/人品。\n可以在商城购买预知水晶（10 星币）。`);
             return false;
         }
 
@@ -123,19 +123,15 @@ class ForeseePlugin {
             // 渲染为图片输出
             const { puppeteer } = this.ctx;
             if (!puppeteer) {
-                throw new Error('puppeteer插件未启用');
+                throw new Error('puppeteer 插件未启用');
             }
 
-            const html = buildFortuneHtml(fortuneData, session.userId);
+            const html = buildFortuneHtml(fortuneData, session.userId, true);
             return await puppeteer.render(html);
         } catch (error) {
             return `生成明日运势失败: ${error.message}`;
         }
     }
-
-
-
-
 }
 
 export default ForeseePlugin;

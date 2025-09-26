@@ -22,13 +22,13 @@ export const ITEMS: Item[] = [
     {
         id: 'lucky_card',
         name: '幸运卡',
-        description: '使用后在未来3天（包括当天）略微提高今日运势',
+        description: '使用后在未来 3 天（包括当天）略微提高今日运势',
         price: 30,
         type: 'buff',
         effect: '运势提升',
         buffConfig: {
-            durationDays: 3, // 持续3天
-            maxDurationDays: 10, // 最大叠加30天
+            durationDays: 3, // 持续 3 天
+            maxDurationDays: 10, // 最大叠加 30 天
             buffType: 'lucky_card' as BuffType
         }
     },

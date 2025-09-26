@@ -25,7 +25,7 @@ guess_number:
     maxSkips: 最大连续跳过次数
     defaultStarCoin: 默认初始星币数
     entryFee: 游戏报名费（星币）
-    defaultDynamicBonus: guess命令默认的动态星币加法值
+    defaultDynamicBonus: guess 命令默认的动态星币加法值
     firstDailyAttempts: 每日前几次游戏
     firstBonus: 每日前几次游戏的固定动态星币加法值
     extraDailyAttempts: 额外游戏次数
@@ -38,7 +38,7 @@ baike_quiz:
     questionTimeout: 问答超时时间（秒）
     rewardStarCoin: 回答正确时奖励的星币数量
     penaltyStarCoin: 回答错误时扣除的星币数量
-    adminQQs: 用于接收申诉通知的管理员QQ列表
+    adminQQs: 用于接收申诉通知的管理员 QQ 列表
     maxDailyAttempts: 用户每日最大答题次数（1-20）
 
 red_packet:

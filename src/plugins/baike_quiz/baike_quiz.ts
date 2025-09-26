@@ -6,7 +6,7 @@ import {Context, Session} from "koishi";
 // 定义数据库表结构
 export interface BaikeQuizRecord {
     id: number; // 自增主键
-    userId: string; // 用户QQ号
+    userId: string; // 用户 QQ 号
     channelId: string; // 频道ID（群号）
     dailyAttempts: number; // 当日答题次数
     lastAttemptDate: string; // 最后答题日期（格式：YYYY-MM-DD）
@@ -17,7 +17,7 @@ export interface BaikeQuizRecord {
 // 申诉记录接口
 export interface BaikeQuizAppeal {
     id: number; // 自增主键
-    userId: string; // 用户QQ号
+    userId: string; // 用户 QQ 号
     channelId: string; // 频道ID（群号）
     question: string; // 问题内容
     userAnswer: string; // 用户答案
@@ -413,7 +413,7 @@ class BaikeQuizPlugin {
         // 检查当日答题次数是否已达上限
         const reachedLimit = await this.checkDailyLimit(userId, channelId);
         if (reachedLimit) {
-            return `你今日已用完${this.config.baike_quiz.maxDailyAttempts}次答题机会，请明天再来吧！`;
+            return `你今日已用完 ${this.config.baike_quiz.maxDailyAttempts} 次答题机会，请明天再来吧！`;
         }
 
         // 获取当前问答状态
@@ -670,7 +670,7 @@ class BaikeQuizPlugin {
                                        channelId: string, question: string, userAnswer: string, 
                                        correctAnswer: string, reason: string): Promise<void> {
         if (this.config.baike_quiz.adminQQs.length === 0) {
-            console.warn('没有配置管理员QQ，无法发送申诉通知');
+            console.warn('没有配置管理员 QQ，无法发送申诉通知');
             return;
         }
         
@@ -835,7 +835,7 @@ class BaikeQuizPlugin {
                  );
              }
               
-             return `✅ 已批准ID为 ${appealId} 的申诉，并退还用户 ${refundAmount} 星币！`;
+             return `✅ 已批准 ID 为 ${appealId} 的申诉，并退还用户 ${refundAmount} 星币！`;
          } catch (error) {
              console.error('批准申诉失败:', error);
              return `❌ 处理申诉失败，请稍后重试！`;
@@ -863,7 +863,7 @@ class BaikeQuizPlugin {
                 { status: 'rejected' }
             );
             
-            return `✅ 已拒绝ID为 ${appealId} 的申诉！`;
+            return `✅ 已拒绝 ID 为 ${appealId} 的申诉！`;
         } catch (error) {
             console.error('拒绝申诉失败:', error);
             return `❌ 处理申诉失败，请稍后重试！`;
