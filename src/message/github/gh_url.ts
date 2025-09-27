@@ -95,7 +95,7 @@ async function getGitHubOGImage(owner: string, repo: string): Promise<string> {
 }
 
 export function gh_url(ctx: Context, config: Config) {
-    ctx.on('message-created', async (session) => {
+    ctx.on('message', async (session) => {
         try {
             // 提取文本内容
             const textContent = h.select(session.elements, 'text').join('').trim();
@@ -134,7 +134,7 @@ export function gh_url(ctx: Context, config: Config) {
 
                     if (retries <= config.github.maxRetries) {
                         // 简单的指数退避
-                        await new Promise(resolve => setTimeout(resolve, Math.pow(2, retries) * 1000));
+                        await ctx.sleep(Math.pow(2, retries) * 1000);
                     }
                 }
             }

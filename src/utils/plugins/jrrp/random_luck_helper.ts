@@ -1,5 +1,5 @@
 import { Context, Session } from 'koishi';
-import { getFestivalBonus, getFestivals } from '../../../plugins/jrrp/festival';
+import { getFestivalBonus, getFestivals } from '../../../plugins/fortune/jrrp/festival';
 import {randomInt} from '../../pseudo_random_helper';
 
 // 运势等级配置接口

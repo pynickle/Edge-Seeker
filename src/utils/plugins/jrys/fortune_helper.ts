@@ -2,8 +2,8 @@ import { Context } from 'koishi';
 import { Solar } from 'lunar-typescript';
 import axios from 'axios';
 import { BiasType, random, randomChoice, randomInt } from '../../pseudo_random_helper';
-import { hasActiveBuff } from '../../../plugins/prop/prop_helper';
-import { BuffType } from '../../../plugins/prop/inventory/inventory';
+import { hasActiveBuff } from '../../prop_helper';
+import { BuffType } from '../../../plugins/currency/prop/inventory/inventory';
 
 export interface FortuneData {
     score: number; // 运势分数
@@ -82,25 +82,12 @@ export async function calculateFortune(
     // 获取一言数据
     let sentence: string, sentenceFrom: string;
     try {
-        if (isTomorrow) {
-            // 对于明日运势，使用模拟的一言数据
-            const mockSentences = [
-                '明日天气晴好，心情也会如阳光般灿烂。',
-                '机遇总是留给有准备的人，明天就是你的机会。',
-                '保持平常心，明天会有意想不到的收获。',
-                '今日的努力，明天的回报，继续加油！',
-                '明天是新的开始，充满无限可能。'
-            ];
-            sentence = randomChoice(mockSentences);
-            sentenceFrom = '明日预测';
-        } else {
-            // 对于今日运势，尝试获取真实的一言数据
-            const res = await axios.get('http://hitokoto_api:8000', {
-                timeout: 10000
-            });
-            sentence = res.data.hitokoto;
-            sentenceFrom = res.data.from;
-        }
+        // 对于今日运势，尝试获取真实的一言数据
+        const res = await axios.get('http://hitokoto_api:8000', {
+            timeout: 5000
+        });
+        sentence = res.data.hitokoto;
+        sentenceFrom = res.data.from;
     } catch (error) {
         // 出错时使用备用的一言数据
         const fallbackSentences = [

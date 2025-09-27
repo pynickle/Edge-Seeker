@@ -1,24 +1,25 @@
 import {Context, Schema} from 'koishi'
-import {zanwo} from "./plugins/zanwo/zanwo";
-import JrrpPlugin from "./plugins/jrrp/jrrp";
-import {cat} from "./plugins/cat/cat";
+import {zanwo} from "./plugins/platform/zanwo/zanwo";
+import JrrpPlugin from "./plugins/fortune/jrrp/jrrp";
+import {cat} from "./plugins/misc/cat/cat";
 import {gh_url} from "./message/github/gh_url";
-import {whois} from "./plugins/whois/whois";
+import {whois} from "./plugins/misc/whois/whois";
 import {minecraft_notifier} from "./intervals/minecraft/minecraft_notifier";
 import {auto_red_packet} from "./intervals/auto_red_packet/auto_red_packet";
-import {emoji_gen} from "./plugins/emoji/emoji";
-import StarCoinPlugin from "./plugins/starcoin/starcoin";
-import {waifu} from "./plugins/waifu/waifu";
-import JrysPlugin from "./plugins/jrys/jrys";
-import {choose} from "./plugins/choose/choose";
-import {guess_number} from "./plugins/guess_number/guess_number";
-import MarketPlugin from "./plugins/prop/market/market";
-import InventoryPlugin from "./plugins/prop/inventory/inventory";
-import ForeseePlugin from "./plugins/foresee/foresee";
-import BaikeQuizPlugin from "./plugins/baike_quiz/baike_quiz";
-import {red_packet} from "./plugins/red_packet/red_packet";
-import {friend_code} from "./plugins/friend_code/friend_code";
-import UserMarketPlugin from "./plugins/user_market/user_market";
+import {emoji_gen} from "./plugins/misc/emoji/emoji";
+import StarCoinPlugin from "./plugins/currency/starcoin/starcoin";
+import {waifu} from "./plugins/misc/waifu/waifu";
+import JrysPlugin from "./plugins/fortune/jrys/jrys";
+import {choose} from "./plugins/misc/choose/choose";
+import {guess_number} from "./plugins/currency/guess_number/guess_number";
+import MarketPlugin from "./plugins/currency/prop/market/market";
+import InventoryPlugin from "./plugins/currency/prop/inventory/inventory";
+import ForeseePlugin from "./plugins/fortune/foresee/foresee";
+import BaikeQuizPlugin from "./plugins/currency/baike_quiz/baike_quiz";
+import {red_packet} from "./plugins/currency/red_packet/red_packet";
+import {friend_code} from "./plugins/platform/friend_code/friend_code";
+import {hitokoto} from "./plugins/misc/hitokoto/hitokoto";
+import UserMarketPlugin from "./plugins/currency/user_market/user_market";
 
 export const inject = ['database', 'puppeteer', 'cron']
 
@@ -163,6 +164,7 @@ export function apply(ctx: Context, cfg: Config) {
     ctx.plugin(emoji_gen, cfg);
     ctx.plugin(waifu, cfg);
     ctx.plugin(choose, cfg);
+    ctx.plugin(hitokoto, cfg);
 
     ctx.plugin(friend_code, cfg);
     ctx.plugin(UserMarketPlugin, cfg);
