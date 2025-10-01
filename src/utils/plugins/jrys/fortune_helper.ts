@@ -67,7 +67,7 @@ export async function calculateFortune(
 
     // 计算幸运颜色
     const luckyColors: string[] = Object.keys(COLORMAP) as Array<string>;
-    const luckyColor: string = randomChoice<string>(luckyColors);
+    const luckyColor: string = randomChoice<string>(luckyColors, seed2);
 
     // 计算幸运数字（1-100）
     const luckyNumber = randomInt(1, 100, seed2);
