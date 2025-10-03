@@ -20,12 +20,16 @@ import {red_packet} from "./plugins/currency/red_packet/red_packet";
 import {friend_code} from "./plugins/platform/friend_code/friend_code";
 import {hitokoto} from "./plugins/misc/hitokoto/hitokoto";
 import UserMarketPlugin from "./plugins/currency/user_market/user_market";
+import {roll} from "./plugins/currency/roll/index";
 
 export const inject = ['database', 'puppeteer', 'cron']
 
 export const name = 'edge-seeker'
 
 export interface Config {
+    roll: {
+        cost: number
+    },
     jrrp: {
         cleanupDays: number,
         rankLimit: number
@@ -84,6 +88,9 @@ export interface Config {
 }
 
 export const Config: Schema<Config> = Schema.object({
+    roll: Schema.object({
+        cost: Schema.number().default(300)
+    }),
     jrrp: Schema.object({
         cleanupDays: Schema.number().default(30),
         rankLimit: Schema.number().default(7),
@@ -157,6 +164,7 @@ export function apply(ctx: Context, cfg: Config) {
 
     ctx.plugin(guess_number, cfg);
     ctx.plugin(red_packet, cfg);
+    ctx.plugin(roll, cfg);
 
     ctx.plugin(zanwo, cfg);
     ctx.plugin(cat, cfg);

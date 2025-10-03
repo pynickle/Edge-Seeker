@@ -53,6 +53,11 @@ auto_sign:
   $inner:
     groupIds: 用于接收签到通知的频道 ID 列表
 
+roll:
+  $desc: 抽奖功能配置
+  $inner:
+    cost: 每次抽奖消耗的星币数量
+
 auto_red_packet:
   $desc: 自动发红包配置
   $inner:
