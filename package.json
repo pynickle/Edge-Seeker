@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-edge-seeker",
   "description": "ENC_Euphony Personal Use Plugin",
-  "version": "0.45.3",
+  "version": "0.46.0",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [

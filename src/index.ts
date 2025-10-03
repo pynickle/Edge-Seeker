@@ -29,6 +29,7 @@ export const name = 'edge-seeker'
 export interface Config {
     roll: {
         cost: number
+        dailyLimit: number
     },
     jrrp: {
         cleanupDays: number,
@@ -89,7 +90,8 @@ export interface Config {
 
 export const Config: Schema<Config> = Schema.object({
     roll: Schema.object({
-        cost: Schema.number().default(300)
+        cost: Schema.number().default(300),
+        dailyLimit: Schema.number().default(1)
     }),
     jrrp: Schema.object({
         cleanupDays: Schema.number().default(30),

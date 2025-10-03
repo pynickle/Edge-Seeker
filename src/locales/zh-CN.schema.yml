@@ -57,6 +57,7 @@ roll:
   $desc: 抽奖功能配置
   $inner:
     cost: 每次抽奖消耗的星币数量
+    dailyLimit: 每日每群每人可抽奖的最大次数
 
 auto_red_packet:
   $desc: 自动发红包配置

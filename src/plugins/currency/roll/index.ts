@@ -11,9 +11,9 @@ interface RollRecord {
     userId: string;
     channelId: string;
     date: string;
-    cost: number;
-    reward: number;
-    rollTime: number;
+    totalCost: number;
+    totalReward: number;
+    count: number;
 }
 
 // 声明数据表
@@ -37,15 +37,15 @@ interface RollConfig {
 export const name = 'roll';
 
 export function roll(ctx: Context, config: Config) {
-    // 确保数据表存在
+    // 确保数据表存在 - 使用每日统计的方式，而不是每次抽奖记录
     ctx.database.extend('rolls', {
         id: 'unsigned',
         userId: 'string',
         channelId: 'string',
         date: 'string',
-        cost: 'unsigned',
-        reward: 'unsigned',
-        rollTime: 'unsigned',
+        totalCost: 'unsigned', // 当日总消耗星币
+        totalReward: 'unsigned', // 当日总获得星币
+        count: 'unsigned', // 当日抽奖次数
     }, {
         primary: 'id',
         autoInc: true,
@@ -59,14 +59,14 @@ export function roll(ctx: Context, config: Config) {
   const DEFAULT_ROLL_CONFIG: RollConfig = {
     cost: config.roll?.cost || 300,
     rewards: [
-      { min: 100, max: 100, weight: 10, message: (amount: number) => `恭喜获得 ${amount} 星币！再接再厉！` },
-      { min: 150, max: 150, weight: 15, message: (amount: number) => `恭喜获得 ${amount} 星币！小有收获！` },
-      { min: 200, max: 200, weight: 25, message: (amount: number) => `恭喜获得 ${amount} 星币！不错的收获！` },
-      { min: 250, max: 250, weight: 15, message: (amount: number) => `恭喜获得 ${amount} 星币！手气不错！` },
-      { min: 300, max: 300, weight: 15, message: (amount: number) => `恭喜获得 ${amount} 星币！运气很好！` },
-      { min: 400, max: 400, weight: 10, message: (amount: number) => `恭喜获得 ${amount} 星币！欧气爆发！` },
-      { min: 600, max: 600, weight: 5, message: (amount: number) => `恭喜获得 ${amount} 星币！超级欧皇！` },
-      { min: 800, max: 800, weight: 5, message: (amount: number) => `恭喜获得 ${amount} 星币！欧气冲天！` },
+      { min: 100, max: 100, weight: 10, message: (amount: number) => `获得 ${amount} 星币，再试一次吧！` },
+      { min: 150, max: 150, weight: 15, message: (amount: number) => `获得 ${amount} 星币，差一点点就回本了！` },
+      { min: 200, max: 200, weight: 25, message: (amount: number) => `获得 ${amount} 星币，继续努力！` },
+      { min: 250, max: 250, weight: 15, message: (amount: number) => `获得 ${amount} 星币，接近回本了！` },
+      { min: 300, max: 300, weight: 15, message: (amount: number) => `恭喜获得 ${amount} 星币，刚好回本！` },
+      { min: 400, max: 400, weight: 10, message: (amount: number) => `恭喜获得 ${amount} 星币！小赚一笔！` },
+      { min: 600, max: 600, weight: 5, message: (amount: number) => `恭喜获得 ${amount} 星币！大赚特赚！欧皇附体！` },
+      { min: 800, max: 800, weight: 5, message: (amount: number) => `恭喜获得 ${amount} 星币！超级大赚！欧皇降临！` },
     ]
   };
 
@@ -74,28 +74,46 @@ export function roll(ctx: Context, config: Config) {
   // 100*10% + 150*15% + 200*25% + 250*20% + 300*15% + 400*10% + 600*5% = 237.5 星币
 
     /**
-     * 检查用户今日是否已抽奖
+     * 获取用户今日抽奖次数
      */
-    async function hasUserRolledToday(ctx: Context, userId: string, channelId: string, date: string): Promise<boolean> {
-        const records = await ctx.database
+    async function countUserRollsToday(ctx: Context, userId: string, channelId: string, date: string): Promise<number> {
+        const record = await ctx.database
             .select('rolls')
             .where({userId, channelId, date})
-            .execute();
-        return records.length > 0;
+            .execute()
+            .then(records => records[0]);
+        return record?.count || 0;
     }
 
     /**
-     * 保存抽奖记录
+     * 保存抽奖记录 - 更新每日统计
      */
     async function saveRollRecord(ctx: Context, userId: string, channelId: string, date: string, cost: number, reward: number): Promise<void> {
-        await ctx.database.create('rolls', {
-            userId,
-            channelId,
-            date,
-            cost,
-            reward,
-            rollTime: Date.now()
-        });
+        // 先检查记录是否存在
+        const existingRecord = await ctx.database
+            .select('rolls')
+            .where({userId, channelId, date})
+            .execute()
+            .then(records => records[0]);
+
+        if (existingRecord) {
+            // 如果记录存在，更新记录
+            await ctx.database.set('rolls', existingRecord.id, {
+                totalCost: existingRecord.totalCost + cost,
+                totalReward: existingRecord.totalReward + reward,
+                count: existingRecord.count + 1
+            });
+        } else {
+            // 如果记录不存在，创建新记录
+            await ctx.database.create('rolls', {
+                userId,
+                channelId,
+                date,
+                totalCost: cost,
+                totalReward: reward,
+                count: 1
+            });
+        }
     }
 
     /**
@@ -122,11 +140,17 @@ export function roll(ctx: Context, config: Config) {
     async function doRoll(ctx: Context, session: Session, cost: number): Promise<string> {
         const {userId, channelId} = session;
         const today = getTodayString();
+        const dailyLimit = config.roll?.dailyLimit || 1;
 
-        // 检查今日是否已抽奖
-        if (await hasUserRolledToday(ctx, userId, channelId, today)) {
-            return '你今天已经抽过奖了，请明天再来！';
+        // 检查今日抽奖次数是否已达上限
+        const todayRolls = await countUserRollsToday(ctx, userId, channelId, today);
+        if (todayRolls >= dailyLimit) {
+            return `你今天已经抽奖${todayRolls}次了，已达到每日${dailyLimit}次的上限，请明天再来！`;
         }
+
+        // 显示剩余抽奖次数
+        const remainingRolls = dailyLimit - todayRolls;
+        await session.send(`今日剩余抽奖次数：${remainingRolls}次`);
 
         // 检查星币是否足够
         const currentStarCoin = await StarCoinHelper.getUserStarCoin(ctx, userId, channelId);
@@ -166,7 +190,9 @@ export function roll(ctx: Context, config: Config) {
             // 返回结果
             const resultMessage = rewardType.message(rewardAmount);
             const finalStarCoin = await StarCoinHelper.getUserStarCoin(ctx, userId, channelId);
-            return `${resultMessage}\n当前星币余额：${finalStarCoin} 星币`;
+            // 显示剩余抽奖次数
+            const remainingRollsAfter = dailyLimit - (todayRolls + 1);
+            return `${resultMessage}\n当前星币余额：${finalStarCoin} 星币\n今日剩余抽奖次数：${remainingRollsAfter}次`;
 
         } catch (error) {
             ctx.logger.warn('抽奖过程中出现错误:', error);
