@@ -56,17 +56,22 @@ export function roll(ctx: Context, config: Config) {
     const confirmationManager = useConfirmationHelper(ctx);
 
     // 默认抽奖配置
-    const DEFAULT_ROLL_CONFIG: RollConfig = {
-        cost: config.roll?.cost || 300,
-        rewards: [
-            {min: 100, max: 200, weight: 30, message: (amount: number) => `恭喜获得 ${amount} 星币！再接再厉！`},
-            {min: 200, max: 300, weight: 25, message: (amount: number) => `恭喜获得 ${amount} 星币！不错的收获！`},
-            {min: 300, max: 400, weight: 20, message: (amount: number) => `恭喜获得 ${amount} 星币！手气不错！`},
-            {min: 400, max: 600, weight: 15, message: (amount: number) => `恭喜获得 ${amount} 星币！运气很好！`},
-            {min: 600, max: 800, weight: 8, message: (amount: number) => `恭喜获得 ${amount} 星币！欧气爆发！`},
-            {min: 800, max: 1200, weight: 2, message: (amount: number) => `恭喜获得 ${amount} 星币！超级欧皇！`},
-        ]
-    };
+  const DEFAULT_ROLL_CONFIG: RollConfig = {
+    cost: config.roll?.cost || 300,
+    rewards: [
+      { min: 100, max: 100, weight: 10, message: (amount: number) => `恭喜获得 ${amount} 星币！再接再厉！` },
+      { min: 150, max: 150, weight: 15, message: (amount: number) => `恭喜获得 ${amount} 星币！小有收获！` },
+      { min: 200, max: 200, weight: 25, message: (amount: number) => `恭喜获得 ${amount} 星币！不错的收获！` },
+      { min: 250, max: 250, weight: 15, message: (amount: number) => `恭喜获得 ${amount} 星币！手气不错！` },
+      { min: 300, max: 300, weight: 15, message: (amount: number) => `恭喜获得 ${amount} 星币！运气很好！` },
+      { min: 400, max: 400, weight: 10, message: (amount: number) => `恭喜获得 ${amount} 星币！欧气爆发！` },
+      { min: 600, max: 600, weight: 5, message: (amount: number) => `恭喜获得 ${amount} 星币！超级欧皇！` },
+      { min: 800, max: 800, weight: 5, message: (amount: number) => `恭喜获得 ${amount} 星币！欧气冲天！` },
+    ]
+  };
+
+  // 计算平均返还星币数量
+  // 100*10% + 150*15% + 200*25% + 250*20% + 300*15% + 400*10% + 600*5% = 237.5 星币
 
     /**
      * 检查用户今日是否已抽奖

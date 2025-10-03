@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-edge-seeker",
   "description": "ENC_Euphony Personal Use Plugin",
-  "version": "0.45.0",
+  "version": "0.45.3",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -24,7 +24,7 @@
     "axios": "^1.12.2",
     "dayjs": "^1.11.18",
     "koishi-plugin-cron": "^3.1.0",
-    "lunar-typescript": "^1.8.1",
+    "lunar-typescript": "^1.8.2",
     "node-emoji": "^2.2.0",
     "whoiser": "^1.18.0"
   }
