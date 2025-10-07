@@ -148,19 +148,16 @@ export function roll(ctx: Context, config: Config) {
             return `你今天已经抽奖${todayRolls}次了，已达到每日${dailyLimit}次的上限，请明天再来！`;
         }
 
-        // 显示剩余抽奖次数
-        const remainingRolls = dailyLimit - todayRolls;
-        await session.send(`今日剩余抽奖次数：${remainingRolls}次`);
-
         // 检查星币是否足够
         const currentStarCoin = await StarCoinHelper.getUserStarCoin(ctx, userId, channelId);
         if (currentStarCoin < cost) {
             return `星币不足，抽奖需要 ${cost} 星币，你当前有 ${currentStarCoin} 星币！`;
         }
 
+        // 显示剩余抽奖次数并请求确认
+        const remainingRolls = dailyLimit - todayRolls;
         try {
-            // 请求确认
-            await session.send(`确认花费 ${cost} 星币进行抽奖吗？请回复「确认」或「取消」（30秒内有效）`);
+            await session.send(`今日剩余抽奖次数：${remainingRolls}次\n确认花费 ${cost} 星币进行抽奖吗？请回复「确认」或「取消」（30秒内有效）`);
             const confirmed = await confirmationManager.createConfirmation(ctx, session, 30);
 
             if (!confirmed) {

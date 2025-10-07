@@ -76,7 +76,7 @@ export function minecraft_notifier(ctx: Context, cfg: Config) {
                 lastRelease = latest.release;
             }
 
-            if (lastSnapshot !== latest.snapshot) {
+            if (lastSnapshot !== latest.snapshot && lastRelease != latest.snapshot) {
                 for (const channel of cfg.minecraft.notifyChannel) {
                     await bot.sendMessage(channel, `Minecraft 新快照版发布了：${latest.snapshot}`);
                 }
