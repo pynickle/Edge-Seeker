@@ -3,8 +3,6 @@ on:
   push:
     branches:
       - master # or main
-  repository_dispatch:
-    types: [ semantic-release ]
 
 permissions:
   contents: read # for checkout
