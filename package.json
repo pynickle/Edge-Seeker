@@ -21,7 +21,7 @@
   "scripts": {
     "lint": "eslint ./src --ext .ts",
     "lint:fix": "eslint ./src --ext .ts --fix",
-    "build": "esbuild src/index.ts --bundle --outfile=lib/index.js --format=cjs --platform=node --external:koishi --external:axios --external:dayjs --external:koishi-plugin-cron --external:lunar-typescript --external:node-emoji --external:whoiser --external:koishi-plugin-puppeteer --external:@koishijs/plugin-adapter-onebot && tsc --emitDeclarationOnly",
+    "build": "node esbuild.config.js && tsc --emitDeclarationOnly",
     "release": "semantic-release"
   },
   "peerDependencies": {
@@ -41,6 +41,7 @@
     "@semantic-release/npm": "^12.0.2",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "esbuild": "^0.25.10",
+    "esbuild-plugin-yaml": "^0.0.1",
     "eslint": "^9.37.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
