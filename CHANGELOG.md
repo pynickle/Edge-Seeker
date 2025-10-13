@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/pynickle/Edge-Seeker/compare/v1.0.2...v1.1.0) (2025-10-13)
+
+### ✨ 功能更新
+
+* 哔哩哔哩绑定加入 userName 和 mid 字段 ([1d795cc](https://github.com/pynickle/Edge-Seeker/commit/1d795cc758210487e98aeee7fe6cdff734449e31))
+
 ## [1.0.2](https://github.com/pynickle/Edge-Seeker/compare/v1.0.1...v1.0.2) (2025-10-13)
 
 ### 💄 样式优化
