@@ -1,4 +1,3 @@
-import '@koishijs/plugin-adapter-onebot';
 import { Context, Session, h } from 'koishi';
 import { Config } from '../../../index';
 import { createTextMsgNode, getUserName } from '../../../utils/onebot_helper';
