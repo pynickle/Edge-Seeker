@@ -2,6 +2,7 @@
 import crypto from 'crypto';
 import { Context } from 'koishi';
 import { Config } from '../../index';
+import {randomInt} from "../../utils/pseudo_random_helper";
 
 export const name = 'cookie-binder';
 
@@ -108,7 +109,7 @@ export function cookie(ctx: Context, config: Config) {
             const maxAttempts = 10;
 
             while (!bindCode && attempts < maxAttempts) {
-                const candidate = Math.floor(Math.random() * 900000) + 100000;
+                const candidate = randomInt(100000, 999999);
 
                 const existing = await ctx.database.get('bili_bind', candidate);
                 if (!existing || existing.length === 0) {
