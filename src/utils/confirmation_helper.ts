@@ -1,13 +1,16 @@
-import {Context, Session} from 'koishi';
+import { Context, Session } from 'koishi';
 
 /**
  * 确认管理器，用于处理用户的确认/取消操作
  */
 export class ConfirmationManager {
-    private pendingConfirmations = new Map<string, {
-        resolve: (value: boolean) => void,
-        timer: ReturnType<typeof setTimeout>
-    }>();
+    private pendingConfirmations = new Map<
+        string,
+        {
+            resolve: (value: boolean) => void;
+            timer: ReturnType<typeof setTimeout>;
+        }
+    >();
 
     /**
      * 创建一个确认请求
@@ -16,7 +19,11 @@ export class ConfirmationManager {
      * @param timeout 超时时间（秒）
      * @returns Promise<boolean> 确认结果，true表示确认，false表示取消或超时
      */
-    createConfirmation(ctx: Context, session: Session, timeout: number): Promise<boolean> {
+    createConfirmation(
+        ctx: Context,
+        session: Session,
+        timeout: number
+    ): Promise<boolean> {
         const key = `${session.platform}:${session.userId}`;
 
         // 如果已经有未确认的请求，拒绝新请求
@@ -31,7 +38,7 @@ export class ConfirmationManager {
                 resolve(false);
             }, timeout * 1000);
 
-            this.pendingConfirmations.set(key, {resolve, timer});
+            this.pendingConfirmations.set(key, { resolve, timer });
         });
     }
 
@@ -44,7 +51,10 @@ export class ConfirmationManager {
             const key = `${session.platform}:${session.userId}`;
             const confirmation = manager.pendingConfirmations.get(key);
 
-            if (confirmation && /^(确认|取消)$/.test(session.content?.trim() || '')) {
+            if (
+                confirmation &&
+                /^(确认|取消)$/.test(session.content?.trim() || '')
+            ) {
                 clearTimeout(confirmation.timer);
                 manager.pendingConfirmations.delete(key);
                 confirmation.resolve(session.content.trim() === '确认');

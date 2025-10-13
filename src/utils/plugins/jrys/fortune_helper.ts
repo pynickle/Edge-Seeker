@@ -1,9 +1,14 @@
+import axios from 'axios';
 import { Context } from 'koishi';
 import { Solar } from 'lunar-typescript';
-import axios from 'axios';
-import { BiasType, random, randomChoice, randomInt } from '../../pseudo_random_helper';
-import { hasActiveBuff } from '../../prop_helper';
 import { BuffType } from '../../../plugins/currency/prop/inventory/inventory';
+import { hasActiveBuff } from '../../prop_helper';
+import {
+    BiasType,
+    random,
+    randomChoice,
+    randomInt,
+} from '../../pseudo_random_helper';
 
 export interface FortuneData {
     score: number; // 运势分数
@@ -18,20 +23,20 @@ export interface FortuneData {
 }
 
 export const COLORMAP: Record<string, string> = {
-    '红色': '#ff0000',
-    '橙色': '#ffa500',
-    '黄色': '#ffff00',
-    '绿色': '#008000',
-    '青色': '#00ffff',
-    '蓝色': '#0000ff',
-    '紫色': '#800080',
-    '粉色': '#ffc0cb',
-    '金色': '#ffd700',
-    '银色': '#c0c0c0',
-    '黑色': '#000000',
-    '灰色': '#808080',
-    '棕色': '#a52a2a',
-    '米色': '#f5f5dc'
+    红色: '#ff0000',
+    橙色: '#ffa500',
+    黄色: '#ffff00',
+    绿色: '#008000',
+    青色: '#00ffff',
+    蓝色: '#0000ff',
+    紫色: '#800080',
+    粉色: '#ffc0cb',
+    金色: '#ffd700',
+    银色: '#c0c0c0',
+    黑色: '#000000',
+    灰色: '#808080',
+    棕色: '#a52a2a',
+    米色: '#f5f5dc',
 };
 
 /**
@@ -52,8 +57,13 @@ export async function calculateFortune(
 
     // 确定是否有幸运卡加成
     let bias: BiasType = 'none';
-    if (!isTomorrow) { // 只有今日运势才考虑幸运卡效果
-        const hasLuckyCard = await hasActiveBuff(ctx, userId, BuffType.LUCKY_CARD);
+    if (!isTomorrow) {
+        // 只有今日运势才考虑幸运卡效果
+        const hasLuckyCard = await hasActiveBuff(
+            ctx,
+            userId,
+            BuffType.LUCKY_CARD
+        );
         if (hasLuckyCard) {
             bias = 'slight_up';
         }
@@ -84,7 +94,7 @@ export async function calculateFortune(
     try {
         // 对于今日运势，尝试获取真实的一言数据
         const res = await axios.get('http://hitokoto_api:8000', {
-            timeout: 5000
+            timeout: 5000,
         });
         sentence = res.data.hitokoto;
         sentenceFrom = res.data.from;
@@ -95,7 +105,7 @@ export async function calculateFortune(
             '一切都会好起来的。',
             '每一个平凡的日子都值得珍惜。',
             '保持微笑，好运自然来。',
-            '今天也要元气满满！'
+            '今天也要元气满满！',
         ];
         sentence = randomChoice(fallbackSentences);
         sentenceFrom = '系统提示';
@@ -110,14 +120,18 @@ export async function calculateFortune(
         luckyNumber,
         solarDate,
         sentence,
-        sentenceFrom
+        sentenceFrom,
     };
 }
 
 /**
  * 构建运势图片的 HTML 内容
  */
-export function buildFortuneHtml(fortuneData: FortuneData, userId: string, isTomorrow: boolean = false): string {
+export function buildFortuneHtml(
+    fortuneData: FortuneData,
+    userId: string,
+    isTomorrow: boolean = false
+): string {
     const luckyColorValue = getColorValue(fortuneData.luckyColor);
     return `
 <!DOCTYPE html>

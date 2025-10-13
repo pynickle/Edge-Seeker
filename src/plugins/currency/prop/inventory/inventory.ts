@@ -1,7 +1,7 @@
-import {Context, Session} from 'koishi';
-import {Config} from '../../../../index';
-import {ITEMS} from "../item_mapping";
-import {useBuffItem} from "../../../../utils/prop_helper";
+import { Context, Session } from 'koishi';
+import { Config } from '../../../../index';
+import { useBuffItem } from '../../../../utils/prop_helper';
+import { ITEMS } from '../item_mapping';
 
 // 定义用户道具接口
 export interface UserItem {
@@ -47,54 +47,65 @@ class InventoryPlugin {
 
     private setupDatabase(): void {
         // 用户道具表
-        this.ctx.model.extend('market_user_items', {
-            id: 'unsigned',
-            userId: 'string',
-            channelId: 'string',
-            itemId: 'string',
-            quantity: 'integer',
-            expireDate: 'unsigned',
-        }, {
-            primary: 'id',
-            autoInc: true,
-            indexes: [
-                ['userId', 'channelId', 'itemId']
-            ]
-        });
+        this.ctx.model.extend(
+            'market_user_items',
+            {
+                id: 'unsigned',
+                userId: 'string',
+                channelId: 'string',
+                itemId: 'string',
+                quantity: 'integer',
+                expireDate: 'unsigned',
+            },
+            {
+                primary: 'id',
+                autoInc: true,
+                indexes: [['userId', 'channelId', 'itemId']],
+            }
+        );
 
         // 通用 Buff 效果表
-        this.ctx.model.extend('user_buff_effects', {
-            id: 'unsigned',
-            userId: 'string',
-            buffType: 'string',
-            startDate: 'string',
-            endDate: 'string',
-            data: 'json' // JSON格式存储额外数据
-        }, {
-            primary: 'id',
-            autoInc: true,
-            indexes: [
-                ['userId', 'buffType', 'startDate', 'endDate']
-            ]
-        });
+        this.ctx.model.extend(
+            'user_buff_effects',
+            {
+                id: 'unsigned',
+                userId: 'string',
+                buffType: 'string',
+                startDate: 'string',
+                endDate: 'string',
+                data: 'json', // JSON格式存储额外数据
+            },
+            {
+                primary: 'id',
+                autoInc: true,
+                indexes: [['userId', 'buffType', 'startDate', 'endDate']],
+            }
+        );
     }
 
     private registerCommands(): void {
         // 查看道具库命令
-        this.ctx.command('inventory', '查看你的道具库')
-            .action(async ({session}) => this.handleInventoryCommand(session));
+        this.ctx
+            .command('inventory', '查看你的道具库')
+            .action(async ({ session }) =>
+                this.handleInventoryCommand(session)
+            );
 
         // 使用道具命令
-        this.ctx.command('use <itemName:string>', '使用道具')
-            .action(async ({session}, itemName: string) => this.handleUseItemCommand(session, itemName));
+        this.ctx
+            .command('use <itemName:string>', '使用道具')
+            .action(async ({ session }, itemName: string) =>
+                this.handleUseItemCommand(session, itemName)
+            );
     }
 
     private async handleInventoryCommand(session: Session): Promise<string> {
-        const {userId, channelId, username} = session;
+        const { userId, channelId, username } = session;
 
         // 查询用户的道具
-        const userItems = await this.ctx.database.select('market_user_items')
-            .where({userId, channelId})
+        const userItems = await this.ctx.database
+            .select('market_user_items')
+            .where({ userId, channelId })
             .execute();
 
         if (userItems.length === 0) {
@@ -108,19 +119,19 @@ class InventoryPlugin {
         const buffItems: string[] = [];
         const otherItems: string[] = [];
 
-        userItems.forEach(item => {
-            const itemInfo = items.find(i => i.id === item.itemId);
+        userItems.forEach((item) => {
+            const itemInfo = items.find((i) => i.id === item.itemId);
             if (itemInfo) {
-                const expireInfo = item.expireDate ?
-                    `（有效期至：${new Date(item.expireDate).toLocaleDateString()}）` :
-                    '';
+                const expireInfo = item.expireDate
+                    ? `（有效期至：${new Date(item.expireDate).toLocaleDateString()}）`
+                    : '';
                 let itemLine = `${itemInfo.name} x${item.quantity} ${expireInfo}`;
-                
+
                 // 如果是other类型且有使用说明，添加使用说明标记
                 if (itemInfo.type === 'other' && itemInfo.usageInstructions) {
                     itemLine += ' 💡';
                 }
-                
+
                 // 根据道具类型分组
                 if (itemInfo.type === 'buff') {
                     buffItems.push(itemLine);
@@ -131,9 +142,7 @@ class InventoryPlugin {
         });
 
         // 生成道具库消息
-        const inventoryMessage = [
-            `🎒 @${username} 的道具库：`
-        ];
+        const inventoryMessage = [`🎒 @${username} 的道具库：`];
 
         // 添加buff类型道具
         if (buffItems.length > 0) {
@@ -145,39 +154,53 @@ class InventoryPlugin {
         if (otherItems.length > 0) {
             inventoryMessage.push('\n📦 其他道具：');
             inventoryMessage.push(...otherItems);
-            
+
             // 查找是否有带使用说明的道具
-            const hasInstructions = userItems.some(item => {
-                const itemInfo = items.find(i => i.id === item.itemId);
-                return itemInfo && itemInfo.type === 'other' && itemInfo.usageInstructions;
+            const hasInstructions = userItems.some((item) => {
+                const itemInfo = items.find((i) => i.id === item.itemId);
+                return (
+                    itemInfo &&
+                    itemInfo.type === 'other' &&
+                    itemInfo.usageInstructions
+                );
             });
-            
+
             if (hasInstructions) {
-                inventoryMessage.push('\n💡 标有💡的道具需使用特定命令，输入 "use 道具名" 查看具体使用方法');
+                inventoryMessage.push(
+                    '\n💡 标有💡的道具需使用特定命令，输入 "use 道具名" 查看具体使用方法'
+                );
             }
         }
 
-        inventoryMessage.push('\n输入 "use 道具名" 使用道具，例如 "use 幸运卡"');
+        inventoryMessage.push(
+            '\n输入 "use 道具名" 使用道具，例如 "use 幸运卡"'
+        );
 
         return inventoryMessage.join('\n');
     }
 
-    private async handleUseItemCommand(session: Session, itemName: string): Promise<string> {
-        const {userId, channelId, username} = session;
+    private async handleUseItemCommand(
+        session: Session,
+        itemName: string
+    ): Promise<string> {
+        const { userId, channelId, username } = session;
 
         // 获取道具列表
         const items = [...ITEMS];
 
         // 查找对应的道具
-        const item = items.find(i => i.name.includes(itemName) || itemName.includes(i.name));
+        const item = items.find(
+            (i) => i.name.includes(itemName) || itemName.includes(i.name)
+        );
 
         if (!item) {
             return `@${username}，找不到名为 "${itemName}" 的道具。`;
         }
 
         // 检查用户是否拥有该道具
-        const userItem = await this.ctx.database.select('market_user_items')
-            .where({userId, channelId, itemId: item.id})
+        const userItem = await this.ctx.database
+            .select('market_user_items')
+            .where({ userId, channelId, itemId: item.id })
             .execute();
 
         if (userItem.length === 0 || userItem[0].quantity <= 0) {
@@ -194,7 +217,7 @@ class InventoryPlugin {
             if (item.usageInstructions) {
                 return `@${username}，"${item.name}" 不能通过use命令直接使用。\n${item.usageInstructions}`;
             }
-            
+
             return `@${username}，"${item.name}" 道具不能通过use命令直接使用。\n请查看道具描述了解如何使用。`;
         }
 

@@ -1,5 +1,5 @@
-﻿import {Context} from 'koishi';
-import {Config} from "../../../index";
+﻿import { Context } from 'koishi';
+import { Config } from '../../../index';
 
 // 定义数据库表结构
 interface UserBiliInfo {
@@ -22,22 +22,26 @@ export const name = 'bili-bind';
 
 export async function bind(ctx: Context, config: Config) {
     // 扩展数据库，创建 user_bili_info 表
-    ctx.model.extend('user_bili_info', {
-        id: 'unsigned',
-        userId: 'string',
-        bindCode: 'unsigned',
-        cookie: 'string',
-        cookieInfo: 'json',
-        bindTime: 'unsigned',
-    }, {
-        primary: 'id',
-        autoInc: true,
-        unique: ['userId'] // 用户在每个频道只能有一个绑定记录
-    });
+    ctx.model.extend(
+        'user_bili_info',
+        {
+            id: 'unsigned',
+            userId: 'string',
+            bindCode: 'unsigned',
+            cookie: 'string',
+            cookieInfo: 'json',
+            bindTime: 'unsigned',
+        },
+        {
+            primary: 'id',
+            autoInc: true,
+            unique: ['userId'], // 用户在每个频道只能有一个绑定记录
+        }
+    );
 
     // 注册bind指令
-    ctx.command('bili.bind <bindCode:number>', '绑定B站账号')
-        .action(async ({session}, bindCode) => {
+    ctx.command('bili.bind <bindCode:number>', '绑定B站账号').action(
+        async ({ session }, bindCode) => {
             if (!session.guildId) {
                 return '请在群聊中使用绑定命令哦！';
             }
@@ -47,13 +51,14 @@ export async function bind(ctx: Context, config: Config) {
             }
 
             try {
-                const {userId} = session;
+                const { userId } = session;
                 const now = Date.now();
                 const oneHourAgo = now - 3600000; // 1小时前的时间戳
 
                 // 查找有效的绑定码
-                const bindRecords = await ctx.database.select('bili_bind')
-                    .where({bindCode, createdAt: {$gt: oneHourAgo}})
+                const bindRecords = await ctx.database
+                    .select('bili_bind')
+                    .where({ bindCode, createdAt: { $gt: oneHourAgo } })
                     .execute();
 
                 if (bindRecords.length === 0) {
@@ -63,19 +68,21 @@ export async function bind(ctx: Context, config: Config) {
                 const bindRecord = bindRecords[0];
 
                 // 检查用户是否已绑定
-                const existingBind = await ctx.database.select('user_bili_info')
-                    .where({userId})
+                const existingBind = await ctx.database
+                    .select('user_bili_info')
+                    .where({ userId })
                     .execute();
 
                 if (existingBind.length > 0) {
                     // 更新现有绑定
-                    await ctx.database.set('user_bili_info',
-                        {userId},
+                    await ctx.database.set(
+                        'user_bili_info',
+                        { userId },
                         {
                             bindCode,
                             cookie: bindRecord.cookie,
                             cookieInfo: bindRecord.cookieInfo,
-                            bindTime: now
+                            bindTime: now,
                         }
                     );
                 } else {
@@ -85,58 +92,60 @@ export async function bind(ctx: Context, config: Config) {
                         bindCode,
                         cookie: bindRecord.cookie,
                         cookieInfo: bindRecord.cookieInfo,
-                        bindTime: now
+                        bindTime: now,
                     });
                 }
 
                 // 绑定成功后删除临时绑定码记录
-                await ctx.database.remove('bili_bind', {bindCode});
+                await ctx.database.remove('bili_bind', { bindCode });
 
                 return 'B 站账号绑定成功！';
             } catch (error) {
                 ctx.logger('bili-bind').error('绑定失败:', error);
                 return '绑定过程中出现错误，请稍后重试！';
             }
-        });
+        }
+    );
 
     // 注册解绑指令
-    ctx.command('bili.unbind', '解绑B站账号')
-        .action(async ({session}) => {
-            if (!session.guildId) {
-                return '请在群聊中使用解绑命令哦！';
+    ctx.command('bili.unbind', '解绑B站账号').action(async ({ session }) => {
+        if (!session.guildId) {
+            return '请在群聊中使用解绑命令哦！';
+        }
+
+        const { userId } = session;
+
+        try {
+            const existingBind = await ctx.database
+                .select('user_bili_info')
+                .where({ userId })
+                .execute();
+
+            if (existingBind.length === 0) {
+                return '你还没有绑定B站账号哦！';
             }
 
-            const {userId} = session;
-
-            try {
-                const existingBind = await ctx.database.select('user_bili_info')
-                    .where({userId})
-                    .execute();
-
-                if (existingBind.length === 0) {
-                    return '你还没有绑定B站账号哦！';
-                }
-
-                await ctx.database.remove('user_bili_info', {userId});
-                return 'B站账号解绑成功！';
-            } catch (error) {
-                ctx.logger('bili-bind').error('解绑失败:', error);
-                return '解绑过程中出现错误，请稍后重试！';
-            }
-        });
+            await ctx.database.remove('user_bili_info', { userId });
+            return 'B站账号解绑成功！';
+        } catch (error) {
+            ctx.logger('bili-bind').error('解绑失败:', error);
+            return '解绑过程中出现错误，请稍后重试！';
+        }
+    });
 
     // 注册查询绑定状态指令
-    ctx.command('bili.status', '查询B站账号绑定状态')
-        .action(async ({session}) => {
+    ctx.command('bili.status', '查询B站账号绑定状态').action(
+        async ({ session }) => {
             if (!session.guildId) {
                 return '请在群聊中使用查询命令哦！';
             }
 
-            const {userId} = session;
+            const { userId } = session;
 
             try {
-                const existingBind = await ctx.database.select('user_bili_info')
-                    .where({userId})
+                const existingBind = await ctx.database
+                    .select('user_bili_info')
+                    .where({ userId })
                     .execute();
 
                 if (existingBind.length === 0) {
@@ -145,7 +154,7 @@ export async function bind(ctx: Context, config: Config) {
 
                 const bindInfo = existingBind[0];
                 const bindTime = new Date(bindInfo.bindTime).toLocaleString();
-                
+
                 // 从cookieInfo中获取可能的用户信息（如果有）
                 let userName = '未知用户';
                 /*
@@ -164,5 +173,6 @@ export async function bind(ctx: Context, config: Config) {
                 ctx.logger('bili-bind').error('查询绑定状态失败:', error);
                 return '查询过程中出现错误，请稍后重试！';
             }
-        });
+        }
+    );
 }

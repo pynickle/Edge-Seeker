@@ -1,6 +1,6 @@
-﻿import {Context} from 'koishi';
-import axios from 'axios';
-import {Config} from "../../index";
+﻿import axios from 'axios';
+import { Context } from 'koishi';
+import { Config } from '../../index';
 
 export const name = 'minecraft_notifier';
 
@@ -17,11 +17,15 @@ declare module 'koishi' {
 }
 
 export function minecraft_notifier(ctx: Context, cfg: Config) {
-    ctx.database.extend('minecraft_notifier', {
-        id: 'integer',
-        lastRelease: 'string',
-        lastSnapshot: 'string',
-    }, {primary: 'id'});
+    ctx.database.extend(
+        'minecraft_notifier',
+        {
+            id: 'integer',
+            lastRelease: 'string',
+            lastSnapshot: 'string',
+        },
+        { primary: 'id' }
+    );
 
     let lastRelease = '';
     let lastSnapshot = '';
@@ -37,7 +41,9 @@ export function minecraft_notifier(ctx: Context, cfg: Config) {
 
     const saveData = async () => {
         if (ctx.database) {
-            await ctx.database.upsert('minecraft_notifier', [{ id: 1, lastRelease, lastSnapshot }]);
+            await ctx.database.upsert('minecraft_notifier', [
+                { id: 1, lastRelease, lastSnapshot },
+            ]);
         }
     };
 
@@ -45,9 +51,12 @@ export function minecraft_notifier(ctx: Context, cfg: Config) {
         let retries = 0;
         while (retries <= 3) {
             try {
-                const response = await axios.get('https://launchermeta.mojang.com/mc/game/version_manifest.json', {
-                    timeout: 10000
-                });
+                const response = await axios.get(
+                    'https://launchermeta.mojang.com/mc/game/version_manifest.json',
+                    {
+                        timeout: 10000,
+                    }
+                );
                 const data = response.data;
                 return {
                     release: data.latest.release,
@@ -57,7 +66,9 @@ export function minecraft_notifier(ctx: Context, cfg: Config) {
                 retries++;
                 if (retries <= 3) {
                     // 简单的指数退避
-                    await new Promise(resolve => setTimeout(resolve, Math.pow(2, retries) * 1000));
+                    await new Promise((resolve) =>
+                        setTimeout(resolve, Math.pow(2, retries) * 1000)
+                    );
                 }
             }
         }
@@ -71,21 +82,33 @@ export function minecraft_notifier(ctx: Context, cfg: Config) {
             const bot = ctx.bots[0];
             if (lastRelease !== latest.release) {
                 for (const channel of cfg.minecraft.notifyChannel) {
-                    await bot.sendMessage(channel, `Minecraft 新正式版发布了：${latest.release}`);
+                    await bot.sendMessage(
+                        channel,
+                        `Minecraft 新正式版发布了：${latest.release}`
+                    );
                 }
                 lastRelease = latest.release;
             }
 
-            if (lastSnapshot !== latest.snapshot && lastRelease != latest.snapshot) {
+            if (
+                lastSnapshot !== latest.snapshot &&
+                lastRelease != latest.snapshot
+            ) {
                 for (const channel of cfg.minecraft.notifyChannel) {
-                    await bot.sendMessage(channel, `Minecraft 新快照版发布了：${latest.snapshot}`);
+                    await bot.sendMessage(
+                        channel,
+                        `Minecraft 新快照版发布了：${latest.snapshot}`
+                    );
                 }
                 lastSnapshot = latest.snapshot;
             }
 
             await saveData();
         } catch (error) {
-            ctx.logger('minecraft-notifier').error('检查 Minecraft 版本时出错：', error);
+            ctx.logger('minecraft-notifier').error(
+                '检查 Minecraft 版本时出错：',
+                error
+            );
         }
     }, 60000 * cfg.minecraft.checkInterval); // 默认每 10 分钟检查一次
 }

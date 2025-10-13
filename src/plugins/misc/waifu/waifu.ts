@@ -1,6 +1,6 @@
-import { Context, h, Session } from 'koishi';
+import { Context, Session, h } from 'koishi';
 import { stickEmoji } from '../../../utils/msg_emoji/emoji_helper';
-import {randomChoice} from "../../../utils/pseudo_random_helper";
+import { randomChoice } from '../../../utils/pseudo_random_helper';
 
 export const name = 'waifu';
 
@@ -12,20 +12,46 @@ const API_CONFIG = {
 
 // 可用类别配置
 const CATEGORIES = [
-    'waifu', 'neko', 'shinobu', 'megumin', 'bully', 'cuddle', 'cry', 'hug',
-    'awoo', 'kiss', 'lick', 'pat', 'smug', 'bonk', 'yeet', 'blush', 'smile',
-    'wave', 'highfive', 'handhold', 'nom', 'bite', 'glomp', 'slap', 'kill',
-    'kick', 'happy', 'wink', 'poke', 'dance', 'cringe'
+    'waifu',
+    'neko',
+    'shinobu',
+    'megumin',
+    'bully',
+    'cuddle',
+    'cry',
+    'hug',
+    'awoo',
+    'kiss',
+    'lick',
+    'pat',
+    'smug',
+    'bonk',
+    'yeet',
+    'blush',
+    'smile',
+    'wave',
+    'highfive',
+    'handhold',
+    'nom',
+    'bite',
+    'glomp',
+    'slap',
+    'kill',
+    'kick',
+    'happy',
+    'wink',
+    'poke',
+    'dance',
+    'cringe',
 ] as const;
 
-type CategoryType = typeof CATEGORIES[number];
+type CategoryType = (typeof CATEGORIES)[number];
 
 // 错误消息配置
 const ERROR_MESSAGES = {
     invalidCategory: (availableCategories: string) =>
         `无效的类别！可用类别：${availableCategories}`,
-    fetchFailed: (category: string) =>
-        `获取 ${category} 图片失败，请稍后再试`,
+    fetchFailed: (category: string) => `获取 ${category} 图片失败，请稍后再试`,
     networkError: '网络连接失败，请检查网络后重试',
 } as const;
 
@@ -46,12 +72,15 @@ function formatCategoryList(): string {
 /**
  * 获取图片 URL
  */
-async function fetchImageUrl(ctx: Context, category: CategoryType): Promise<{ success: true; url: string } | { success: false; error: string }> {
+async function fetchImageUrl(
+    ctx: Context,
+    category: CategoryType
+): Promise<{ success: true; url: string } | { success: false; error: string }> {
     const url = `${API_CONFIG.baseUrl}/${category.toLowerCase()}`;
 
     try {
         const response = await ctx.http.get(url, {
-            timeout: API_CONFIG.timeout
+            timeout: API_CONFIG.timeout,
         });
 
         if (!response?.url) {
@@ -90,7 +119,7 @@ async function handleImageRequest(
 
     // 确定最终类别
     const finalCategory: CategoryType = category
-        ? category.toLowerCase() as CategoryType
+        ? (category.toLowerCase() as CategoryType)
         : randomChoice(CATEGORIES);
 
     // 获取图片并发送
@@ -124,6 +153,7 @@ export function waifu(ctx: Context) {
         });
 
     // 保留原有的 categories 子命令以保持兼容性
-    ctx.command('waifu.categories', '显示所有可用类别')
-        .action(() => `可用类别：${formatCategoryList()}`);
+    ctx.command('waifu.categories', '显示所有可用类别').action(
+        () => `可用类别：${formatCategoryList()}`
+    );
 }

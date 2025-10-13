@@ -7,7 +7,11 @@ export class StarCoinHelper {
     /**
      * 获取用户星币数量
      */
-    public static async getUserStarCoin(ctx: Context, userId: string, channelId: string): Promise<number> {
+    public static async getUserStarCoin(
+        ctx: Context,
+        userId: string,
+        channelId: string
+    ): Promise<number> {
         const records = await ctx.database
             .select('sign_in')
             .where({ userId, channelId })
@@ -18,7 +22,12 @@ export class StarCoinHelper {
     /**
      * 设置用户星币数量
      */
-    public static async setUserStarCoin(ctx: Context, userId: string, channelId: string, amount: number): Promise<boolean> {
+    public static async setUserStarCoin(
+        ctx: Context,
+        userId: string,
+        channelId: string,
+        amount: number
+    ): Promise<boolean> {
         // 验证星币数量
         if (amount < 0 || !Number.isInteger(amount)) {
             return false;
@@ -26,16 +35,22 @@ export class StarCoinHelper {
 
         try {
             const now = new Date().getTime();
-            
+
             // 更新或创建用户记录
-            await ctx.database.upsert('sign_in', [{
-                userId,
-                channelId,
-                starCoin: amount,
-                consecutiveDays: 0,
-                lastSignIn: now,
-            }], ['userId', 'channelId']);
-            
+            await ctx.database.upsert(
+                'sign_in',
+                [
+                    {
+                        userId,
+                        channelId,
+                        starCoin: amount,
+                        consecutiveDays: 0,
+                        lastSignIn: now,
+                    },
+                ],
+                ['userId', 'channelId']
+            );
+
             return true;
         } catch (error) {
             ctx.logger.warn('设置星币失败:', error);
@@ -46,7 +61,12 @@ export class StarCoinHelper {
     /**
      * 增加用户星币数量
      */
-    public static async addUserStarCoin(ctx: Context, userId: string, channelId: string, amount: number): Promise<boolean> {
+    public static async addUserStarCoin(
+        ctx: Context,
+        userId: string,
+        channelId: string,
+        amount: number
+    ): Promise<boolean> {
         // 验证星币数量
         if (amount <= 0 || !Number.isInteger(amount)) {
             return false;
@@ -65,21 +85,28 @@ export class StarCoinHelper {
                 // 用户已存在，更新星币数量
                 const currentStarCoin = records[0].starCoin;
                 const newStarCoin = currentStarCoin + amount;
-                await ctx.database.set('sign_in', 
-                    { userId, channelId }, 
+                await ctx.database.set(
+                    'sign_in',
+                    { userId, channelId },
                     { starCoin: newStarCoin }
                 );
             } else {
                 // 用户不存在，创建新记录
-                await ctx.database.upsert('sign_in', [{
-                    userId,
-                    channelId,
-                    starCoin: amount,
-                    consecutiveDays: 0,
-                    lastSignIn: now,
-                }], ['userId', 'channelId']);
+                await ctx.database.upsert(
+                    'sign_in',
+                    [
+                        {
+                            userId,
+                            channelId,
+                            starCoin: amount,
+                            consecutiveDays: 0,
+                            lastSignIn: now,
+                        },
+                    ],
+                    ['userId', 'channelId']
+                );
             }
-            
+
             return true;
         } catch (error) {
             ctx.logger.warn('增加星币失败:', error);
@@ -90,7 +117,12 @@ export class StarCoinHelper {
     /**
      * 减少用户星币数量
      */
-    public static async removeUserStarCoin(ctx: Context, userId: string, channelId: string, amount: number): Promise<boolean> {
+    public static async removeUserStarCoin(
+        ctx: Context,
+        userId: string,
+        channelId: string,
+        amount: number
+    ): Promise<boolean> {
         // 验证星币数量
         if (amount <= 0 || !Number.isInteger(amount)) {
             return false;
@@ -111,12 +143,13 @@ export class StarCoinHelper {
             // 确保星币数量不为负
             const currentStarCoin = records[0].starCoin;
             const newStarCoin = Math.max(0, currentStarCoin - amount);
-            
-            await ctx.database.set('sign_in', 
-                { userId, channelId }, 
+
+            await ctx.database.set(
+                'sign_in',
+                { userId, channelId },
                 { starCoin: newStarCoin }
             );
-            
+
             return true;
         } catch (error) {
             ctx.logger.warn('减少星币失败:', error);
@@ -127,11 +160,16 @@ export class StarCoinHelper {
     /**
      * 检查用户星币是否足够
      */
-    public static async hasEnoughStarCoin(ctx: Context, userId: string, channelId: string, amount: number): Promise<boolean> {
+    public static async hasEnoughStarCoin(
+        ctx: Context,
+        userId: string,
+        channelId: string,
+        amount: number
+    ): Promise<boolean> {
         if (amount <= 0) {
             return true; // 不需要检查负数或零
         }
-        
+
         const userStarCoin = await this.getUserStarCoin(ctx, userId, channelId);
         return userStarCoin >= amount;
     }

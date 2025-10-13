@@ -1,5 +1,5 @@
 // 定义道具接口
-import {BuffType} from "./inventory/inventory";
+import { BuffType } from './inventory/inventory';
 
 export interface Item {
     id: string;
@@ -29,8 +29,8 @@ export const ITEMS: Item[] = [
         buffConfig: {
             durationDays: 3, // 持续 3 天
             maxDurationDays: 10, // 最大叠加 30 天
-            buffType: 'lucky_card' as BuffType
-        }
+            buffType: 'lucky_card' as BuffType,
+        },
     },
     {
         id: 'foresee_crystal',
@@ -39,6 +39,7 @@ export const ITEMS: Item[] = [
         price: 10,
         type: 'other',
         effect: '预知明日',
-        usageInstructions: '请使用 "mrrp" 命令查看明日人品，或使用 "mrys" 命令查看明日运势。\n（使用时将自动消耗一个预知水晶）'
-    }
+        usageInstructions:
+            '请使用 "mrrp" 命令查看明日人品，或使用 "mrys" 命令查看明日运势。\n（使用时将自动消耗一个预知水晶）',
+    },
 ];

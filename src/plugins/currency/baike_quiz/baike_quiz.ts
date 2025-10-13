@@ -1,7 +1,7 @@
-import {formatDate} from '../../../utils/time_helper';
-import {StarCoinHelper} from '../../../utils/starcoin_helper';
 import axios from 'axios';
-import {Context, Session} from "koishi";
+import { Context, Session } from 'koishi';
+import { StarCoinHelper } from '../../../utils/starcoin_helper';
+import { formatDate } from '../../../utils/time_helper';
 
 // 定义数据库表结构
 export interface BaikeQuizRecord {
@@ -89,58 +89,73 @@ class BaikeQuizPlugin {
     private readonly API_URL = 'https://apis.tianapi.com/baiketiku/index';
     private readonly activeTimeouts = new Map<string, NodeJS.Timeout>();
 
-    constructor(private ctx: Context, private config: any) {
+    constructor(
+        private ctx: Context,
+        private config: any
+    ) {
         // 扩展数据库，创建baike_quiz_record表
-        ctx.model.extend('baike_quiz_record', {
-            id: 'unsigned',
-            userId: 'string',
-            channelId: 'string',
-            dailyAttempts: 'unsigned',
-            lastAttemptDate: 'string',
-            correctAnswers: 'unsigned',
-            wrongAnswers: 'unsigned',
-        }, {
-            primary: 'id',
-            autoInc: true,
-            unique: [['userId', 'channelId']]
-        });
+        ctx.model.extend(
+            'baike_quiz_record',
+            {
+                id: 'unsigned',
+                userId: 'string',
+                channelId: 'string',
+                dailyAttempts: 'unsigned',
+                lastAttemptDate: 'string',
+                correctAnswers: 'unsigned',
+                wrongAnswers: 'unsigned',
+            },
+            {
+                primary: 'id',
+                autoInc: true,
+                unique: [['userId', 'channelId']],
+            }
+        );
 
         // 扩展数据库，创建 baike_quiz_history 表，用于存储历史问答状态
-        ctx.model.extend('baike_quiz_history', {
-            id: 'unsigned',
-            channelId: 'string',
-            userId: 'string',
-            question: 'text',
-            answerA: 'text',
-            answerB: 'text',
-            answerC: 'text',
-            answerD: 'text',
-            correctAnswer: 'string',
-            analytic: 'text',
-            createTime: 'unsigned',
-            completionTime: 'unsigned',
-            userAnswer: 'string',
-            isCorrect: 'boolean',
-        }, {
-            primary: 'id',
-            autoInc: true
-        });
+        ctx.model.extend(
+            'baike_quiz_history',
+            {
+                id: 'unsigned',
+                channelId: 'string',
+                userId: 'string',
+                question: 'text',
+                answerA: 'text',
+                answerB: 'text',
+                answerC: 'text',
+                answerD: 'text',
+                correctAnswer: 'string',
+                analytic: 'text',
+                createTime: 'unsigned',
+                completionTime: 'unsigned',
+                userAnswer: 'string',
+                isCorrect: 'boolean',
+            },
+            {
+                primary: 'id',
+                autoInc: true,
+            }
+        );
 
         // 扩展数据库，创建 baike_quiz_appeal 表
-        ctx.model.extend('baike_quiz_appeal', {
-            id: 'unsigned',
-            userId: 'string',
-            channelId: 'string',
-            question: 'string',
-            userAnswer: 'string',
-            correctAnswer: 'string',
-            reason: 'string',
-            createTime: 'string',
-            status: 'string'
-        }, {
-            primary: 'id',
-            autoInc: true
-        });
+        ctx.model.extend(
+            'baike_quiz_appeal',
+            {
+                id: 'unsigned',
+                userId: 'string',
+                channelId: 'string',
+                question: 'string',
+                userAnswer: 'string',
+                correctAnswer: 'string',
+                reason: 'string',
+                createTime: 'string',
+                status: 'string',
+            },
+            {
+                primary: 'id',
+                autoInc: true,
+            }
+        );
 
         this.registerCommands();
         this.registerMessageListener();
@@ -151,19 +166,29 @@ class BaikeQuizPlugin {
 
     private registerCommands(): void {
         // 开始百科问答
-        this.ctx.command('quiz', '开始一次百科知识问答')
+        this.ctx
+            .command('quiz', '开始一次百科知识问答')
             .action(this.handleStartQuiz.bind(this));
 
         // 查看百科问答统计
-        this.ctx.command('quiz.stats', '查看个人百科问答统计信息')
+        this.ctx
+            .command('quiz.stats', '查看个人百科问答统计信息')
             .action(this.handleQuizStats.bind(this));
-            
+
         // 申诉功能
-        this.ctx.command('quiz.appeal <reason:text>', '当你认为题目答案不正确时可以申诉')
+        this.ctx
+            .command(
+                'quiz.appeal <reason:text>',
+                '当你认为题目答案不正确时可以申诉'
+            )
             .action(this.handleAppeal.bind(this));
-        
+
         // 管理员审核申诉命令
-        this.ctx.command('quiz.admin.appeal <action:string> [id:number]', '管理员审核用户申诉 (action: list/approve/reject)')
+        this.ctx
+            .command(
+                'quiz.admin.appeal <action:string> [id:number]',
+                '管理员审核用户申诉 (action: list/approve/reject)'
+            )
             .action(this.handleAdminAppeal.bind(this));
     }
 
@@ -172,31 +197,39 @@ class BaikeQuizPlugin {
         this.ctx.on('message', async (session) => {
             // 只在群聊中处理
             if (!session.guildId) return;
-            
+
             const { userId, channelId, content } = session;
             // 提取纯文本内容（去掉可能的at和特殊符号）
-            const cleanContent = content.replace(/@\S+/g, '').trim().toUpperCase();
-            
+            const cleanContent = content
+                .replace(/@\S+/g, '')
+                .trim()
+                .toUpperCase();
+
             // 检查是否是A/B/C/D回答
             if (!['A', 'B', 'C', 'D'].includes(cleanContent)) return;
-            
+
             // 检查是否有活跃的问答
             const quizState = this.getQuizState(channelId);
             if (!quizState) return;
-            
+
             // 检查是否是开启问答的用户在回答
             if (userId !== quizState.questionerId) {
                 return;
             }
-            
+
             // 保存用户答案，用于可能的申诉
             if (!quizState.userAnswers) {
                 quizState.userAnswers = new Map();
             }
             quizState.userAnswers.set(userId, cleanContent);
-            
+
             // 处理回答
-            const result = await this.handleAnswer(channelId, userId, session.username, cleanContent);
+            const result = await this.handleAnswer(
+                channelId,
+                userId,
+                session.username,
+                cleanContent
+            );
             if (result) {
                 await session.send(result);
             }
@@ -206,7 +239,10 @@ class BaikeQuizPlugin {
     /**
      * 获取用户问答记录
      */
-    private async getUserRecord(userId: string, channelId: string): Promise<BaikeQuizRecord | null> {
+    private async getUserRecord(
+        userId: string,
+        channelId: string
+    ): Promise<BaikeQuizRecord | null> {
         const records = await this.ctx.database
             .select('baike_quiz_record')
             .where({ userId, channelId })
@@ -233,49 +269,76 @@ class BaikeQuizPlugin {
     /**
      * 更新或创建用户问答记录
      */
-    private async updateUserRecord(userId: string, channelId: string, attemptResult: 'correct' | 'wrong'): Promise<void> {
+    private async updateUserRecord(
+        userId: string,
+        channelId: string,
+        attemptResult: 'correct' | 'wrong'
+    ): Promise<void> {
         const today = formatDate(new Date());
         const userRecord = await this.getUserRecord(userId, channelId);
 
         if (userRecord) {
             // 检查是否跨天，跨天则重置每日答题次数
             if (userRecord.lastAttemptDate !== today) {
-                await this.ctx.database.set('baike_quiz_record', 
-                    { userId, channelId }, 
+                await this.ctx.database.set(
+                    'baike_quiz_record',
+                    { userId, channelId },
                     {
                         dailyAttempts: 1,
                         lastAttemptDate: today,
-                        correctAnswers: attemptResult === 'correct' ? userRecord.correctAnswers + 1 : userRecord.correctAnswers,
-                        wrongAnswers: attemptResult === 'wrong' ? userRecord.wrongAnswers + 1 : userRecord.wrongAnswers
+                        correctAnswers:
+                            attemptResult === 'correct'
+                                ? userRecord.correctAnswers + 1
+                                : userRecord.correctAnswers,
+                        wrongAnswers:
+                            attemptResult === 'wrong'
+                                ? userRecord.wrongAnswers + 1
+                                : userRecord.wrongAnswers,
                     }
                 );
             } else {
-                await this.ctx.database.set('baike_quiz_record', 
-                    { userId, channelId }, 
+                await this.ctx.database.set(
+                    'baike_quiz_record',
+                    { userId, channelId },
                     {
                         dailyAttempts: userRecord.dailyAttempts + 1,
-                        correctAnswers: attemptResult === 'correct' ? userRecord.correctAnswers + 1 : userRecord.correctAnswers,
-                        wrongAnswers: attemptResult === 'wrong' ? userRecord.wrongAnswers + 1 : userRecord.wrongAnswers
+                        correctAnswers:
+                            attemptResult === 'correct'
+                                ? userRecord.correctAnswers + 1
+                                : userRecord.correctAnswers,
+                        wrongAnswers:
+                            attemptResult === 'wrong'
+                                ? userRecord.wrongAnswers + 1
+                                : userRecord.wrongAnswers,
                     }
                 );
             }
         } else {
             // 创建新记录
-            await this.ctx.database.upsert('baike_quiz_record', [{
-                userId,
-                channelId,
-                dailyAttempts: 1,
-                lastAttemptDate: today,
-                correctAnswers: attemptResult === 'correct' ? 1 : 0,
-                wrongAnswers: attemptResult === 'wrong' ? 1 : 0,
-            }], ['userId', 'channelId']);
+            await this.ctx.database.upsert(
+                'baike_quiz_record',
+                [
+                    {
+                        userId,
+                        channelId,
+                        dailyAttempts: 1,
+                        lastAttemptDate: today,
+                        correctAnswers: attemptResult === 'correct' ? 1 : 0,
+                        wrongAnswers: attemptResult === 'wrong' ? 1 : 0,
+                    },
+                ],
+                ['userId', 'channelId']
+            );
         }
     }
 
     /**
      * 检查用户当日答题次数是否已达上限
      */
-    private async checkDailyLimit(userId: string, channelId: string): Promise<boolean> {
+    private async checkDailyLimit(
+        userId: string,
+        channelId: string
+    ): Promise<boolean> {
         const today = formatDate(new Date());
         const userRecord = await this.getUserRecord(userId, channelId);
 
@@ -283,7 +346,9 @@ class BaikeQuizPlugin {
             return false; // 未达到上限
         }
 
-        return userRecord.dailyAttempts >= this.config.baike_quiz.maxDailyAttempts;
+        return (
+            userRecord.dailyAttempts >= this.config.baike_quiz.maxDailyAttempts
+        );
     }
 
     /**
@@ -291,7 +356,9 @@ class BaikeQuizPlugin {
      */
     private async fetchQuizQuestion(): Promise<QuizResult | null> {
         if (!this.config.baike_quiz.apiKey) {
-            this.ctx.logger.warn('百科题库 API 密钥未配置，请在配置文件中设置 baike_quiz.apiKey');
+            this.ctx.logger.warn(
+                '百科题库 API 密钥未配置，请在配置文件中设置 baike_quiz.apiKey'
+            );
             return null;
         }
 
@@ -301,8 +368,8 @@ class BaikeQuizPlugin {
             for (let i = 0; i < maxRetries; i++) {
                 const response = await axios.get<QuizResult>(this.API_URL, {
                     params: {
-                        key: this.config.baike_quiz.apiKey
-                    }
+                        key: this.config.baike_quiz.apiKey,
+                    },
                 });
 
                 // 检查是否获取到有效数据
@@ -314,14 +381,15 @@ class BaikeQuizPlugin {
                 const question = quizResult.result.title;
 
                 // 检查题目是否在已批准的申诉列表中
-                const isQuestionInApprovedAppeals = await this.checkIfQuestionInApprovedAppeals(question);
-                
+                const isQuestionInApprovedAppeals =
+                    await this.checkIfQuestionInApprovedAppeals(question);
+
                 // 如果题目不在已批准的申诉列表中，则返回该题目
                 if (!isQuestionInApprovedAppeals) {
                     return quizResult;
                 }
             }
-            
+
             // 超过最大重试次数仍未获取到合适题目
             return null;
         } catch (error) {
@@ -332,12 +400,14 @@ class BaikeQuizPlugin {
     /**
      * 检查题目是否在已批准的申诉列表中
      */
-    private async checkIfQuestionInApprovedAppeals(question: string): Promise<boolean> {
+    private async checkIfQuestionInApprovedAppeals(
+        question: string
+    ): Promise<boolean> {
         const appeals = await this.ctx.database
             .select('baike_quiz_appeal')
             .where({
                 question: question,
-                status: 'approved'
+                status: 'approved',
             })
             .execute();
 
@@ -347,11 +417,25 @@ class BaikeQuizPlugin {
     /**
      * 更新星币数量
      */
-    private async updateStarCoin(userId: string, channelId: string, amount: number): Promise<void> {
+    private async updateStarCoin(
+        userId: string,
+        channelId: string,
+        amount: number
+    ): Promise<void> {
         if (amount > 0) {
-            await StarCoinHelper.addUserStarCoin(this.ctx, userId, channelId, amount);
+            await StarCoinHelper.addUserStarCoin(
+                this.ctx,
+                userId,
+                channelId,
+                amount
+            );
         } else if (amount < 0) {
-            await StarCoinHelper.removeUserStarCoin(this.ctx, userId, channelId, Math.abs(amount));
+            await StarCoinHelper.removeUserStarCoin(
+                this.ctx,
+                userId,
+                channelId,
+                Math.abs(amount)
+            );
         }
     }
 
@@ -369,7 +453,8 @@ class BaikeQuizPlugin {
             const quizState = this.getQuizState(channelId);
             if (quizState) {
                 // 通知用户问题已超时
-                await this.ctx.broadcast([`${platform}:${channelId}`],
+                await this.ctx.broadcast(
+                    [`${platform}:${channelId}`],
                     `⏰ 百科问答题目已超时！正确答案是：${quizState.correctAnswer}`
                 );
 
@@ -387,7 +472,12 @@ class BaikeQuizPlugin {
     /**
      * 处理回答逻辑
      */
-    private async handleAnswer(channelId: string, userId: string, username: string, userAnswer: string): Promise<string | null> {
+    private async handleAnswer(
+        channelId: string,
+        userId: string,
+        username: string,
+        userAnswer: string
+    ): Promise<string | null> {
         // 检查当日答题次数是否已达上限
         const reachedLimit = await this.checkDailyLimit(userId, channelId);
         if (reachedLimit) {
@@ -409,18 +499,24 @@ class BaikeQuizPlugin {
         const isCorrect = userAnswer === correctAnswer;
 
         // 更新用户答题记录
-        await this.updateUserRecord(userId, channelId, isCorrect ? 'correct' : 'wrong');
+        await this.updateUserRecord(
+            userId,
+            channelId,
+            isCorrect ? 'correct' : 'wrong'
+        );
 
         // 更新星币
-        const starCoinAmount = isCorrect ? this.config.baike_quiz.rewardStarCoin : -this.config.baike_quiz.penaltyStarCoin;
+        const starCoinAmount = isCorrect
+            ? this.config.baike_quiz.rewardStarCoin
+            : -this.config.baike_quiz.penaltyStarCoin;
         await this.updateStarCoin(userId, channelId, starCoinAmount);
-        
+
         // 保存问答状态到历史记录
         await this.saveQuizStateToHistory(quizState, userAnswer, isCorrect);
 
         // 删除当前问答状态
         this.activeQuizStates.delete(channelId);
-        
+
         // 清除超时计时器
         if (this.activeTimeouts.has(channelId)) {
             clearTimeout(this.activeTimeouts.get(channelId)!);
@@ -429,7 +525,9 @@ class BaikeQuizPlugin {
 
         // 获取用户当日剩余答题次数
         const userRecord = await this.getUserRecord(userId, channelId);
-        const remainingAttempts = userRecord ? this.config.baike_quiz.maxDailyAttempts - userRecord.dailyAttempts : this.config.baike_quiz.maxDailyAttempts - 1;
+        const remainingAttempts = userRecord
+            ? this.config.baike_quiz.maxDailyAttempts - userRecord.dailyAttempts
+            : this.config.baike_quiz.maxDailyAttempts - 1;
 
         // 生成回答结果
         if (isCorrect) {
@@ -437,7 +535,7 @@ class BaikeQuizPlugin {
                 `🎉 恭喜 @${username} 回答正确！`,
                 `获得 ${this.config.baike_quiz.rewardStarCoin} 星币奖励！`,
                 `📝 解析：${analytic || '暂无解析信息'}`,
-                `你今日还剩 ${remainingAttempts} 次答题机会。`
+                `你今日还剩 ${remainingAttempts} 次答题机会。`,
             ].join('\n');
         } else {
             return [
@@ -446,7 +544,7 @@ class BaikeQuizPlugin {
                 `正确答案是：${correctAnswer}`,
                 `📝 解析：${analytic || '暂无解析信息'}`,
                 `你今日还剩 ${remainingAttempts} 次答题机会。`,
-                `如果你认为答案不正确，可以使用\`quiz.appeal 理由\`命令进行申诉。`
+                `如果你认为答案不正确，可以使用\`quiz.appeal 理由\`命令进行申诉。`,
             ].join('\n');
         }
     }
@@ -454,7 +552,11 @@ class BaikeQuizPlugin {
     /**
      * 开始百科问答命令处理
      */
-    private async handleStartQuiz({ session }: { session: any }): Promise<string> {
+    private async handleStartQuiz({
+        session,
+    }: {
+        session: any;
+    }): Promise<string> {
         if (!session.guildId) {
             return '请在群聊中使用此命令哦！';
         }
@@ -485,7 +587,15 @@ class BaikeQuizPlugin {
             return `❌ 获取百科题目失败：${errorMsg}`;
         }
 
-        const { title, answerA, answerB, answerC, answerD, answer: correctAnswer, analytic } = quizResult.result;
+        const {
+            title,
+            answerA,
+            answerB,
+            answerC,
+            answerD,
+            answer: correctAnswer,
+            analytic,
+        } = quizResult.result;
 
         // 保存问答状态到内存
         this.activeQuizStates.set(channelId, {
@@ -499,7 +609,7 @@ class BaikeQuizPlugin {
             analytic,
             questionerId: userId,
             createTime: Date.now(),
-            userAnswers: new Map()
+            userAnswers: new Map(),
         });
 
         // 设置问题超时处理
@@ -514,14 +624,18 @@ class BaikeQuizPlugin {
             `C. ${answerC}`,
             `D. ${answerD}`,
             `⏰ 答题时间：${this.config.baike_quiz.questionTimeout} 秒`,
-            `请直接输入 A/B/C/D 来回答问题！（只有你能回答哦）`
+            `请直接输入 A/B/C/D 来回答问题！（只有你能回答哦）`,
         ].join('\n');
     }
 
     /**
      * 查看百科问答统计命令处理
      */
-    private async handleQuizStats({ session }: { session: any }): Promise<string> {
+    private async handleQuizStats({
+        session,
+    }: {
+        session: any;
+    }): Promise<string> {
         if (!session.guildId) {
             return '请在群聊中使用此命令哦！';
         }
@@ -535,12 +649,18 @@ class BaikeQuizPlugin {
         }
 
         // 计算今日剩余答题次数
-        const todayAttempts = userRecord.lastAttemptDate === today ? userRecord.dailyAttempts : 0;
-        const remainingAttempts = this.config.baike_quiz.maxDailyAttempts - todayAttempts;
+        const todayAttempts =
+            userRecord.lastAttemptDate === today ? userRecord.dailyAttempts : 0;
+        const remainingAttempts =
+            this.config.baike_quiz.maxDailyAttempts - todayAttempts;
 
         // 计算总答题数和正确率
-        const totalAttempts = userRecord.correctAnswers + userRecord.wrongAnswers;
-        const accuracyRate = totalAttempts > 0 ? Math.round((userRecord.correctAnswers / totalAttempts) * 100) : 0;
+        const totalAttempts =
+            userRecord.correctAnswers + userRecord.wrongAnswers;
+        const accuracyRate =
+            totalAttempts > 0
+                ? Math.round((userRecord.correctAnswers / totalAttempts) * 100)
+                : 0;
 
         return [
             `📊 @${username} 的百科问答统计`,
@@ -548,39 +668,45 @@ class BaikeQuizPlugin {
             `❌ 错误答案：${userRecord.wrongAnswers} 题`,
             `🎯 正确率：${accuracyRate}%`,
             `📅 今日已答：${todayAttempts}/${this.config.baike_quiz.maxDailyAttempts} 题`,
-            `⏳ 今日剩余：${remainingAttempts} 次答题机会`
+            `⏳ 今日剩余：${remainingAttempts} 次答题机会`,
         ].join('\n');
     }
-    
+
     /**
      * 处理申诉功能
      */
-    private async handleAppeal({ session }: { session: any }, reason: string): Promise<string> {
+    private async handleAppeal(
+        { session }: { session: any },
+        reason: string
+    ): Promise<string> {
         if (!session.guildId) {
             return '请在群聊中使用此命令哦！';
         }
-        
+
         const { userId, channelId, username } = session;
-        
+
         // 验证申诉理由是否为空
         if (!reason || reason.trim().length === 0) {
             return '请提供申诉理由！格式：\`quiz.appeal 你的理由\`';
         }
-        
+
         // 获取最近一次的问答记录
-        const recentQuizState = await this.getRecentQuizStateForUser(channelId, userId);
-        
+        const recentQuizState = await this.getRecentQuizStateForUser(
+            channelId,
+            userId
+        );
+
         if (!recentQuizState) {
             return '未找到你最近的答题记录，无法申诉！';
         }
-        
+
         // 获取用户在该题目上的答案
         const userAnswer = recentQuizState.userAnswers?.get(userId);
-        
+
         if (!userAnswer) {
             return '未找到你在该题的答案记录，无法申诉！';
         }
-        
+
         // 保存申诉记录到数据库
         await this.ctx.database.create('baike_quiz_appeal', {
             userId,
@@ -590,28 +716,40 @@ class BaikeQuizPlugin {
             correctAnswer: recentQuizState.correctAnswer,
             reason: reason.trim(),
             createTime: formatDate(new Date()),
-            status: 'pending'
+            status: 'pending',
         });
-        
+
         // 向管理员发送通知
-        await this.notifyAdminsAboutAppeal(session, userId, username, channelId,
-            recentQuizState.currentQuestion, userAnswer, recentQuizState.correctAnswer, reason.trim());
-        
+        await this.notifyAdminsAboutAppeal(
+            session,
+            userId,
+            username,
+            channelId,
+            recentQuizState.currentQuestion,
+            userAnswer,
+            recentQuizState.correctAnswer,
+            reason.trim()
+        );
+
         return '✅ 申诉已提交！管理员将尽快处理你的申诉，请耐心等待。';
     }
-    
+
     /**
      * 获取用户最近一次的问答状态
      */
-    private async getRecentQuizStateForUser(channelId: string, userId: string): Promise<BaikeQuizState | null> {
+    private async getRecentQuizStateForUser(
+        channelId: string,
+        userId: string
+    ): Promise<BaikeQuizState | null> {
         // 首先检查当前活跃的问答状态
         const quizState = this.getQuizState(channelId);
         if (quizState && quizState.questionerId === userId) {
             return quizState;
         }
-        
+
         // 从历史记录中查找用户最近的答题记录
-        const recentHistory = await this.ctx.database.select('baike_quiz_history')
+        const recentHistory = await this.ctx.database
+            .select('baike_quiz_history')
             .where({ channelId, userId })
             .orderBy('completionTime', 'desc')
             .limit(1)
@@ -630,24 +768,33 @@ class BaikeQuizPlugin {
                 analytic: history.analytic,
                 questionerId: history.userId,
                 createTime: history.createTime,
-                userAnswers: new Map<string, string>([[history.userId, history.userAnswer]])
+                userAnswers: new Map<string, string>([
+                    [history.userId, history.userAnswer],
+                ]),
             };
         }
-        
+
         return null;
     }
-    
+
     /**
      * 向管理员发送申诉通知
      */
-    private async notifyAdminsAboutAppeal(session: Session, userId: string, username: string,
-                                       channelId: string, question: string, userAnswer: string, 
-                                       correctAnswer: string, reason: string): Promise<void> {
+    private async notifyAdminsAboutAppeal(
+        session: Session,
+        userId: string,
+        username: string,
+        channelId: string,
+        question: string,
+        userAnswer: string,
+        correctAnswer: string,
+        reason: string
+    ): Promise<void> {
         if (this.config.baike_quiz.adminQQs.length === 0) {
             this.ctx.logger.info('没有配置管理员 QQ，无法发送申诉通知');
             return;
         }
-        
+
         const notification = [
             '🚨 百科问答申诉通知',
             `用户：@${username} (${userId})`,
@@ -657,9 +804,9 @@ class BaikeQuizPlugin {
             `系统答案：${correctAnswer}`,
             `申诉理由：${reason}`,
             `时间：${formatDate(new Date())}`,
-            '请及时处理该申诉！'
+            '请及时处理该申诉！',
         ].join('\n');
-        
+
         try {
             // 向每个管理员发送私信
             if (session.onebot) {
@@ -671,21 +818,25 @@ class BaikeQuizPlugin {
             this.ctx.logger.warn('发送申诉通知失败:', error);
         }
     }
-    
+
     /**
      * 管理员审核申诉
      */
-    private async handleAdminAppeal({ session }: { session: any }, action: string, id?: number): Promise<string> {
-        const { userId} = session;
-        
+    private async handleAdminAppeal(
+        { session }: { session: any },
+        action: string,
+        id?: number
+    ): Promise<string> {
+        const { userId } = session;
+
         // 检查是否是管理员
         if (!this.isAdmin(userId)) {
             return '❌ 你没有权限执行此操作！';
         }
-        
+
         // 标准化操作指令
         action = action.toLowerCase();
-        
+
         switch (action) {
             case 'list':
                 return await this.listAppeals();
@@ -703,105 +854,131 @@ class BaikeQuizPlugin {
                 return '❌ 无效的操作！\n可用操作：list, approve, reject';
         }
     }
-    
+
     /**
      * 检查用户是否是管理员
      */
     private isAdmin(userId: string): boolean {
         return this.config.baike_quiz.adminQQs.includes(userId);
     }
-    
+
     /**
-      * 列出所有待处理的申诉
-      */
-     private async listAppeals(): Promise<string> {
-         const appeals = await this.ctx.database
-             .select('baike_quiz_appeal')
-             .where({ status: 'pending' })
-             .orderBy('createTime', 'desc')
-             .execute();
+     * 列出所有待处理的申诉
+     */
+    private async listAppeals(): Promise<string> {
+        const appeals = await this.ctx.database
+            .select('baike_quiz_appeal')
+            .where({ status: 'pending' })
+            .orderBy('createTime', 'desc')
+            .execute();
 
-         if (appeals.length === 0) {
-             return '✅ 当前没有待处理的申诉！';
-         }
+        if (appeals.length === 0) {
+            return '✅ 当前没有待处理的申诉！';
+        }
 
-         const messages = ['📋 待处理的申诉列表：'];
+        const messages = ['📋 待处理的申诉列表：'];
 
-         for (const appeal of appeals) {
-             messages.push(`\n${appeal.id}. 用户：${appeal.userId}`);
-             messages.push(`   问题：${this.truncateText(appeal.question, 20)}`);
+        for (const appeal of appeals) {
+            messages.push(`\n${appeal.id}. 用户：${appeal.userId}`);
+            messages.push(`   问题：${this.truncateText(appeal.question, 20)}`);
 
-             // 从历史记录中获取完整的题目信息（包括四个选项）
-             const history = await this.ctx.database.select('baike_quiz_history')
-                 .where({ channelId: appeal.channelId, userId: appeal.userId, question: appeal.question })
-                 .orderBy('completionTime', 'desc')
-                 .limit(1)
-                 .execute();
+            // 从历史记录中获取完整的题目信息（包括四个选项）
+            const history = await this.ctx.database
+                .select('baike_quiz_history')
+                .where({
+                    channelId: appeal.channelId,
+                    userId: appeal.userId,
+                    question: appeal.question,
+                })
+                .orderBy('completionTime', 'desc')
+                .limit(1)
+                .execute();
 
-             if (history && history.length > 0) {
-                 const quiz = history[0];
-                 messages.push(`   选项A：${this.truncateText(quiz.answerA, 15)}`);
-                 messages.push(`   选项B：${this.truncateText(quiz.answerB, 15)}`);
-                 messages.push(`   选项C：${this.truncateText(quiz.answerC, 15)}`);
-                 messages.push(`   选项D：${this.truncateText(quiz.answerD, 15)}`);
-             }
+            if (history && history.length > 0) {
+                const quiz = history[0];
+                messages.push(
+                    `   选项A：${this.truncateText(quiz.answerA, 15)}`
+                );
+                messages.push(
+                    `   选项B：${this.truncateText(quiz.answerB, 15)}`
+                );
+                messages.push(
+                    `   选项C：${this.truncateText(quiz.answerC, 15)}`
+                );
+                messages.push(
+                    `   选项D：${this.truncateText(quiz.answerD, 15)}`
+                );
+            }
 
-             messages.push(`   用户答案：${appeal.userAnswer}`);
-             messages.push(`   正确答案：${appeal.correctAnswer}`);
-             messages.push(`   时间：${appeal.createTime}`);
-             messages.push(`   状态：${this.getStatusText(appeal.status)}`);
-         }
+            messages.push(`   用户答案：${appeal.userAnswer}`);
+            messages.push(`   正确答案：${appeal.correctAnswer}`);
+            messages.push(`   时间：${appeal.createTime}`);
+            messages.push(`   状态：${this.getStatusText(appeal.status)}`);
+        }
 
-         messages.push('\n使用 \`quiz.admin.appeal approve/reject <申诉ID>\` 来处理申诉。');
-         return messages.join('\n');
-     }
-    
+        messages.push(
+            '\n使用 \`quiz.admin.appeal approve/reject <申诉ID>\` 来处理申诉。'
+        );
+        return messages.join('\n');
+    }
+
     /**
-      * 批准申诉并退还星币
-      */
-     private async approveAppeal(session: any, appealId: number): Promise<string> {
-         // 查找申诉记录
-         const appeals = await this.ctx.database
-             .select('baike_quiz_appeal')
-             .where({ id: appealId, status: 'pending' })
-             .execute();
+     * 批准申诉并退还星币
+     */
+    private async approveAppeal(
+        session: any,
+        appealId: number
+    ): Promise<string> {
+        // 查找申诉记录
+        const appeals = await this.ctx.database
+            .select('baike_quiz_appeal')
+            .where({ id: appealId, status: 'pending' })
+            .execute();
 
-         if (appeals.length === 0) {
-             return `❌ 未找到ID为 ${appealId} 的待处理申诉！`;
-         }
+        if (appeals.length === 0) {
+            return `❌ 未找到ID为 ${appealId} 的待处理申诉！`;
+        }
 
-         const appeal = appeals[0];
+        const appeal = appeals[0];
 
-         // 更新申诉状态为已批准
-         await this.ctx.database.set('baike_quiz_appeal',
-             { id: appealId },
-             { status: 'approved' }
-         );
+        // 更新申诉状态为已批准
+        await this.ctx.database.set(
+            'baike_quiz_appeal',
+            { id: appealId },
+            { status: 'approved' }
+        );
 
-         // 退还用户扣除的星币加上赢得的星币（默认5+10）
-         const refundAmount = this.config.baike_quiz.penaltyStarCoin + this.config.baike_quiz.rewardStarCoin;
-         await this.updateStarCoin(appeal.userId, appeal.channelId, refundAmount);
+        // 退还用户扣除的星币加上赢得的星币（默认5+10）
+        const refundAmount =
+            this.config.baike_quiz.penaltyStarCoin +
+            this.config.baike_quiz.rewardStarCoin;
+        await this.updateStarCoin(
+            appeal.userId,
+            appeal.channelId,
+            refundAmount
+        );
 
-         if (session.onebot) {
-             await session.onebot.sendGroupMsg(appeal.channelId, [
-                 {
-                     "type": "at",
-                     "data": {
-                         "qq": appeal.userId
-                     }
-                 },
-                 `，你的申诉已通过！\n已退还你 ${refundAmount} 星币！`
-             ]);
-         } else {
-             // 通知用户申诉已通过
-             await this.ctx.broadcast([`${session.platform}:${appeal.channelId}`],
-                 `🎉 @${await this.getUserName(appeal.userId)}，你的申诉已通过！\n已退还你 ${refundAmount} 星币！`
-             );
-         }
+        if (session.onebot) {
+            await session.onebot.sendGroupMsg(appeal.channelId, [
+                {
+                    type: 'at',
+                    data: {
+                        qq: appeal.userId,
+                    },
+                },
+                `，你的申诉已通过！\n已退还你 ${refundAmount} 星币！`,
+            ]);
+        } else {
+            // 通知用户申诉已通过
+            await this.ctx.broadcast(
+                [`${session.platform}:${appeal.channelId}`],
+                `🎉 @${await this.getUserName(appeal.userId)}，你的申诉已通过！\n已退还你 ${refundAmount} 星币！`
+            );
+        }
 
-         return `✅ 已批准 ID 为 ${appealId} 的申诉，并退还用户 ${refundAmount} 星币！`;
-     }
-    
+        return `✅ 已批准 ID 为 ${appealId} 的申诉，并退还用户 ${refundAmount} 星币！`;
+    }
+
     /**
      * 拒绝申诉
      */
@@ -817,26 +994,27 @@ class BaikeQuizPlugin {
         }
 
         // 更新申诉状态为已拒绝
-        await this.ctx.database.set('baike_quiz_appeal',
+        await this.ctx.database.set(
+            'baike_quiz_appeal',
             { id: appealId },
             { status: 'rejected' }
         );
 
         return `✅ 已拒绝 ID 为 ${appealId} 的申诉！`;
     }
-    
+
     /**
      * 获取状态的文本表示
      */
     private getStatusText(status: string): string {
         const statusMap: Record<string, string> = {
-            'pending': '⏳ 待处理',
-            'approved': '✅ 已批准',
-            'rejected': '❌ 已拒绝'
+            pending: '⏳ 待处理',
+            approved: '✅ 已批准',
+            rejected: '❌ 已拒绝',
         };
         return statusMap[status] || status;
     }
-    
+
     /**
      * 截断文本
      */
@@ -846,7 +1024,7 @@ class BaikeQuizPlugin {
         }
         return text.substring(0, maxLength) + '...';
     }
-    
+
     /**
      * 获取用户名称（简化版，实际可能需要根据平台API获取）
      */
@@ -854,11 +1032,15 @@ class BaikeQuizPlugin {
         // 这里简化处理，实际可能需要调用平台API获取用户名称
         return userId;
     }
-    
+
     /**
      * 保存问答状态到历史记录
      */
-    private async saveQuizStateToHistory(quizState: BaikeQuizState, userAnswer: string, isCorrect: boolean): Promise<void> {
+    private async saveQuizStateToHistory(
+        quizState: BaikeQuizState,
+        userAnswer: string,
+        isCorrect: boolean
+    ): Promise<void> {
         await this.ctx.database.create('baike_quiz_history', {
             channelId: quizState.channelId,
             userId: quizState.questionerId,
@@ -872,7 +1054,7 @@ class BaikeQuizPlugin {
             createTime: quizState.createTime,
             completionTime: Date.now(),
             userAnswer: userAnswer,
-            isCorrect: isCorrect
+            isCorrect: isCorrect,
         });
     }
 
@@ -882,10 +1064,10 @@ class BaikeQuizPlugin {
     private setupCleanupTask(): void {
         // 每7天执行一次清理任务
         const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
-        
+
         // 设置定时任务
         setInterval(() => {
-            this.cleanupOldHistoryRecords().catch(error => {
+            this.cleanupOldHistoryRecords().catch((error) => {
                 this.ctx.logger.warn('清理历史记录任务失败:', error);
             });
         }, sevenDaysInMs);
@@ -899,8 +1081,8 @@ class BaikeQuizPlugin {
 
         await this.ctx.database.remove('baike_quiz_history', {
             completionTime: {
-                $lt: thirtyDaysAgo
-            }
+                $lt: thirtyDaysAgo,
+            },
         });
 
         this.ctx.logger.info(`成功清理30天以前的历史问答记录`);

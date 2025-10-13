@@ -1,5 +1,5 @@
-import {Context} from 'koishi';
-import {randomChoice} from "../../../utils/pseudo_random_helper";
+import { Context } from 'koishi';
+import { randomChoice } from '../../../utils/pseudo_random_helper';
 
 export const name = 'choose';
 
@@ -26,7 +26,7 @@ const RESPONSE_TEMPLATES = {
         '叮铃铃~ 硬币显示：{result}',
         '抛硬币结果：{result}',
         '硬币翻转... {result}朝上！',
-    ]
+    ],
 } as const;
 
 const COIN_SIDES = ['正面', '反面'] as const;
@@ -59,27 +59,29 @@ function generateCoinResponse(): string {
  * 验证并过滤选项
  */
 function validateOptions(options: string[]): string[] {
-    return options.filter(option => option.trim()).map(option => option.trim());
+    return options
+        .filter((option) => option.trim())
+        .map((option) => option.trim());
 }
 
 export function choose(ctx: Context) {
     ctx.command('choose <...options:string>', '从多个选项中随机选择一个')
-        .usage('用法：choose 选项1 选项2 选项3 ...\n示例：choose 吃饭 睡觉 打游戏')
-        .action(async (_, ...options: string[]) => {
-                if (options.some(option => option.includes('茉莉'))) {
-                    return '选项中包含不当内容，请重新输入。';
-                }
-                const validOptions = validateOptions(options);
-
-                if (validOptions.length < 2) {
-                    return randomChoice(RESPONSE_TEMPLATES.error);
-                }
-
-                const selectedOption = randomChoice(validOptions);
-                return generateChooseResponse(selectedOption);
-            }
+        .usage(
+            '用法：choose 选项1 选项2 选项3 ...\n示例：choose 吃饭 睡觉 打游戏'
         )
+        .action(async (_, ...options: string[]) => {
+            if (options.some((option) => option.includes('茉莉'))) {
+                return '选项中包含不当内容，请重新输入。';
+            }
+            const validOptions = validateOptions(options);
 
-    ctx.command('coin', '掷硬币决定')
-        .action(() => generateCoinResponse());
+            if (validOptions.length < 2) {
+                return randomChoice(RESPONSE_TEMPLATES.error);
+            }
+
+            const selectedOption = randomChoice(validOptions);
+            return generateChooseResponse(selectedOption);
+        });
+
+    ctx.command('coin', '掷硬币决定').action(() => generateCoinResponse());
 }

@@ -1,10 +1,17 @@
-import {Context, Session} from "koishi";
+import { Context, Session } from 'koishi';
 
-export async function getUserName(ctx: Context, session: Session, userId: string): Promise<string> {
+export async function getUserName(
+    ctx: Context,
+    session: Session,
+    userId: string
+): Promise<string> {
     let userName: string;
     if (session.onebot) {
         try {
-            const memberInfo = await session.onebot.getGroupMemberInfo(session.channelId, userId);
+            const memberInfo = await session.onebot.getGroupMemberInfo(
+                session.channelId,
+                userId
+            );
             userName = memberInfo.card || memberInfo.nickname || userId; // 优先群名片，其次昵称，最后 QQ 号
         } catch (error) {
             ctx.logger.warn(`获取群成员信息失败（userId: ${userId}）：`, error);
@@ -19,14 +26,18 @@ export async function getUserName(ctx: Context, session: Session, userId: string
     return userName;
 }
 
-export function createTextMsgNode(userId: string, nickname: string, content: string) {
+export function createTextMsgNode(
+    userId: string,
+    nickname: string,
+    content: string
+) {
     return {
-        type: "node",
+        type: 'node',
         data: {
             user_id: userId,
             nickname: nickname,
-            content: content
-        }
+            content: content,
+        },
     };
 }
 
@@ -34,8 +45,8 @@ export function createTextMsg(content: string) {
     return {
         type: 'text',
         data: {
-            text: content
-        }
+            text: content,
+        },
     };
 }
 
@@ -43,7 +54,7 @@ export function createFileMsg(content: string, type: string = 'image') {
     return {
         type: type,
         data: {
-            file: content
-        }
+            file: content,
+        },
     };
 }
