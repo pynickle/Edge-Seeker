@@ -24,6 +24,7 @@ import {roll} from "./plugins/currency/roll/roll";
 import {cookie} from "./server/bili_cookie/cookie";
 import {bind} from "./plugins/bili/bind/bind";
 import {nav_user_info} from "./server/bili_nav_user_info/nav_user_info";
+import {cors} from "./server/cors";
 
 export const inject = ['database', 'puppeteer', 'cron', 'server']
 
@@ -163,20 +164,23 @@ export const Config: Schema<Config> = Schema.object({
 })
 
 export function apply(ctx: Context, cfg: Config) {
+    // currency
     ctx.plugin(StarCoinPlugin, cfg);
     ctx.plugin(BaikeQuizPlugin, cfg);
 
     ctx.plugin(InventoryPlugin, cfg);
     ctx.plugin(MarketPlugin, cfg);
-    ctx.plugin(ForeseePlugin, cfg);
-
-    ctx.plugin(JrrpPlugin, cfg);
-    ctx.plugin(JrysPlugin, cfg);
 
     ctx.plugin(guess_number, cfg);
     ctx.plugin(red_packet, cfg);
     ctx.plugin(roll, cfg);
 
+    // fortune
+    ctx.plugin(ForeseePlugin, cfg);
+    ctx.plugin(JrrpPlugin, cfg);
+    ctx.plugin(JrysPlugin, cfg);
+
+    // misc
     ctx.plugin(zanwo, cfg);
     ctx.plugin(cat, cfg);
     ctx.plugin(whois, cfg);
@@ -185,6 +189,7 @@ export function apply(ctx: Context, cfg: Config) {
     ctx.plugin(choose, cfg);
     ctx.plugin(hitokoto, cfg);
 
+    // platform
     ctx.plugin(friend_code, cfg);
     ctx.plugin(UserMarketPlugin, cfg);
 
@@ -198,6 +203,7 @@ export function apply(ctx: Context, cfg: Config) {
     ctx.plugin(auto_red_packet, cfg)
 
     // server
-    ctx.plugin(cookie, cfg)
+    ctx.plugin(cors, cfg);
+    ctx.plugin(cookie, cfg);
     ctx.plugin(nav_user_info, cfg);
 }

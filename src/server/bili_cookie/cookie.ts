@@ -59,32 +59,8 @@ export function cookie(ctx: Context, config: Config) {
         primary: 'bindCode',
     });
 
-    // 优化：统一设置 CORS 中间件
-    ctx.server.all("/bind-cookie", async (koaCtx: any, next) => {
-        // 设置CORS头
-        koaCtx.set('Access-Control-Allow-Origin', '*')
-        koaCtx.set('Access-Control-Allow-Methods', 'POST, OPTIONS')
-        koaCtx.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
-
-        if (koaCtx.method === 'OPTIONS') {
-            ctx.logger("cookie").info(`处理OPTIONS预检请求: ${koaCtx.path}`)
-            koaCtx.status = 200
-            return
-        }
-
-        if (koaCtx.method !== 'POST') {
-            koaCtx.status = 405
-            koaCtx.body = { error: { message: 'Method Not Allowed', type: 'invalid_request_error' } }
-            return
-        }
-
-        await next()
-    })
-
-    // 使用 router 处理 POST 请求，优化：合并 CORS 设置，改进错误处理
-    ctx.server.post('/bind-cookie', async (koaCtx: any) => {
+    ctx.server.post('/api/bind-cookie', async (koaCtx: any) => {
         try {
-            // 解析 JSON 请求体
             let body = koaCtx.request.body;
             if (!body) {
                 koaCtx.response.body = { error: 'Invalid JSON body' };
@@ -96,7 +72,7 @@ export function cookie(ctx: Context, config: Config) {
             const md5 = body["md5"];
             const original = body["original"];
             const cookie = body["cookie"];
-            if (!md5 || !original || !cookie) {  // 优化：同时检查 original
+            if (!md5 || !original || !cookie) {
                 koaCtx.response.body = { error: "Missing required fields (md5, original, cookie)" };
                 return koaCtx.status = 400;
             }
@@ -118,7 +94,7 @@ export function cookie(ctx: Context, config: Config) {
 
             let bindCode: number | null = null
             let attempts = 0
-            const maxAttempts = 10  // 防止无限循环，实际中90万种可能，重复率极低
+            const maxAttempts = 10
 
             while (!bindCode && attempts < maxAttempts) {
                 const candidate = Math.floor(Math.random() * 900000) + 100000
@@ -131,7 +107,7 @@ export function cookie(ctx: Context, config: Config) {
                 }
             }
 
-            if (!bindCode) {  // 优化：处理生成失败
+            if (!bindCode) {
                 koaCtx.response.body = { error: 'Failed to generate unique bindCode after max attempts' };
                 return koaCtx.status = 500;
             }

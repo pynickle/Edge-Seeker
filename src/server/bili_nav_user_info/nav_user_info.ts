@@ -98,9 +98,7 @@ async function loadImageAsBase64(imageUrl: string): Promise<string> {
 
         // Step 3: 将 buffer 转换为 base64，并构造完整 data URL
         const base64Data = Buffer.from(response.data, 'binary').toString('base64');
-        const dataUrl = `data:${mimeType};base64,${base64Data}`;
-
-        return dataUrl;
+        return `data:${mimeType};base64,${base64Data}`;
     } catch (error) {
         console.error('Error loading image:', error);
         throw error;
