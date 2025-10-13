@@ -2,7 +2,7 @@
 import crypto from 'crypto';
 import { Context } from 'koishi';
 import { Config } from '../../index';
-import {randomInt} from "../../utils/pseudo_random_helper";
+import { randomInt } from '../../utils/pseudo_random_helper';
 
 export const name = 'cookie-binder';
 
@@ -21,8 +21,8 @@ interface BiliBind {
     bindCode: number;
     cookie: string;
     cookieInfo: Cookie[];
-    mid: number,
-    userName: string,
+    mid: number;
+    userName: string;
     createdAt: number;
 }
 

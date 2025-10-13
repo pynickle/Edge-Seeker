@@ -9,8 +9,8 @@ interface UserBiliInfo {
     bindCode: number; // 绑定码
     cookie: string; // 原始 cookie 字符串
     cookieInfo: any[]; // 解析后的 cookie 信息数组
-    mid: number, // B 站用户 UID
-    userName: string, // B 站用户名
+    mid: number; // B 站用户 UID
+    userName: string; // B 站用户名
     bindTime: number; // 绑定时间戳
 }
 

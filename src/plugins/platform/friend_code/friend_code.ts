@@ -1,6 +1,6 @@
 import { Context } from 'koishi';
 import { getUserName } from '../../../utils/onebot_helper';
-import {randomInt} from "../../../utils/pseudo_random_helper";
+import { randomInt } from '../../../utils/pseudo_random_helper';
 
 export const name = 'friend_code';
 

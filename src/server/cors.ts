@@ -11,7 +11,7 @@ export function cors(ctx: Context, config: Config) {
             'Content-Type, Authorization, X-Requested-With'
         );
 
-        ctx.logger("cors").info(`处理请求: ${koaCtx.method} ${koaCtx.path}`);
+        ctx.logger('cors').info(`处理请求: ${koaCtx.method} ${koaCtx.path}`);
 
         if (koaCtx.method === 'OPTIONS') {
             ctx.logger('cookie').info(`处理 OPTIONS 预检请求: ${koaCtx.path}`);
