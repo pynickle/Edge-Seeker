@@ -1,3 +1,15 @@
+## [1.1.3](https://github.com/pynickle/Edge-Seeker/compare/v1.1.2...v1.1.3) (2025-10-13)
+
+### 💄 样式优化
+
+* release ([8acf992](https://github.com/pynickle/Edge-Seeker/commit/8acf9925f4b8471662ee1172b76e06fdf61bb442))
+
+### 🔧 其他更改
+
+* 使用 tsc ([6e4c0f0](https://github.com/pynickle/Edge-Seeker/commit/6e4c0f0b312fdd6e56bf35999a943a3224c988b7))
+* 加入 yml 配置 ([30f7f30](https://github.com/pynickle/Edge-Seeker/commit/30f7f302c55562a0a4bcbad28fb8fd5fc0b60b15))
+* 尝试修复加载问题 ([8755bb0](https://github.com/pynickle/Edge-Seeker/commit/8755bb08e30d24335876b584108516d71760a2aa))
+
 ## [1.1.2](https://github.com/pynickle/Edge-Seeker/compare/v1.1.1...v1.1.2) (2025-10-13)
 
 ### 🐛 Bug修复
