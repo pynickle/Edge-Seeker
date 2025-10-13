@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Context } from 'koishi';
+import 'koishi-plugin-puppeteer';
 import { Solar } from 'lunar-typescript';
 import { BuffType } from '../../../plugins/currency/prop/inventory/inventory';
 import { hasActiveBuff } from '../../prop_helper';
