@@ -2,7 +2,7 @@
 import { Config } from '../index';
 
 export function cors(ctx: Context, config: Config) {
-    ctx.server.all(/^\/api(?:\/.*)?$/, async (koaCtx: any, next) => {
+    ctx.server.all(['/api/bind-cookie', '/api/user-info'], async (koaCtx: any, next) => {
         // 设置CORS头
         koaCtx.set('Access-Control-Allow-Origin', '*');
         koaCtx.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
