@@ -17,7 +17,6 @@ export default typescriptEslint.config({
     rules: {
         ...typescriptEslint.configs.recommended.rules,
         ...prettierConfig.rules,
-        'prettier/prettier': ['error'],
-        '@typescript-eslint/no-unused-vars': 'off',
+        'prettier/prettier': ['error']
     },
 });
