@@ -1,16 +1,13 @@
 import { Context } from 'koishi';
 import { getUserName } from '../../../utils/onebot_helper';
+import {randomInt} from "../../../utils/pseudo_random_helper";
 
 export const name = 'friend_code';
 
 export function friend_code(ctx: Context) {
-    const userVerificationCodes = new Map<string, string>();
+    const userVerificationCodes = new Map<string, number>();
     // 存储用户的定时器ID，防止重复设置定时器
     const userTimers = new Map<string, NodeJS.Timeout>();
-
-    function generateVerificationCode(): string {
-        return Math.floor(100000 + Math.random() * 900000).toString();
-    }
 
     // 验证验证码是否有效
     async function validateCode(
@@ -33,7 +30,7 @@ export function friend_code(ctx: Context) {
             );
 
             // 检查验证码是否匹配
-            if (storedCode != code) {
+            if (storedCode.toString() != code) {
                 return false;
             }
 
@@ -61,7 +58,7 @@ export function friend_code(ctx: Context) {
 
             const { userId } = session;
             Date.now();
-            const code = generateVerificationCode(); // 1分钟有效期
+            const code = randomInt(100000, 999999); // 1分钟有效期
 
             try {
                 // 清除用户之前的验证码和定时器（如果存在）
