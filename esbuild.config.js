@@ -16,7 +16,7 @@ await build({
         'node-emoji',
         'whoiser',
         'koishi-plugin-puppeteer',
-        '@koishijs/plugin-adapter-onebot',
+        'koishi-plugin-adapter-onebot',
     ],
     plugins: [yamlPlugin.yamlPlugin({})],
 })
