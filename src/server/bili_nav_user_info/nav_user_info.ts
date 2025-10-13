@@ -29,35 +29,6 @@ async function getBilibiliNav(data) {
 }
 
 export function nav_user_info(ctx: Context, config: Config) {
-    ctx.server.all('/api/user-info', async (koaCtx: any, next) => {
-        // 设置CORS头
-        koaCtx.set('Access-Control-Allow-Origin', '*');
-        koaCtx.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-        koaCtx.set(
-            'Access-Control-Allow-Headers',
-            'Content-Type, Authorization, X-Requested-With'
-        );
-
-        if (koaCtx.method === 'OPTIONS') {
-            ctx.logger('cookie').info(`处理OPTIONS预检请求: ${koaCtx.path}`);
-            koaCtx.status = 200;
-            return;
-        }
-
-        if (koaCtx.method !== 'POST') {
-            koaCtx.status = 405;
-            koaCtx.body = {
-                error: {
-                    message: 'Method Not Allowed',
-                    type: 'invalid_request_error',
-                },
-            };
-            return;
-        }
-
-        await next();
-    });
-
     ctx.server.post('/api/user-info', async (koaCtx: any) => {
         try {
             // 解析 JSON 请求体

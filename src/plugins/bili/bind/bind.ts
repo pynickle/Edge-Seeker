@@ -9,6 +9,8 @@ interface UserBiliInfo {
     bindCode: number; // 绑定码
     cookie: string; // 原始 cookie 字符串
     cookieInfo: any[]; // 解析后的 cookie 信息数组
+    mid: number, // B 站用户 UID
+    userName: string, // B 站用户名
     bindTime: number; // 绑定时间戳
 }
 
@@ -30,12 +32,14 @@ export async function bind(ctx: Context, config: Config) {
             bindCode: 'unsigned',
             cookie: 'string',
             cookieInfo: 'json',
+            mid: 'unsigned',
+            userName: 'string',
             bindTime: 'unsigned',
         },
         {
             primary: 'id',
             autoInc: true,
-            unique: ['userId'], // 用户在每个频道只能有一个绑定记录
+            unique: ['userId'],
         }
     );
 
@@ -82,6 +86,8 @@ export async function bind(ctx: Context, config: Config) {
                             bindCode,
                             cookie: bindRecord.cookie,
                             cookieInfo: bindRecord.cookieInfo,
+                            mid: bindRecord.mid,
+                            userName: bindRecord.userName,
                             bindTime: now,
                         }
                     );
@@ -156,17 +162,7 @@ export async function bind(ctx: Context, config: Config) {
                 const bindTime = new Date(bindInfo.bindTime).toLocaleString();
 
                 // 从cookieInfo中获取可能的用户信息（如果有）
-                let userName = '未知用户';
-                /*
-                if (bindInfo.cookieInfo && bindInfo.cookieInfo.length > 0) {
-                    const DedeUserIDCookie = bindInfo.cookieInfo.find((cookie: any) => 
-                        cookie.name === 'DedeUserID'
-                    );
-                    if (DedeUserIDCookie) {
-                        userName = `用户ID: ${DedeUserIDCookie.value}`;
-                    }
-                }
-                 */
+                let userName = bindInfo.userName;
 
                 return `B站账号绑定状态：已绑定\n绑定用户：${userName}\n绑定时间：${bindTime}`;
             } catch (error) {

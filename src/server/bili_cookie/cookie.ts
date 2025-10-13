@@ -21,6 +21,8 @@ interface BiliBind {
     bindCode: number;
     cookie: string;
     cookieInfo: Cookie[];
+    mid: number,
+    userName: string,
     createdAt: number;
 }
 
@@ -57,6 +59,8 @@ export function cookie(ctx: Context, config: Config) {
             bindCode: 'unsigned',
             cookie: 'string',
             cookieInfo: 'json',
+            mid: 'unsigned',
+            userName: 'string',
             createdAt: 'unsigned',
         },
         {
@@ -77,9 +81,11 @@ export function cookie(ctx: Context, config: Config) {
             const md5 = body['md5'];
             const original = body['original'];
             const cookie = body['cookie'];
-            if (!md5 || !original || !cookie) {
+            const userName = body['userName'];
+            const mid = body['mid'];
+            if (!md5 || !original || !cookie || !userName || !mid) {
                 koaCtx.response.body = {
-                    error: 'Missing required fields (md5, original, cookie)',
+                    error: 'Missing required fields (md5, original, cookie, userName, mid)',
                 };
                 return (koaCtx.status = 400);
             }
@@ -138,6 +144,8 @@ export function cookie(ctx: Context, config: Config) {
                 bindCode,
                 cookie,
                 cookieInfo,
+                mid,
+                userName,
                 createdAt: now,
             });
 
