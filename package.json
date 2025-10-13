@@ -21,7 +21,7 @@
   "scripts": {
     "lint": "eslint ./src --ext .ts",
     "lint:fix": "eslint ./src --ext .ts --fix",
-    "build": "esbuild src/index.ts --bundle --outfile=lib/index.js --format=cjs --platform=node --external:koishi --external:axios --external:dayjs --external:koishi-plugin-cron --external:lunar-typescript --external:node-emoji --external:whoiser && tsc --emitDeclarationOnly",
+    "build": "esbuild src/index.ts --bundle --outfile=lib/index.js --format=cjs --platform=node --external:koishi --external:axios --external:dayjs --external:koishi-plugin-cron --external:lunar-typescript --external:node-emoji --external:whoiser --external:koishi-plugin-puppeteer --external:@koishijs/plugin-adapter-onebot && tsc --emitDeclarationOnly",
     "release": "semantic-release"
   },
   "peerDependencies": {
