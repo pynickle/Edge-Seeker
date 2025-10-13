@@ -1,3 +1,15 @@
+## [1.0.2](https://github.com/pynickle/Edge-Seeker/compare/v1.0.1...v1.0.2) (2025-10-13)
+
+### 💄 样式优化
+
+* 使用随机数工具方法 ([5b355a0](https://github.com/pynickle/Edge-Seeker/commit/5b355a069e341d16fcf514d49de5c651d42e4fc3))
+
+### 🔧 其他更改
+
+* 加入手动触发 ([84ae0c9](https://github.com/pynickle/Edge-Seeker/commit/84ae0c95daa74f0c31ff26038f3c2d3846094dd6))
+* 去除手动触发，修改 type 配置 ([4738d12](https://github.com/pynickle/Edge-Seeker/commit/4738d120486b01cf2c408e1b3b50870b2ab56f8e))
+* 重新使用 refactor ([b6fcc64](https://github.com/pynickle/Edge-Seeker/commit/b6fcc64ed36c4df0d5efb1e1600f7debe0d9e77e))
+
 ## [1.0.1](https://github.com/pynickle/Edge-Seeker/compare/v1.0.0...v1.0.1) (2025-10-13)
 
 ### 💄 样式优化
