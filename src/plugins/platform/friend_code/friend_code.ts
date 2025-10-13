@@ -4,14 +4,11 @@ import { getUserName } from '../../../utils/onebot_helper';
 export const name = 'friend_code';
 
 export function friend_code(ctx: Context) {
-    // 使用Map存储用户验证码，不使用数据库，只存储userId和验证码字符串
     const userVerificationCodes = new Map<string, string>();
     // 存储用户的定时器ID，防止重复设置定时器
     const userTimers = new Map<string, NodeJS.Timeout>();
 
-    // 生成随机验证码
     function generateVerificationCode(): string {
-        // 生成6位数字验证码
         return Math.floor(100000 + Math.random() * 900000).toString();
     }
 
