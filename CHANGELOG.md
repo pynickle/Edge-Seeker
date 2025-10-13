@@ -1,3 +1,9 @@
+## [1.1.1](https://github.com/pynickle/Edge-Seeker/compare/v1.1.0...v1.1.1) (2025-10-13)
+
+### 🐛 Bug修复
+
+* 使用具体地址而不是 regex 设置 cors ([4cc1837](https://github.com/pynickle/Edge-Seeker/commit/4cc1837e2ab2d966c19eaa01dc52ec1c652cf14a))
+
 ## [1.1.0](https://github.com/pynickle/Edge-Seeker/compare/v1.0.2...v1.1.0) (2025-10-13)
 
 ### ✨ 功能更新
