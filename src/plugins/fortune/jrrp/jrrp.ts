@@ -46,7 +46,6 @@ class JrrpPlugin {
         }, {
             primary: 'id',
             autoInc: true,
-            // 添加唯一约束以防止重复记录
             unique: [['userId', 'date']]
         });
     }

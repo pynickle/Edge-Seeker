@@ -25,7 +25,7 @@ export function createTextMsgNode(userId: string, nickname: string, content: str
         data: {
             user_id: userId,
             nickname: nickname,
-            content: [{type: 'text', data: {text: content}}]
+            content: content
         }
     };
 }

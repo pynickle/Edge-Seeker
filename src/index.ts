@@ -20,13 +20,19 @@ import {red_packet} from "./plugins/currency/red_packet/red_packet";
 import {friend_code} from "./plugins/platform/friend_code/friend_code";
 import {hitokoto} from "./plugins/misc/hitokoto/hitokoto";
 import UserMarketPlugin from "./plugins/currency/user_market/user_market";
-import {roll} from "./plugins/currency/roll/index";
+import {roll} from "./plugins/currency/roll/roll";
+import {cookie} from "./server/bili_cookie/cookie";
+import {bind} from "./plugins/bili/bind/bind";
+import {nav_user_info} from "./server/bili_nav_user_info/nav_user_info";
 
-export const inject = ['database', 'puppeteer', 'cron']
+export const inject = ['database', 'puppeteer', 'cron', 'server']
 
 export const name = 'edge-seeker'
 
 export interface Config {
+    bili: {
+        secretKey: string,
+    },
     roll: {
         cost: number
         dailyLimit: number
@@ -89,6 +95,9 @@ export interface Config {
 }
 
 export const Config: Schema<Config> = Schema.object({
+    bili: Schema.object({
+        secretKey: Schema.string().default(''),
+    }),
     roll: Schema.object({
         cost: Schema.number().default(300),
         dailyLimit: Schema.number().default(1)
@@ -179,10 +188,16 @@ export function apply(ctx: Context, cfg: Config) {
     ctx.plugin(friend_code, cfg);
     ctx.plugin(UserMarketPlugin, cfg);
 
+    ctx.plugin(bind, cfg);
+
     // message
     ctx.plugin(gh_url, cfg);
 
     // intervals
     ctx.plugin(minecraft_notifier, cfg)
     ctx.plugin(auto_red_packet, cfg)
+
+    // server
+    ctx.plugin(cookie, cfg)
+    ctx.plugin(nav_user_info, cfg);
 }
