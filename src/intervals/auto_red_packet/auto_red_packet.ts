@@ -131,9 +131,6 @@ export function auto_red_packet(ctx: Context, cfg: Config) {
                     // 使用配置中的范围生成随机金额和数量
                     const amount = randomInt(minAmount, maxAmount);
                     const count = randomInt(minCount, maxCount);
-                    // 将小时转换为毫秒
-                    const intervalMinMs = minInterval * 3600000;
-                    const intervalMaxMs = maxInterval * 3600000;
 
                     // 使用Bot的ID作为创建者
                     const botId = bot.userId;
