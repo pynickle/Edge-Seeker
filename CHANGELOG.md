@@ -1,3 +1,9 @@
+## [1.1.2](https://github.com/pynickle/Edge-Seeker/compare/v1.1.1...v1.1.2) (2025-10-13)
+
+### 🐛 Bug修复
+
+* 修复 type module 带来的问题 ([ff5efd2](https://github.com/pynickle/Edge-Seeker/commit/ff5efd24aa74fd419bbbb16b6ceb7d0823c4f22c))
+
 ## [1.1.1](https://github.com/pynickle/Edge-Seeker/compare/v1.1.0...v1.1.1) (2025-10-13)
 
 ### 🐛 Bug修复
