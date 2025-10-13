@@ -1,3 +1,10 @@
+## [1.1.5](https://github.com/pynickle/Edge-Seeker/compare/v1.1.4...v1.1.5) (2025-10-13)
+
+### 🐛 Bug修复
+
+* 修复错误的依赖 ([99df3c6](https://github.com/pynickle/Edge-Seeker/commit/99df3c645b36a4075f84177f2bf24e393f114f12))
+* 移除错误的导入 ([ba0b42b](https://github.com/pynickle/Edge-Seeker/commit/ba0b42b083407a40f731f52692859356dddf568c))
+
 ## [1.1.4](https://github.com/pynickle/Edge-Seeker/compare/v1.1.3...v1.1.4) (2025-10-13)
 
 ### 🐛 Bug修复
