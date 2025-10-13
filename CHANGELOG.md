@@ -1,3 +1,9 @@
+## [1.1.4](https://github.com/pynickle/Edge-Seeker/compare/v1.1.3...v1.1.4) (2025-10-13)
+
+### 🐛 Bug修复
+
+* 改为 cjs 尝试解决 ([84d1055](https://github.com/pynickle/Edge-Seeker/commit/84d1055d86b70bcd824fee0f20a4a06bc81888f1))
+
 ## [1.1.3](https://github.com/pynickle/Edge-Seeker/compare/v1.1.2...v1.1.3) (2025-10-13)
 
 ### 💄 样式优化
