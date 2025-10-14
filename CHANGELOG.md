@@ -1,3 +1,9 @@
+## [1.3.0](https://github.com/pynickle/Edge-Seeker/compare/v1.2.2...v1.3.0) (2025-10-14)
+
+### ✨ 功能更新
+
+* 加入 WBI Keys 缓存 ([16dabb8](https://github.com/pynickle/Edge-Seeker/commit/16dabb8f0b48d8f9250168bb0dab029cb5f315ff))
+
 ## [1.2.2](https://github.com/pynickle/Edge-Seeker/compare/v1.2.1...v1.2.2) (2025-10-14)
 
 ### 🐛 Bug修复
