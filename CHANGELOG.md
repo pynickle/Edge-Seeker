@@ -1,3 +1,9 @@
+## [1.6.0](https://github.com/pynickle/Edge-Seeker/compare/v1.5.4...v1.6.0) (2025-10-14)
+
+### ✨ 功能更新
+
+* 加入直播间观看时长指令 ([4b7eaa7](https://github.com/pynickle/Edge-Seeker/commit/4b7eaa7a5af75a256fcbea80ea174f4055a5bc95))
+
 ## [1.5.4](https://github.com/pynickle/Edge-Seeker/compare/v1.5.3...v1.5.4) (2025-10-14)
 
 ### 🐛 Bug修复
