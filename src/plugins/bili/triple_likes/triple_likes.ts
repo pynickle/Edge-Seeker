@@ -70,7 +70,7 @@ export function triple_likes(ctx: Context, config: Config) {
             const headers = {
                 Cookie: cookie,
                 'Content-Type': 'application/x-www-form-urlencoded',
-                Referer: 'https://www.bilibili.com/',
+                Referer: `https://www.bilibili.com/video/${bvid}`,
                 Origin: 'https://www.bilibili.com',
                 'User-Agent': getRandomUserAgent(),
             };
