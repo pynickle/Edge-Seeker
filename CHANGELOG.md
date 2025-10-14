@@ -1,3 +1,9 @@
+## [1.4.0](https://github.com/pynickle/Edge-Seeker/compare/v1.3.1...v1.4.0) (2025-10-14)
+
+### ✨ 功能更新
+
+* 加入一键三连功能 ([ef1f9c7](https://github.com/pynickle/Edge-Seeker/commit/ef1f9c7d913221208889f541f0c7b96a7a7bfeb1))
+
 ## [1.3.1](https://github.com/pynickle/Edge-Seeker/compare/v1.3.0...v1.3.1) (2025-10-14)
 
 ### 💄 样式优化
