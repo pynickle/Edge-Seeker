@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/pynickle/Edge-Seeker/compare/v1.1.6...v1.2.0) (2025-10-14)
+
+### ✨ 功能更新
+
+* **bili:** 加入千赞脚本 ([0d6225a](https://github.com/pynickle/Edge-Seeker/commit/0d6225a0dc76b2eaa7fff9547d4e8c2255fe3c0d))
+
 ## [1.1.6](https://github.com/pynickle/Edge-Seeker/compare/v1.1.5...v1.1.6) (2025-10-14)
 
 ### 🐛 Bug修复
