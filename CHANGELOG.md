@@ -1,3 +1,9 @@
+## [1.6.2](https://github.com/pynickle/Edge-Seeker/compare/v1.6.1...v1.6.2) (2025-10-14)
+
+### 🐛 Bug修复
+
+* 修复错误的 uid 获取 ([39cb717](https://github.com/pynickle/Edge-Seeker/commit/39cb7176a0db694cbad1f8fecfadd5ac34ff2b15))
+
 ## [1.6.1](https://github.com/pynickle/Edge-Seeker/compare/v1.6.0...v1.6.1) (2025-10-14)
 
 ### 🐛 Bug修复
