@@ -1,3 +1,9 @@
+## [1.3.1](https://github.com/pynickle/Edge-Seeker/compare/v1.3.0...v1.3.1) (2025-10-14)
+
+### 💄 样式优化
+
+* 使用英语键 ([f8b6dc5](https://github.com/pynickle/Edge-Seeker/commit/f8b6dc526a06c89836546247f91e3189a3352014))
+
 ## [1.3.0](https://github.com/pynickle/Edge-Seeker/compare/v1.2.2...v1.3.0) (2025-10-14)
 
 ### ✨ 功能更新
