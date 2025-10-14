@@ -1,3 +1,9 @@
+## [1.5.1](https://github.com/pynickle/Edge-Seeker/compare/v1.5.0...v1.5.1) (2025-10-14)
+
+### 🐛 Bug修复
+
+* 修复千赞直播间信息网址问题 ([f29dbe9](https://github.com/pynickle/Edge-Seeker/commit/f29dbe9724d5564b1c81e48f82270946f11aee6b))
+
 ## [1.5.0](https://github.com/pynickle/Edge-Seeker/compare/v1.4.2...v1.5.0) (2025-10-14)
 
 ### ✨ 功能更新
