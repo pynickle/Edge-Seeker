@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { Context } from 'koishi';
-import { Config } from '../../../index';
 import {
     extractBiliJct,
     extractDedeUserID,
@@ -30,7 +29,7 @@ function encWbi(
     img_key: string,
     sub_key: string
 ): string {
-    const mixin_key = getMixinKey(img_key + sub_key);
+    getMixinKey(img_key + sub_key);
     const curr_time = Math.round(Date.now() / 1000);
     const chr_filter = /[!'()*]/g;
 
@@ -64,22 +63,27 @@ async function getWbiKeys(
             }
         );
         const data = response.data;
-        if (!data || !data.wbi_img) {
-            throw new Error('无法获取WBI图像信息');
+        ctx.logger('bili-thousand-likes').info('获取 WBI Keys 响应数据:', data);
+        if (!data || !data.data.wbi_img) {
+            ctx.logger('bili-thousand-likes').error('无法获取 WBI 图像信息');
+            return null;
         }
 
+        const img_url = data.data.wbi_img.img_url;
+        const sub_url = data.data.wbi_img.sub_url;
+
         return {
-            img_key: data.wbi_img.img_url.slice(
-                data.wbi_img.img_url.lastIndexOf('/') + 1,
-                data.wbi_img.img_url.lastIndexOf('.')
+            img_key: img_url.slice(
+                img_url.lastIndexOf('/') + 1,
+                img_url.lastIndexOf('.')
             ),
-            sub_key: data.wbi_img.sub_url.slice(
-                data.wbi_img.sub_url.lastIndexOf('/') + 1,
-                data.wbi_img.sub_url.lastIndexOf('.')
+            sub_key: sub_url.slice(
+                sub_url.lastIndexOf('/') + 1,
+                sub_url.lastIndexOf('.')
             ),
         };
     } catch (error) {
-        ctx.logger('bili-thousand-likes').error('获取WBI Keys失败:', error);
+        ctx.logger('bili-thousand-likes').error('获取 WBI Keys 失败:', error);
         return null;
     }
 }
@@ -98,7 +102,7 @@ async function sendThousandLikes(
             .execute();
 
         if (userBiliInfo.length === 0) {
-            return '🌸 你还没有绑定B站账号！请先使用 `bili.bind` 命令绑定账号';
+            return '🌸 你还没有绑定 B 站账号！请先使用 `bili.bind` 命令绑定账号';
         }
 
         const biliInfo = userBiliInfo[0];
@@ -118,7 +122,7 @@ async function sendThousandLikes(
 
         // 验证直播间ID
         if (!roomId || !/^\d+$/.test(roomId)) {
-            return '🌸 请输入有效的直播间ID！';
+            return '🌸 请输入有效的直播间 ID！';
         }
 
         const targetRoomId = roomId;
@@ -141,7 +145,7 @@ async function sendThousandLikes(
         // 获取WBI签名（带上用户cookie）
         const wbiKeys = await getWbiKeys(ctx, cookie);
         if (!wbiKeys) {
-            return '🌸 获取WBI签名失败，请稍后重试';
+            return '🌸 获取 WBI 签名失败，请稍后重试';
         }
 
         // 构造带签名的请求URL
@@ -169,7 +173,7 @@ async function sendThousandLikes(
 
         // 检查响应
         if (response.data && response.data.code === 0) {
-            return `✨ 千赞请求发送成功！已为直播间 ${targetRoomId} 提交1000次点赞 💖`;
+            return `✨ 千赞请求发送成功！已为直播间 ${targetRoomId} 提交 1000 次点赞 💖`;
         } else {
             return `🌸 千赞请求失败：${response.data?.message || '未知错误'}`;
         }
@@ -181,7 +185,7 @@ async function sendThousandLikes(
 
 export const name = 'bili-thousand-likes';
 
-export async function thousand_likes(ctx: Context, config: Config) {
+export async function thousand_likes(ctx: Context) {
     // 注册千赞指令
     ctx.command(
         'bili.thousand-likes <roomId:string>',
