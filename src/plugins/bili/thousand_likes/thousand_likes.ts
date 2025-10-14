@@ -14,10 +14,7 @@ const mixinKeyEncTab = [
     36, 20, 34, 44, 52,
 ];
 
-// WBI Keys缓存
-let cachedWbiKeys: { img_key: string; sub_key: string } | null = null;
-let lastWbiKeysFetch = 0;
-const WBI_KEYS_CACHE_DURATION = 600 * 1000; // 10分钟缓存
+// 移除缓存机制，每次请求都获取最新的WBI Keys
 
 // 对 imgKey 和 subKey 进行字符顺序打乱编码
 function getMixinKey(orig: string): string {
@@ -54,24 +51,24 @@ function encWbi(
 
 // 获取最新的 img_key 和 sub_key
 async function getWbiKeys(
-    ctx: Context
+    ctx: Context,
+    cookie: string
 ): Promise<{ img_key: string; sub_key: string } | null> {
-    // 检查缓存
-    const now = Date.now();
-    if (cachedWbiKeys && now - lastWbiKeysFetch < WBI_KEYS_CACHE_DURATION) {
-        return cachedWbiKeys;
-    }
-
     try {
         const response = await axios.get(
-            'https://api.bilibili.com/x/web-interface/nav'
+            'https://api.bilibili.com/x/web-interface/nav',
+            {
+                headers: {
+                    Cookie: cookie,
+                },
+            }
         );
         const data = response.data;
         if (!data || !data.wbi_img) {
             throw new Error('无法获取WBI图像信息');
         }
 
-        cachedWbiKeys = {
+        return {
             img_key: data.wbi_img.img_url.slice(
                 data.wbi_img.img_url.lastIndexOf('/') + 1,
                 data.wbi_img.img_url.lastIndexOf('.')
@@ -81,9 +78,6 @@ async function getWbiKeys(
                 data.wbi_img.sub_url.lastIndexOf('.')
             ),
         };
-
-        lastWbiKeysFetch = now;
-        return cachedWbiKeys;
     } catch (error) {
         ctx.logger('bili-thousand-likes').error('获取WBI Keys失败:', error);
         return null;
@@ -144,8 +138,8 @@ async function sendThousandLikes(
             visit_id: '',
         };
 
-        // 获取WBI签名
-        const wbiKeys = await getWbiKeys(ctx);
+        // 获取WBI签名（带上用户cookie）
+        const wbiKeys = await getWbiKeys(ctx, cookie);
         if (!wbiKeys) {
             return '🌸 获取WBI签名失败，请稍后重试';
         }
@@ -191,9 +185,9 @@ export async function thousand_likes(ctx: Context, config: Config) {
     // 注册千赞指令
     ctx.command(
         'bili.thousand-likes <roomId:string>',
-        '向指定直播间发送1000次点赞'
+        '向指定直播间发送 1000 次点赞'
     )
-        .alias('bili.qz <roomId:string>')
+        .alias('bili.qz')
         .action(async ({ session }, roomId) => {
             if (!session.guildId) {
                 return '🌸 请在群聊中使用千赞命令哦！';
