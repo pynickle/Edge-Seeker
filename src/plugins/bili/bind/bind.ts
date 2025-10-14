@@ -5,8 +5,6 @@ import { Config } from '../../../index';
 interface UserBiliInfo {
     id: number; // 自增主键
     userId: string; // 用户 ID
-    channelId: string; // 频道 ID（群号）
-    bindCode: number; // 绑定码
     cookie: string; // 原始 cookie 字符串
     cookieInfo: any[]; // 解析后的 cookie 信息数组
     mid: number; // B 站用户 UID
@@ -29,7 +27,6 @@ export async function bind(ctx: Context, config: Config) {
         {
             id: 'unsigned',
             userId: 'string',
-            bindCode: 'unsigned',
             cookie: 'string',
             cookieInfo: 'json',
             mid: 'unsigned',
@@ -83,7 +80,6 @@ export async function bind(ctx: Context, config: Config) {
                         'user_bili_info',
                         { userId },
                         {
-                            bindCode,
                             cookie: bindRecord.cookie,
                             cookieInfo: bindRecord.cookieInfo,
                             mid: bindRecord.mid,
@@ -95,7 +91,6 @@ export async function bind(ctx: Context, config: Config) {
                     // 创建新绑定
                     await ctx.database.create('user_bili_info', {
                         userId,
-                        bindCode,
                         cookie: bindRecord.cookie,
                         cookieInfo: bindRecord.cookieInfo,
                         mid: bindRecord.mid,
