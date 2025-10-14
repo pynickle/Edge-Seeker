@@ -5,6 +5,7 @@ import { gh_url } from './message/github/gh_url';
 import { bind } from './plugins/bili/bind/bind';
 import { thousand_likes } from './plugins/bili/thousand_likes/thousand_likes';
 import { triple_likes } from './plugins/bili/triple_likes/triple_likes';
+import { watch_time } from './plugins/bili/watch_time/watch_time';
 import BaikeQuizPlugin from './plugins/currency/baike_quiz/baike_quiz';
 import { guess_number } from './plugins/currency/guess_number/guess_number';
 import InventoryPlugin from './plugins/currency/prop/inventory/inventory';
@@ -201,6 +202,7 @@ export function apply(ctx: Context, cfg: Config) {
     ctx.plugin(bind, cfg);
     ctx.plugin(thousand_likes, cfg);
     ctx.plugin(triple_likes, cfg);
+    ctx.plugin(watch_time, cfg);
 
     // message
     ctx.plugin(gh_url, cfg);
