@@ -98,6 +98,8 @@ export async function bind(ctx: Context, config: Config) {
                         bindCode,
                         cookie: bindRecord.cookie,
                         cookieInfo: bindRecord.cookieInfo,
+                        mid: bindRecord.mid,
+                        userName: bindRecord.userName,
                         bindTime: now,
                     });
                 }
