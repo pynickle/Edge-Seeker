@@ -1,3 +1,9 @@
+## [1.5.4](https://github.com/pynickle/Edge-Seeker/compare/v1.5.3...v1.5.4) (2025-10-14)
+
+### 🐛 Bug修复
+
+* 修复直播间状态判断错误 ([fa7fad7](https://github.com/pynickle/Edge-Seeker/commit/fa7fad7880226c149cd01cb5399d728aa7284192))
+
 ## [1.5.3](https://github.com/pynickle/Edge-Seeker/compare/v1.5.2...v1.5.3) (2025-10-14)
 
 ### 🐛 Bug修复
