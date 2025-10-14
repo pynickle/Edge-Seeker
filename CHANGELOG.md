@@ -1,3 +1,9 @@
+## [1.2.1](https://github.com/pynickle/Edge-Seeker/compare/v1.2.0...v1.2.1) (2025-10-14)
+
+### 🐛 Bug修复
+
+* 修复 WBI 请求失败问题，去除 WBI 缓存 ([e2b3019](https://github.com/pynickle/Edge-Seeker/commit/e2b3019c9d1b033e6e7bb002bb093aad99fa146b))
+
 ## [1.2.0](https://github.com/pynickle/Edge-Seeker/compare/v1.1.6...v1.2.0) (2025-10-14)
 
 ### ✨ 功能更新
