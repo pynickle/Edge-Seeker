@@ -15,7 +15,7 @@ export function triple_likes(ctx: Context, config: Config) {
     initWbiKeysCache(ctx);
 
     // 注册一键三连指令
-    ctx.command('bili.triple <bvid:str>', '对B站视频进行一键三连').action(
+    ctx.command('bili.triple <bvid:string>', '对B站视频进行一键三连').action(
         async ({ session }, bvid) => {
             if (!session) return '会话信息不存在';
             if (!bvid) return '请提供视频的 bvid 参数';
@@ -73,9 +73,7 @@ export function triple_likes(ctx: Context, config: Config) {
                 const headers = {
                     Cookie: cookie,
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    Referer: `https://www.bilibili.com/video/${bvid}`,
-                    'User-Agent':
-                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+                    Referer: `https://www.bilibili.com/${bvid}`
                 };
 
                 // 发送一键三连请求
