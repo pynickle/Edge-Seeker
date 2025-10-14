@@ -125,7 +125,6 @@ async function sendThousandLikes(
 export const name = 'bili-thousand-likes';
 
 export async function thousand_likes(ctx: Context) {
-    // 初始化 WBI Keys 缓存表
     initWbiKeysCache(ctx);
 
     // 注册千赞指令
