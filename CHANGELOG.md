@@ -1,3 +1,9 @@
+## [1.4.2](https://github.com/pynickle/Edge-Seeker/compare/v1.4.1...v1.4.2) (2025-10-14)
+
+### 🐛 Bug修复
+
+* 修复一键三连指令错误 ([8f873c0](https://github.com/pynickle/Edge-Seeker/commit/8f873c0e717e08337447f7506cc78becde438f30))
+
 ## [1.4.1](https://github.com/pynickle/Edge-Seeker/compare/v1.4.0...v1.4.1) (2025-10-14)
 
 ### 🐛 Bug修复
