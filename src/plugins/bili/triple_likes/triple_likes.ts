@@ -6,6 +6,7 @@ import {
     extractBuvid3,
 } from '../../../utils/bili/cookie_parser';
 import { getWbiKeys, initWbiKeysCache } from '../../../utils/bili/wbi_helper';
+import { getRandomUserAgent } from '../../../utils/web/web_helper';
 
 // 插件主函数
 export const name = 'triple_likes';
@@ -36,7 +37,7 @@ export function triple_likes(ctx: Context, config: Config) {
             }
 
             const user = userInfo[0];
-            const cookie = user.cookie;
+            let cookie = user.cookie;
             const mid = user.mid;
 
             if (!cookie) {
@@ -46,7 +47,22 @@ export function triple_likes(ctx: Context, config: Config) {
             // 检查 cookie 中是否存在 buvid3
             const buvid3 = extractBuvid3(cookie);
             if (!buvid3) {
-                return '绑定的账号缺少必要的 buvid3 信息，可能会触发风控，请重新绑定：/bili.bind';
+                const buvid3_res = await axios.get(
+                    'https://api.bilibili.com/x/web-frontend/getbuvid'
+                );
+                const buvid3_data = buvid3_res.data;
+                if (
+                    buvid3_data.code === 0 &&
+                    buvid3_data.data &&
+                    buvid3_data.data.buvid
+                ) {
+                    cookie += `; buvid3=${buvid3_data.data.buvid}`;
+                    await ctx.database.set(
+                        'user_bili_info',
+                        { userId },
+                        { cookie: cookie }
+                    );
+                }
             }
 
             // 提取 CSRF Token
@@ -66,14 +82,15 @@ export function triple_likes(ctx: Context, config: Config) {
                 const params = {
                     bvid,
                     csrf: biliJct,
-                    csrf_token: biliJct,
                 };
 
                 // 构建请求头
                 const headers = {
                     Cookie: cookie,
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    Referer: `https://www.bilibili.com/${bvid}`
+                    Referer: 'https://www.bilibili.com/',
+                    Origin: 'https://www.bilibili.com',
+                    'User-Agent': getRandomUserAgent(),
                 };
 
                 // 发送一键三连请求
