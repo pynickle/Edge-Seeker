@@ -52,8 +52,16 @@ async function sendThousandLikes(
 
         let targetAnchorId: string;
 
+        const headers = {
+            Cookie: cookie,
+            'User-Agent': getRandomUserAgent(),
+            Referer: `https://live.bilibili.com/`,
+            Origin: 'https://live.bilibili.com',
+        };
+
         const targetRoomInfoRes = await axios.get(
-            `https://api.live.bilibili.com/room/v1/Room/get_info?room_id=${targetRoomId}`
+            `https://api.live.bilibili.com/room/v1/Room/get_info?room_id=${targetRoomId}`,
+            { headers }
         );
         if (targetRoomInfoRes.data.code !== 0) {
             return `🌸 无法获取直播间信息，请确认直播间 ID 是否正确：${targetRoomId}`;

@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { Context } from 'koishi';
 import { Config } from '../../../index';
 import { extractBiliJct } from '../../../utils/bili/cookie_parser';
@@ -30,7 +31,7 @@ export function watch_time(ctx: Context, config: Config) {
         'bili.watch_time <ruid:number>',
         '查询自己在某 B 站直播间的观看时长'
     ).action(async ({ session }, ruid) => {
-        if (!ruid) return '请提供主播的uid参数';
+        if (!ruid) return '请提供主播的 uid 参数';
 
         // 验证ruid格式
         if (!Number.isInteger(ruid) || ruid <= 0) {
@@ -48,14 +49,12 @@ export function watch_time(ctx: Context, config: Config) {
 
         const user = userInfo[0];
         let cookie = user.cookie;
-        const mid = user.mid;
 
         if (!cookie) {
             return '绑定信息不完整，请重新绑定：/bili.bind';
         }
 
         try {
-            // 构建请求头
             const headers = {
                 Cookie: cookie,
                 'User-Agent': getRandomUserAgent(),
@@ -67,7 +66,7 @@ export function watch_time(ctx: Context, config: Config) {
             const url = `https://api.live.bilibili.com/xlive/general-interface/v1/guard/GuardActive?platform=android&ruid=${ruid}`;
 
             // 发送请求
-            const response = await ctx.http.get(url, {
+            const response = await axios.get(url, {
                 headers,
             });
 
@@ -123,6 +122,7 @@ export function watch_time(ctx: Context, config: Config) {
             }
         } catch (error) {
             ctx.logger('bili-watch-time').error('观看时长查询请求失败:', error);
+            ctx.logger('bili-watch-time').info(error.message);
             return `查询失败：${error instanceof Error ? error.message : '未知错误'}`;
         }
     });
