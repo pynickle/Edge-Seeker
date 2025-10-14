@@ -1,3 +1,9 @@
+## [1.5.3](https://github.com/pynickle/Edge-Seeker/compare/v1.5.2...v1.5.3) (2025-10-14)
+
+### 🐛 Bug修复
+
+* 修复 referer ([a241991](https://github.com/pynickle/Edge-Seeker/commit/a241991019b4676a47951956c4a1e325d6a05c5d))
+
 ## [1.5.2](https://github.com/pynickle/Edge-Seeker/compare/v1.5.1...v1.5.2) (2025-10-14)
 
 ### 🐛 Bug修复
