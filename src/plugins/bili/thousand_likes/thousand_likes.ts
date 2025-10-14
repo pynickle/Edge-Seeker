@@ -50,10 +50,10 @@ async function sendThousandLikes(
 
         const targetRoomId = roomId;
 
-        let targetAnchorId;
+        let targetAnchorId: string;
 
         const targetRoomInfoRes = await axios.get(
-            `https://api.live.bilibili.com/room/v1/get_info?room_id=${targetRoomId}`
+            `https://api.live.bilibili.com/room/v1/Room/get_info?room_id=${targetRoomId}`
         );
         if (targetRoomInfoRes.data.code !== 0) {
             return `🌸 无法获取直播间信息，请确认直播间 ID 是否正确：${targetRoomId}`;

@@ -16,7 +16,7 @@ export function triple_likes(ctx: Context, config: Config) {
     initWbiKeysCache(ctx);
 
     // 注册一键三连指令
-    ctx.command('bili.triple <bvid:string>', '对B站视频进行一键三连').action(
+    ctx.command('bili.triple <bvid:string>', '对 B 站视频进行一键三连，请使用浏览器 cookie 绑定').action(
         async ({ session }, bvid) => {
             if (!session) return '会话信息不存在';
             if (!bvid) return '请提供视频的 bvid 参数';
@@ -44,28 +44,11 @@ export function triple_likes(ctx: Context, config: Config) {
                 return '绑定信息不完整，请重新绑定：/bili.bind';
             }
 
-            // 检查 cookie 中是否存在 buvid3
             const buvid3 = extractBuvid3(cookie);
             if (!buvid3) {
-                const buvid3_res = await axios.get(
-                    'https://api.bilibili.com/x/web-frontend/getbuvid'
-                );
-                const buvid3_data = buvid3_res.data;
-                if (
-                    buvid3_data.code === 0 &&
-                    buvid3_data.data &&
-                    buvid3_data.data.buvid
-                ) {
-                    cookie += `; buvid3=${buvid3_data.data.buvid}`;
-                    await ctx.database.set(
-                        'user_bili_info',
-                        { userId },
-                        { cookie: cookie }
-                    );
-                }
+                return '绑定的账号缺少必要的 buvid3 信息，可能会触发风控，请重新绑定：/bili.bind';
             }
 
-            // 提取 CSRF Token
             const biliJct = extractBiliJct(cookie);
             if (!biliJct) {
                 return '无法从 cookie 中提取 CSRF Token，请重新绑定：/bili.bind';
