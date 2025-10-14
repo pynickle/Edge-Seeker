@@ -9,6 +9,7 @@ import {
     getWbiKeys,
     initWbiKeysCache,
 } from '../../../utils/bili/wbi_helper';
+import { getRandomUserAgent } from '../../../utils/web/web_helper';
 
 // 发送千赞请求的核心函数
 async function sendThousandLikes(
@@ -48,7 +49,22 @@ async function sendThousandLikes(
         }
 
         const targetRoomId = roomId;
-        const targetAnchorId = '686127'; // 默认主播ID（可以根据需求修改）
+
+        let targetAnchorId;
+
+        const targetRoomInfoRes = await axios.get(
+            `https://api.live.bilibili.com/room/v1/get_info?room_id=${targetRoomId}`
+        );
+        if (targetRoomInfoRes.data.code !== 0) {
+            return `🌸 无法获取直播间信息，请确认直播间 ID 是否正确：${targetRoomId}`;
+        } else {
+            const roomData = targetRoomInfoRes.data.data;
+            if (roomData.room_status !== 1) {
+                return `🌸 目标直播间当前未开播，请选择一个正在直播的间：${targetRoomId}`;
+            } else {
+                targetAnchorId = roomData.uid;
+            }
+        }
 
         // 构造请求参数
         const baseUrl =
@@ -90,6 +106,7 @@ async function sendThousandLikes(
                 Cookie: cookie,
                 Origin: 'https://live.bilibili.com',
                 Referer: `https://live.bilibili.com/${targetRoomId}`,
+                'User-Agent': getRandomUserAgent(),
             },
         });
 
