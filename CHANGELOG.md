@@ -1,3 +1,9 @@
+## [1.2.2](https://github.com/pynickle/Edge-Seeker/compare/v1.2.1...v1.2.2) (2025-10-14)
+
+### 🐛 Bug修复
+
+* 修复无法获取 WBI Keys 的问题 ([78198b3](https://github.com/pynickle/Edge-Seeker/commit/78198b36db81c5f00b7080fde11309f8e83b0852))
+
 ## [1.2.1](https://github.com/pynickle/Edge-Seeker/compare/v1.2.0...v1.2.1) (2025-10-14)
 
 ### 🐛 Bug修复
