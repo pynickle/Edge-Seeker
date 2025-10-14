@@ -23,21 +23,40 @@ export interface FortuneData {
     solarDate: string; // 阳历日期
 }
 
-export const COLORMAP: Record<string, string> = {
-    红色: '#ff0000',
-    橙色: '#ffa500',
-    黄色: '#ffff00',
-    绿色: '#008000',
-    青色: '#00ffff',
-    蓝色: '#0000ff',
-    紫色: '#800080',
-    粉色: '#ffc0cb',
-    金色: '#ffd700',
-    银色: '#c0c0c0',
-    黑色: '#000000',
-    灰色: '#808080',
-    棕色: '#a52a2a',
-    米色: '#f5f5dc',
+// 英文键的颜色映射
+export const COLOR_MAP: Record<string, string> = {
+    red: '#ff0000',
+    orange: '#ffa500',
+    yellow: '#ffff00',
+    green: '#008000',
+    cyan: '#00ffff',
+    blue: '#0000ff',
+    purple: '#800080',
+    pink: '#ffc0cb',
+    gold: '#ffd700',
+    silver: '#c0c0c0',
+    black: '#000000',
+    gray: '#808080',
+    brown: '#a52a2a',
+    beige: '#f5f5dc',
+};
+
+// 英文键到中文显示名称的映射
+export const COLOR_NAME_MAP: Record<string, string> = {
+    red: '红色',
+    orange: '橙色',
+    yellow: '黄色',
+    green: '绿色',
+    cyan: '青色',
+    blue: '蓝色',
+    purple: '紫色',
+    pink: '粉色',
+    gold: '金色',
+    silver: '银色',
+    black: '黑色',
+    gray: '灰色',
+    brown: '棕色',
+    beige: '米色',
 };
 
 /**
@@ -76,9 +95,11 @@ export async function calculateFortune(
     // 计算运势分数（1-100）
     const score = randomInt(1, 100, seed1, { bias });
 
-    // 计算幸运颜色
-    const luckyColors: string[] = Object.keys(COLORMAP) as Array<string>;
-    const luckyColor: string = randomChoice<string>(luckyColors, seed2);
+    // 计算幸运颜色（英文键）
+    const colorKeys: string[] = Object.keys(COLOR_MAP) as Array<string>;
+    const englishColorKey: string = randomChoice<string>(colorKeys, seed2);
+    // 转换为中文显示名称
+    const luckyColor: string = COLOR_NAME_MAP[englishColorKey];
 
     // 计算幸运数字（1-100）
     const luckyNumber = randomInt(1, 100, seed2);
@@ -254,5 +275,18 @@ export function buildFortuneHtml(
  * 获取颜色的十六进制值
  */
 export function getColorValue(colorName: string): string {
-    return COLORMAP[colorName] || '#000000';
+    // 如果传入的是英文键，直接从 COLOR_MAP 获取
+    if (COLOR_MAP[colorName]) {
+        return COLOR_MAP[colorName];
+    }
+
+    // 如果传入的是中文名称，查找对应的英文键
+    const englishKey = Object.keys(COLOR_NAME_MAP).find(
+        (key) => COLOR_NAME_MAP[key] === colorName
+    );
+    if (englishKey) {
+        return COLOR_MAP[englishKey] || '#000000';
+    }
+
+    return '#000000';
 }
