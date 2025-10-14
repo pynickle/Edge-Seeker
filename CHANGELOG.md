@@ -1,3 +1,9 @@
+## [1.5.2](https://github.com/pynickle/Edge-Seeker/compare/v1.5.1...v1.5.2) (2025-10-14)
+
+### 🐛 Bug修复
+
+* 指定使用浏览器 cookie 请求一键三连 ([cf35d05](https://github.com/pynickle/Edge-Seeker/commit/cf35d05f545b9f8a2ad27141394b2af0564e8707))
+
 ## [1.5.1](https://github.com/pynickle/Edge-Seeker/compare/v1.5.0...v1.5.1) (2025-10-14)
 
 ### 🐛 Bug修复
