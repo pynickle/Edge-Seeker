@@ -59,7 +59,7 @@ async function sendThousandLikes(
             return `🌸 无法获取直播间信息，请确认直播间 ID 是否正确：${targetRoomId}`;
         } else {
             const roomData = targetRoomInfoRes.data.data;
-            if (roomData.room_status !== 1) {
+            if (roomData.live_status !== 1) {
                 return `🌸 目标直播间当前未开播，请选择一个正在直播的间：${targetRoomId}`;
             } else {
                 targetAnchorId = roomData.uid;
