@@ -1,3 +1,9 @@
+## [1.1.6](https://github.com/pynickle/Edge-Seeker/compare/v1.1.5...v1.1.6) (2025-10-14)
+
+### 🐛 Bug修复
+
+* 修复首次绑定缺失保存字段 ([6b78c34](https://github.com/pynickle/Edge-Seeker/commit/6b78c34be9fd6f637c795296d88ff6409f5c3449))
+
 ## [1.1.5](https://github.com/pynickle/Edge-Seeker/compare/v1.1.4...v1.1.5) (2025-10-13)
 
 ### 🐛 Bug修复
