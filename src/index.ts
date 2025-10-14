@@ -4,6 +4,7 @@ import { minecraft_notifier } from './intervals/minecraft/minecraft_notifier';
 import { gh_url } from './message/github/gh_url';
 import { bind } from './plugins/bili/bind/bind';
 import { thousand_likes } from './plugins/bili/thousand_likes/thousand_likes';
+import { triple_likes } from './plugins/bili/triple_likes/triple_likes';
 import BaikeQuizPlugin from './plugins/currency/baike_quiz/baike_quiz';
 import { guess_number } from './plugins/currency/guess_number/guess_number';
 import InventoryPlugin from './plugins/currency/prop/inventory/inventory';
@@ -196,8 +197,10 @@ export function apply(ctx: Context, cfg: Config) {
     ctx.plugin(friend_code, cfg);
     ctx.plugin(UserMarketPlugin, cfg);
 
+    // bili
     ctx.plugin(bind, cfg);
     ctx.plugin(thousand_likes, cfg);
+    ctx.plugin(triple_likes, cfg);
 
     // message
     ctx.plugin(gh_url, cfg);

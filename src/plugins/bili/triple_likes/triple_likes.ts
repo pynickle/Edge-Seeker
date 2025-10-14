@@ -1,39 +1,22 @@
 import axios from 'axios';
-import { Context, Schema } from 'koishi';
+import { Context } from 'koishi';
+import { Config } from '../../../index';
 import {
     extractBiliJct,
     extractBuvid3,
 } from '../../../utils/bili/cookie_parser';
-import {
-    generateSignedUrl,
-    getWbiKeys,
-    initWbiKeysCache,
-} from '../../../utils/bili/wbi_helper';
-
-// 定义插件配置接口
-interface TripleLikesConfig {
-    debug?: boolean;
-}
-
-// 插件配置
-const Config: Schema<TripleLikesConfig> = Schema.object({
-    debug: Schema.boolean().description('是否启用调试模式').default(false),
-});
+import { getWbiKeys, initWbiKeysCache } from '../../../utils/bili/wbi_helper';
 
 // 插件主函数
 export const name = 'triple_likes';
-export const using = ['database'];
-export const schema = Config;
 
-export function apply(ctx: Context, config: TripleLikesConfig) {
+export function triple_likes(ctx: Context, config: Config) {
     // 初始化 WBI Keys 缓存表
     initWbiKeysCache(ctx);
 
     // 注册一键三连指令
-    ctx.command('bili.triple <bvid:str>', '对B站视频进行一键三连')
-        .usage('使用示例：/bili.triple BV1Wj411f79U')
-        .example('/bili.triple BV1Wj411f79U')
-        .action(async ({ session }, bvid) => {
+    ctx.command('bili.triple <bvid:str>', '对B站视频进行一键三连').action(
+        async ({ session }, bvid) => {
             if (!session) return '会话信息不存在';
             if (!bvid) return '请提供视频的 bvid 参数';
 
@@ -105,9 +88,6 @@ export function apply(ctx: Context, config: TripleLikesConfig) {
                 );
 
                 const data = response.data;
-                if (config.debug) {
-                    ctx.logger('bili-triple').debug('API 响应:', data);
-                }
 
                 // 处理响应
                 if (data.code === 0) {
@@ -144,5 +124,6 @@ export function apply(ctx: Context, config: TripleLikesConfig) {
                 ctx.logger('bili-triple').error('一键三连请求失败:', error);
                 return `一键三连失败：${error instanceof Error ? error.message : '未知错误'}`;
             }
-        });
+        }
+    );
 }
