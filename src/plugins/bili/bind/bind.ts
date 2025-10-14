@@ -145,7 +145,7 @@ export async function bind(ctx: Context, config: Config) {
     ctx.command('bili.status', '查询B站账号绑定状态').action(
         async ({ session }) => {
             if (!session.guildId) {
-                return '请在群聊中使用查询命令哦！';
+                return '🌸 请在群聊中使用查询命令哦！';
             }
 
             const { userId } = session;
@@ -157,19 +157,18 @@ export async function bind(ctx: Context, config: Config) {
                     .execute();
 
                 if (existingBind.length === 0) {
-                    return '你还没有绑定B站账号！\n使用命令：bili.bind 绑定码 来绑定账号\n访问 http://47.117.27.240:5000/ 获取绑定码';
+                    return '🌸 你还没有绑定B站账号！\n✨ 使用命令：bili.bind 绑定码 来绑定账号\n🌐 访问 http://47.117.27.240:5000/ 获取绑定码';
                 }
 
                 const bindInfo = existingBind[0];
                 const bindTime = new Date(bindInfo.bindTime).toLocaleString();
+                const userName = bindInfo.userName || '未知用户';
+                const mid = bindInfo.mid || '未知UID';
 
-                // 从cookieInfo中获取可能的用户信息（如果有）
-                let userName = bindInfo.userName;
-
-                return `B站账号绑定状态：已绑定\n绑定用户：${userName}\n绑定时间：${bindTime}`;
+                return `✨ B站账号绑定状态：已绑定 ✨\n👤 用户名：${userName}\n🆔 用户UID：${mid}\n⏰ 绑定时间：${bindTime}\n💖 感谢您的绑定！`;
             } catch (error) {
                 ctx.logger('bili-bind').error('查询绑定状态失败:', error);
-                return '查询过程中出现错误，请稍后重试！';
+                return '🌸 查询过程中出现错误，请稍后重试！';
             }
         }
     );
