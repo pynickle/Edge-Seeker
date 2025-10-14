@@ -1,3 +1,13 @@
+## [1.5.0](https://github.com/pynickle/Edge-Seeker/compare/v1.4.2...v1.5.0) (2025-10-14)
+
+### ✨ 功能更新
+
+* 加入获取 buvid3 方法 ([8a7de04](https://github.com/pynickle/Edge-Seeker/commit/8a7de04bdaa55e17ae80fc70b67af1f44d491c42))
+
+### 🐛 Bug修复
+
+* 修复千赞主播 id 不匹配的问题 ([6f00081](https://github.com/pynickle/Edge-Seeker/commit/6f000812d95127ad03a12574e846b21590d42cbe))
+
 ## [1.4.2](https://github.com/pynickle/Edge-Seeker/compare/v1.4.1...v1.4.2) (2025-10-14)
 
 ### 🐛 Bug修复
