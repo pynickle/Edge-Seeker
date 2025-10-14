@@ -1,7 +1,10 @@
 import axios from 'axios';
 import { Context } from 'koishi';
-import { Config } from '../../../index';
-import { extractBiliJct } from '../../../utils/bili/cookie_parser';
+import {
+    encWbi,
+    getWbiKeys,
+    initWbiKeysCache,
+} from '../../../utils/bili/wbi_helper';
 import { getRandomUserAgent } from '../../../utils/web/web_helper';
 
 // 插件名称
@@ -15,17 +18,18 @@ function formatWatchTime(seconds: number): string {
     const remainingSeconds = seconds % 60;
 
     let result = '';
-    if (days > 0) result += `${days}天`;
-    if (hours > 0) result += `${hours}小时`;
-    if (minutes > 0) result += `${minutes}分钟`;
+    if (days > 0) result += `${days} 天 `;
+    if (hours > 0) result += `${hours} 小时 `;
+    if (minutes > 0) result += `${minutes} 分钟 `;
     if (remainingSeconds > 0 || result === '')
-        result += `${remainingSeconds}秒`;
+        result += `${remainingSeconds} 秒`;
 
     return result;
 }
 
 // 插件主函数
-export function watch_time(ctx: Context, config: Config) {
+export function watch_time(ctx: Context) {
+    initWbiKeysCache(ctx);
     // 注册命令
     ctx.command(
         'bili.watch_time <ruid:number>',
@@ -33,7 +37,6 @@ export function watch_time(ctx: Context, config: Config) {
     ).action(async ({ session }, ruid) => {
         if (!ruid) return '请提供主播的 uid 参数';
 
-        // 验证ruid格式
         if (!Number.isInteger(ruid) || ruid <= 0) {
             return `主播 uid 格式不正确：${ruid}`;
         }
@@ -55,6 +58,12 @@ export function watch_time(ctx: Context, config: Config) {
         }
 
         try {
+            const uid = user.mid;
+
+            if (!uid) {
+                return '无法从绑定信息中获取必要的用户凭证，请重新绑定账号';
+            }
+
             const headers = {
                 Cookie: cookie,
                 'User-Agent': getRandomUserAgent(),
@@ -62,11 +71,30 @@ export function watch_time(ctx: Context, config: Config) {
                 Origin: 'https://live.bilibili.com',
             };
 
-            // 构建请求URL
-            const url = `https://api.live.bilibili.com/xlive/general-interface/v1/guard/GuardActive?platform=android&ruid=${ruid}`;
+            // 构建请求参数
+            const baseUrl =
+                'https://api.live.bilibili.com/xlive/general-interface/v1/guard/GuardActive';
+            const params: Record<string, string> = {
+                platform: 'android',
+                ruid: ruid.toString(),
+            };
+
+            // 获取 WBI 签名
+            const wbiKeys = await getWbiKeys(ctx, cookie, Number(uid));
+            if (!wbiKeys) {
+                return '获取 WBI 签名失败，请稍后重试';
+            }
+
+            // 构造带签名的请求 URL
+            const signedQuery = encWbi(
+                params,
+                wbiKeys.img_key,
+                wbiKeys.sub_key
+            );
+            const requestUrl = `${baseUrl}?${signedQuery}`;
 
             // 发送请求
-            const response = await axios.get(url, {
+            const response = await axios.get(requestUrl, {
                 headers,
             });
 
@@ -85,7 +113,7 @@ export function watch_time(ctx: Context, config: Config) {
 
                 // 如果有大航海信息，也显示出来
                 if (result.accomany_day !== undefined) {
-                    message += `🚢 大航海陪伴天数：${result.accomany_day}天\n`;
+                    message += `🚢 大航海陪伴天数：${result.accomany_day} 天\n`;
                 }
 
                 // 显示直播间状态

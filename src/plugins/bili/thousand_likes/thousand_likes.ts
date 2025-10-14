@@ -1,9 +1,6 @@
 import axios from 'axios';
 import { Context } from 'koishi';
-import {
-    extractBiliJct,
-    extractDedeUserID,
-} from '../../../utils/bili/cookie_parser';
+import { extractBiliJct } from '../../../utils/bili/cookie_parser';
 import {
     encWbi,
     getWbiKeys,
@@ -35,9 +32,8 @@ async function sendThousandLikes(
             return '🌸 你的B站账号绑定信息不完整，请重新绑定';
         }
 
-        // 从cookie中提取必要的信息
         const csrf = extractBiliJct(cookie);
-        const uid = extractDedeUserID(cookie);
+        const uid = biliInfo.mid.toString();
 
         if (!csrf || !uid) {
             return '🌸 无法从绑定信息中获取必要的用户凭证，请重新绑定账号';
@@ -74,14 +70,13 @@ async function sendThousandLikes(
             }
         }
 
-        // 构造请求参数
         const baseUrl =
             'https://api.live.bilibili.com/xlive/app-ucenter/v1/like_info_v3/like/likeReportV3';
         const params: Record<string, string> = {
             room_id: targetRoomId,
             anchor_id: targetAnchorId,
             uid: uid,
-            click_time: '1000', // 千赞核心
+            click_time: '1000',
             like_time: Math.floor(Date.now() / 1000).toString(),
             csrf: csrf,
             csrf_token: csrf,
@@ -94,10 +89,10 @@ async function sendThousandLikes(
             return '🌸 获取 WBI 签名失败，请稍后重试';
         }
 
-        // 构造带签名的请求URL
+        // 构造带签名的请求 URL
         let signedQuery = encWbi(params, wbiKeys.img_key, wbiKeys.sub_key);
 
-        // 计算MD5签名
+        // 计算 MD5 签名
         const crypto = await import('crypto');
         const md5 = crypto
             .createHash('md5')
@@ -135,7 +130,6 @@ export const name = 'bili-thousand-likes';
 export async function thousand_likes(ctx: Context) {
     initWbiKeysCache(ctx);
 
-    // 注册千赞指令
     ctx.command(
         'bili.thousand-likes <roomId:string>',
         '向指定直播间发送 1000 次点赞'
