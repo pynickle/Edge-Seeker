@@ -1,3 +1,9 @@
+## [1.4.1](https://github.com/pynickle/Edge-Seeker/compare/v1.4.0...v1.4.1) (2025-10-14)
+
+### 🐛 Bug修复
+
+* 修复未注册的一键三连函数 ([dc1e22f](https://github.com/pynickle/Edge-Seeker/commit/dc1e22f5c81741c07780571ef232f7eb79cb7bdf))
+
 ## [1.4.0](https://github.com/pynickle/Edge-Seeker/compare/v1.3.1...v1.4.0) (2025-10-14)
 
 ### ✨ 功能更新
