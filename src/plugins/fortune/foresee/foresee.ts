@@ -147,7 +147,7 @@ class ForeseePlugin {
             // 渲染为图片输出
             const { puppeteer } = this.ctx;
 
-            const html = buildFortuneHtml(fortuneData, session.userId, true);
+            const html = await buildFortuneHtml(fortuneData, true);
             return await puppeteer.render(html);
         } catch (error) {
             return `生成明日运势失败: ${error.message}`;

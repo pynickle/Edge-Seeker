@@ -5,6 +5,7 @@ import {
     FortuneData,
     buildFortuneHtml,
     calculateFortune,
+    getFortuneImageBase64,
 } from '../../../utils/plugins/jrys/fortune_helper';
 
 class JrysPlugin {
@@ -44,7 +45,7 @@ class JrysPlugin {
             throw new Error('puppeteer 插件未启用');
         }
 
-        const html = buildFortuneHtml(fortuneData, userId);
+        const html = await buildFortuneHtml(fortuneData);
         return puppeteer.render(html);
     }
 }

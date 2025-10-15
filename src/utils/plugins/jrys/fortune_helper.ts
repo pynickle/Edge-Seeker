@@ -157,21 +157,19 @@ export async function getFortuneImageBase64(
     try {
         const response = await axios.get(picsumUrl, {
             responseType: 'arraybuffer',
-            timeout: 10000,
+            timeout: 15000,
         });
-        const base64 = Buffer.from(response.data, 'binary').toString('base64');
+        const base64 = response.data.toString('base64');
         return `data:image/jpeg;base64,${base64}`;
     } catch (error) {
-        const randomImageNum = randomInt(1, 5);
+        const randomImageNum = randomInt(1, 5, randomNum.toString());
         const backupUrl = `http://47.117.27.240:5140/files/${randomImageNum}.jpg`;
         try {
             const backupResponse = await axios.get(backupUrl, {
                 responseType: 'arraybuffer',
                 timeout: 10000,
             });
-            const base64 = Buffer.from(backupResponse.data, 'binary').toString(
-                'base64'
-            );
+            const base64 = backupResponse.data.toString('base64');
             return `data:image/jpeg;base64,${base64}`;
         } catch (backupError) {
             return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
@@ -182,12 +180,11 @@ export async function getFortuneImageBase64(
 /**
  * 构建运势图片的 HTML 内容
  */
-export function buildFortuneHtml(
+export async function buildFortuneHtml(
     fortuneData: FortuneData,
-    userId: string,
     isTomorrow: boolean = false
-): string {
-    const imageUrl = getFortuneImageBase64(fortuneData.randomNum);
+): Promise<string> {
+    const imageUrl = await getFortuneImageBase64(fortuneData.randomNum);
     const luckyColorValue = getColorValue(fortuneData.luckyColor);
     return `
 <!DOCTYPE html>
@@ -284,9 +281,7 @@ export function buildFortuneHtml(
         <div class="hero-date">
             <p class="subtitle is-6 has-text-white">${fortuneData.solarDate}</p>
         </div>
-        <figure class="avatar">
-            <img src="https://q1.qlogo.cn/g?b=qq&nk=${userId}&s=640" alt="头像">
-        </figure>
+       
     </div>
     <div class="content">
         <div class="content-inner">
