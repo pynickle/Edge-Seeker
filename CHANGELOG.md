@@ -1,3 +1,9 @@
+## [1.7.0](https://github.com/pynickle/Edge-Seeker/compare/v1.6.2...v1.7.0) (2025-10-15)
+
+### ✨ 功能更新
+
+* 加入 jrys 图片备用 ([1d99265](https://github.com/pynickle/Edge-Seeker/commit/1d99265ba1066933fb0e9444936077efa8596d35))
+
 ## [1.6.2](https://github.com/pynickle/Edge-Seeker/compare/v1.6.1...v1.6.2) (2025-10-14)
 
 ### 🐛 Bug修复
