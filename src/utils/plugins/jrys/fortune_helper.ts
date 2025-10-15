@@ -147,6 +147,39 @@ export async function calculateFortune(
 }
 
 /**
+ * 获取图片并转换为base64格式，支持超时和备用图片
+ */
+export async function getFortuneImageBase64(
+    randomNum: number
+): Promise<string> {
+    const picsumUrl = `https://picsum.photos/seed/${randomNum}/400/120`;
+
+    try {
+        const response = await axios.get(picsumUrl, {
+            responseType: 'arraybuffer',
+            timeout: 10000,
+        });
+        const base64 = Buffer.from(response.data, 'binary').toString('base64');
+        return `data:image/jpeg;base64,${base64}`;
+    } catch (error) {
+        const randomImageNum = randomInt(1, 5);
+        const backupUrl = `http://47.117.27.240:5140/files/${randomImageNum}.jpg`;
+        try {
+            const backupResponse = await axios.get(backupUrl, {
+                responseType: 'arraybuffer',
+                timeout: 10000,
+            });
+            const base64 = Buffer.from(backupResponse.data, 'binary').toString(
+                'base64'
+            );
+            return `data:image/jpeg;base64,${base64}`;
+        } catch (backupError) {
+            return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+        }
+    }
+}
+
+/**
  * 构建运势图片的 HTML 内容
  */
 export function buildFortuneHtml(
@@ -154,6 +187,7 @@ export function buildFortuneHtml(
     userId: string,
     isTomorrow: boolean = false
 ): string {
+    const imageUrl = getFortuneImageBase64(fortuneData.randomNum);
     const luckyColorValue = getColorValue(fortuneData.luckyColor);
     return `
 <!DOCTYPE html>
@@ -243,7 +277,7 @@ export function buildFortuneHtml(
 <body>
 <div class="container">
     <div class="hero-image">
-        <img src="https://picsum.photos/seed/${fortuneData.randomNum}/400/120" alt="每日运势占位图">
+        <img src="${imageUrl}" alt="每日运势图片">
         <div class="hero-text">
             <p class="title is-4 has-text-white">${isTomorrow ? '明日' : '今日'}运势</p>
         </div>
