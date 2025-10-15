@@ -1,3 +1,9 @@
+## [1.7.2](https://github.com/pynickle/Edge-Seeker/compare/v1.7.1...v1.7.2) (2025-10-15)
+
+### 🐛 Bug修复
+
+* 修复 randomChoice 计算错误的问题 ([b040a6a](https://github.com/pynickle/Edge-Seeker/commit/b040a6a64682cda178e2909b540818b5fd4271a8))
+
 ## [1.7.1](https://github.com/pynickle/Edge-Seeker/compare/v1.7.0...v1.7.1) (2025-10-15)
 
 ### 🐛 Bug修复
