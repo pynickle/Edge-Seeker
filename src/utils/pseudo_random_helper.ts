@@ -70,7 +70,9 @@ export function randomChoice<T>(
     options: RandomOptions = {}
 ): T {
     const index = Math.floor(
-        seed.length > 0 ? random(seed, options) : Math.random() * array.length
+        seed.length > 0
+            ? random(seed, options) * array.length
+            : Math.random() * array.length
     );
     return array[index];
 }
