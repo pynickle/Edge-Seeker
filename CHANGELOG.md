@@ -1,3 +1,9 @@
+## [1.7.1](https://github.com/pynickle/Edge-Seeker/compare/v1.7.0...v1.7.1) (2025-10-15)
+
+### 🐛 Bug修复
+
+* 修复今日运势图片不能正常显示的问题 ([091263e](https://github.com/pynickle/Edge-Seeker/commit/091263e526dcea0b90f52380f5928883e34c7d90))
+
 ## [1.7.0](https://github.com/pynickle/Edge-Seeker/compare/v1.6.2...v1.7.0) (2025-10-15)
 
 ### ✨ 功能更新
