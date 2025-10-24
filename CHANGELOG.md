@@ -1,3 +1,13 @@
+## [1.7.3](https://github.com/pynickle/Edge-Seeker/compare/v1.7.2...v1.7.3) (2025-10-24)
+
+### 🔧 Miscellaneous Changes
+
+* add imp for conventional commits type ([9a69c07](https://github.com/pynickle/Edge-Seeker/commit/9a69c07f7362102c8428e302d1c2f25d15f2c04a))
+
+### 🚀 Improvements
+
+* add more tips to bind bilibili ([5f0e226](https://github.com/pynickle/Edge-Seeker/commit/5f0e226ac846dfd57a863c8e759791f96887ae10))
+
 ## [1.7.2](https://github.com/pynickle/Edge-Seeker/compare/v1.7.1...v1.7.2) (2025-10-15)
 
 ### 🐛 Bug修复
