@@ -48,7 +48,7 @@ export async function bind(ctx: Context, config: Config) {
             }
 
             if (!bindCode) {
-                return '请输入正确的绑定码！\n用法：bili.bind 123456';
+                return '请输入正确的绑定码！\n用法：bili.bind 123456\n🌐 访问 http://47.117.27.240:5000/ 获取绑定码';
             }
 
             try {
