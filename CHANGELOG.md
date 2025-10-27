@@ -1,3 +1,13 @@
+## [1.7.4](https://github.com/pynickle/Edge-Seeker/compare/v1.7.3...v1.7.4) (2025-10-27)
+
+### ♻️ Code Refactoring
+
+* remove minecraft notifier ([40add69](https://github.com/pynickle/Edge-Seeker/commit/40add69d79b64b23d4cec6f5d4d29b425354e1cb))
+
+### 🔧 Miscellaneous Changes
+
+* change incorrect type for release rules ([72c7a4e](https://github.com/pynickle/Edge-Seeker/commit/72c7a4e509d439cf3f490ce03c404c9afe8ae7f2))
+
 ## [1.7.3](https://github.com/pynickle/Edge-Seeker/compare/v1.7.2...v1.7.3) (2025-10-24)
 
 ### 🔧 Miscellaneous Changes
