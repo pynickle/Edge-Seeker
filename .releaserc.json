@@ -41,7 +41,7 @@
   "preset": "angular",
   "releaseRules": [
     {
-      "type": "refactor",
+      "type": "ref",
       "release": "patch"
     },
     {
