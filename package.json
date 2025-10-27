@@ -32,7 +32,7 @@
     "koishi-plugin-adapter-onebot": "^6.8.0",
     "koishi-plugin-cron": "^3.1.0",
     "koishi-plugin-puppeteer": "^3.9.0",
-    "lunar-typescript": "^1.8.2",
+    "lunar-typescript": "^1.8.5",
     "node-emoji": "^2.2.0",
     "whoiser": "^1.18.0"
   },
@@ -40,17 +40,18 @@
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/git": "^10.0.1",
-    "@semantic-release/npm": "^12.0.2",
+    "@semantic-release/npm": "^13.1.1",
     "@semantic-release/release-notes-generator": "^14.1.0",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "conventional-changelog-conventionalcommits": "^9.1.0",
-    "esbuild": "^0.25.10",
+    "esbuild": "^0.25.11",
     "esbuild-plugin-yaml": "^0.0.1",
-    "eslint": "^9.37.0",
+    "eslint": "^9.38.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "prettier": "^3.6.2",
-    "semantic-release": "^24.2.9",
-    "typescript-eslint": "^8.46.0"
+    "semantic-release": "^25.0.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.2"
   }
 }

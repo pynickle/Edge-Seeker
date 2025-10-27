@@ -1,6 +1,5 @@
 import { Context, Schema } from 'koishi';
 import { auto_red_packet } from './intervals/auto_red_packet/auto_red_packet';
-import { minecraft_notifier } from './intervals/minecraft/minecraft_notifier';
 import { gh_url } from './message/github/gh_url';
 import { bind } from './plugins/bili/bind/bind';
 import { thousand_likes } from './plugins/bili/thousand_likes/thousand_likes';
@@ -49,10 +48,6 @@ export interface Config {
         timeout: number;
         maxRetries: number;
         enableShortName: boolean;
-    };
-    minecraft: {
-        checkInterval: number;
-        notifyChannel: string[];
     };
     guess_number: {
         signUpTime: number;
@@ -114,10 +109,6 @@ export const Config: Schema<Config> = Schema.object({
         timeout: Schema.number().default(10000),
         maxRetries: Schema.number().default(2),
         enableShortName: Schema.boolean().default(false),
-    }),
-    minecraft: Schema.object({
-        checkInterval: Schema.number().default(10),
-        notifyChannel: Schema.array(String).default([]),
     }),
     guess_number: Schema.object({
         signUpTime: Schema.number().default(45),
@@ -206,7 +197,6 @@ export function apply(ctx: Context, cfg: Config) {
     ctx.plugin(gh_url, cfg);
 
     // intervals
-    ctx.plugin(minecraft_notifier, cfg);
     ctx.plugin(auto_red_packet, cfg);
 
     // server
