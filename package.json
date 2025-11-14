@@ -27,6 +27,7 @@
     "koishi": "^4.18.9"
   },
   "dependencies": {
+    "@pynickle/koishi-plugin-adapter-onebot": "^1.0.0",
     "axios": "^1.13.2",
     "dayjs": "^1.11.19",
     "koishi-plugin-adapter-onebot": "^6.8.0",
