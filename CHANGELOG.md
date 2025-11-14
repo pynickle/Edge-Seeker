@@ -1,3 +1,9 @@
+## [1.8.1](https://github.com/pynickle/Edge-Seeker/compare/v1.8.0...v1.8.1) (2025-11-14)
+
+### 🚀 Improvements
+
+* use more forward msg ([c942808](https://github.com/pynickle/Edge-Seeker/commit/c94280892e16f1ae8e64793371378457ba07ceca))
+
 ## [1.8.0](https://github.com/pynickle/Edge-Seeker/compare/v1.7.4...v1.8.0) (2025-11-14)
 
 ### ✨ Features
