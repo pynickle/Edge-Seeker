@@ -115,7 +115,7 @@ export function daily_baka(ctx: Context, config: Config) {
         }
     );
 
-    ctx.command('baka.cron', '手动触发结算').action(async ({ session }) => {
+    ctx.command('baka.cron', '手动触发结算', { authority: 4 }).action(async ({ session }) => {
         for (const channelId of config.daily_doofus.enabledGroups) {
             await finalizeDailySelection(ctx, channelId);
         }
