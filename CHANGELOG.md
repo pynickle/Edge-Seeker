@@ -1,3 +1,9 @@
+## [1.9.1](https://github.com/pynickle/Edge-Seeker/compare/v1.9.0...v1.9.1) (2025-11-14)
+
+### 🚀 Improvements
+
+* imp ai prompt ([5bdd7ae](https://github.com/pynickle/Edge-Seeker/commit/5bdd7aecab31907a74af6776daf2d9597544e4b2))
+
 ## [1.9.0](https://github.com/pynickle/Edge-Seeker/compare/v1.8.2...v1.9.0) (2025-11-14)
 
 ### ✨ Features
