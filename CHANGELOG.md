@@ -1,3 +1,9 @@
+## [1.11.2](https://github.com/pynickle/Edge-Seeker/compare/v1.11.1...v1.11.2) (2025-11-14)
+
+### 🚀 Improvements
+
+* make prob all not authority 4 ([34e743c](https://github.com/pynickle/Edge-Seeker/commit/34e743ca275f03cd2eac83efd73740803672f65c))
+
 ## [1.11.1](https://github.com/pynickle/Edge-Seeker/compare/v1.11.0...v1.11.1) (2025-11-14)
 
 ### 🚀 Improvements
