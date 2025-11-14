@@ -1,3 +1,13 @@
+## [1.12.0](https://github.com/pynickle/Edge-Seeker/compare/v1.11.2...v1.12.0) (2025-11-14)
+
+### ✨ Features
+
+* 使用提前一分钟的预告功能 ([c8f6d70](https://github.com/pynickle/Edge-Seeker/commit/c8f6d702162eee2d9cb716e62ba486ec086c9915))
+
+### 🚀 Improvements
+
+* 完善不同情况下对话后的话语 ([0d87e9b](https://github.com/pynickle/Edge-Seeker/commit/0d87e9bee77c2bd741042237cda4fc9a99f5ef80))
+
 ## [1.11.2](https://github.com/pynickle/Edge-Seeker/compare/v1.11.1...v1.11.2) (2025-11-14)
 
 ### 🚀 Improvements
