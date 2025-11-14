@@ -1,3 +1,9 @@
+## [1.11.1](https://github.com/pynickle/Edge-Seeker/compare/v1.11.0...v1.11.1) (2025-11-14)
+
+### 🚀 Improvements
+
+* improve baka prob all ([aad279d](https://github.com/pynickle/Edge-Seeker/commit/aad279d427c7cf71f3da2d8ea9cb4faaa61e52b0))
+
 ## [1.11.0](https://github.com/pynickle/Edge-Seeker/compare/v1.10.0...v1.11.0) (2025-11-14)
 
 ### ✨ Features
