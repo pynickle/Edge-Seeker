@@ -248,8 +248,39 @@ export function daily_baka(ctx: Context, config: Config) {
                     ? `\n💬 对你说：${result.explanation}`
                     : '';
 
+                // 根据概率变化方向生成不同的结尾语句
+                let endingText: string;
+                if (probChange < 0) {
+                    // 概率下降（变好）
+                    const decreaseAmount = Math.abs(probChange);
+                    if (decreaseAmount > 5) {
+                        endingText =
+                            '🎊 太棒啦！成功避开了一个大坑～继续保持哦！';
+                    } else if (decreaseAmount > 2) {
+                        endingText =
+                            '👏 不错哦！成功降低了笨蛋概率，继续加油～';
+                    } else {
+                        endingText = '😊 轻微下降，也是不错的进步呢～';
+                    }
+                } else if (probChange > 0) {
+                    // 概率上升（变差）
+                    const increaseAmount = probChange;
+                    if (increaseAmount > 5) {
+                        endingText =
+                            '😅 哎呀～概率涨了不少，赶紧多用点星币压回去吧！';
+                    } else if (increaseAmount > 2) {
+                        endingText = '💪 有点危险哦～记得多用星币保平安！';
+                    } else {
+                        endingText = '🌟 小幅上升，及时补救还来得及～';
+                    }
+                } else {
+                    // 概率不变
+                    endingText =
+                        '🤝 保持现状也很不错～记得多用星币降低概率哦！';
+                }
+
                 await session.send(
-                    `✨ AI 已完成分析！概率已更新\n📊 你的笨蛋概率：${originalProb.toFixed(2)}% → ${updatedProb.toFixed(2)}% (${changeText})${explanation}\n🎉 希望能逃过明天的"每日笨蛋"哦～`
+                    `✨ AI 已完成分析！概率已更新\n📊 你的笨蛋概率：${originalProb.toFixed(2)}% → ${updatedProb.toFixed(2)}% (${changeText})${explanation}\n${endingText}`
                 );
             } catch (error) {
                 console.error('baka.chat error:', error);
