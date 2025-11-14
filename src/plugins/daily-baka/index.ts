@@ -56,7 +56,23 @@ export function daily_baka(ctx: Context, config: Config) {
                     probability,
                 });
             }
-            return `🎯 初始化完成啦！大家的笨蛋概率都重新洗牌～\n${formatProbabilityTable(newProbs)}`;
+
+            const botName =
+                (await getUserName(this.ctx, session, session.bot?.userId)) ||
+                'Bot';
+
+            await session.onebot.sendGroupForwardMsg(session.onebot.group_id, [
+                createTextMsgNode(
+                    session.bot?.userId,
+                    botName,
+                    '🎯 初始化完成啦！大家的笨蛋概率都重新洗牌～'
+                ),
+                createTextMsgNode(
+                    session.bot?.userId,
+                    botName,
+                    formatProbabilityTable(newProbs)
+                ),
+            ]);
         }
     );
 

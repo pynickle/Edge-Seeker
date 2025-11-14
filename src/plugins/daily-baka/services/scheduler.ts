@@ -1,10 +1,6 @@
 ﻿import '@pynickle/koishi-plugin-adapter-onebot';
 import { Context } from 'koishi';
-import {
-    formatProbabilityTable,
-    generateInitialProbabilities,
-    generateInitialProbabilitiesWithoutSession,
-} from '../utils/helper';
+import { generateInitialProbabilitiesWithoutSession } from '../utils/helper';
 
 export function registerDailyJob(ctx: Context, enabledGroups: string[]) {
     ctx.cron('0 0 * * *', async () => {
