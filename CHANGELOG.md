@@ -1,3 +1,13 @@
+## [1.13.1](https://github.com/pynickle/Edge-Seeker/compare/v1.13.0...v1.13.1) (2025-11-14)
+
+### 🐛 Bug Fixes
+
+* fix trigger daily baka error ([ad637e8](https://github.com/pynickle/Edge-Seeker/commit/ad637e8168abc4d0d451d0cdbbb634f4f69e8d86))
+
+### 💄 Style Improvements
+
+* imp ([b29f0b7](https://github.com/pynickle/Edge-Seeker/commit/b29f0b7b35b5b1177ffc9d0f5ac60350bb168f72))
+
 ## [1.13.0](https://github.com/pynickle/Edge-Seeker/compare/v1.12.0...v1.13.0) (2025-11-14)
 
 ### ✨ Features
