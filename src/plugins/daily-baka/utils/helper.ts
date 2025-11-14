@@ -43,13 +43,32 @@ export async function generateInitialProbabilitiesWithoutSession(
 export function formatProbabilityTable(
     records: { userId: string; userName: string; probability: number }[]
 ) {
+    // 按概率从大到小排序
+    const sortedRecords = [...records].sort(
+        (a, b) => b.probability - a.probability
+    );
+
+    // 定义排名对应的emoji
+    const rankEmojis = [
+        '🥇',
+        '🥈',
+        '🥉',
+        '🔟',
+        '🎖️',
+        '🏵️',
+        '✨',
+        '💫',
+        '🌟',
+        '⭐',
+    ];
+
     return (
-        '📋 当前概率分布：\n' +
-        records
-            .map(
-                (r) =>
-                    `👤 ${r.userName} (${r.userId}): ${r.probability.toFixed(2)}%`
-            )
+        '🎲 当前笨蛋概率排行榜：\n' +
+        sortedRecords
+            .map((r, index) => {
+                const rankEmoji = rankEmojis[index] || '🔢';
+                return `${rankEmoji} ${r.userName}: ${r.probability.toFixed(2)}%`;
+            })
             .join('\n')
     );
 }
