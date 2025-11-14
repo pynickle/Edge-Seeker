@@ -15,7 +15,7 @@ async function sendThousandLikes(
     roomId: string
 ): Promise<string> {
     try {
-        // 从数据库获取用户绑定的B站信息
+        // 从数据库获取用户绑定的 B 站信息
         const userBiliInfo = await ctx.database
             .select('user_bili_info')
             .where({ userId })
@@ -29,7 +29,7 @@ async function sendThousandLikes(
         const cookie = biliInfo.cookie;
 
         if (!cookie) {
-            return '🌸 你的B站账号绑定信息不完整，请重新绑定';
+            return '🌸 你的 B 站账号绑定信息不完整，请重新绑定';
         }
 
         const csrf = extractBiliJct(cookie);
@@ -39,7 +39,7 @@ async function sendThousandLikes(
             return '🌸 无法从绑定信息中获取必要的用户凭证，请重新绑定账号';
         }
 
-        // 验证直播间ID
+        // 验证直播间 ID
         if (!roomId || !/^\d+$/.test(roomId)) {
             return '🌸 请输入有效的直播间 ID！';
         }
@@ -83,7 +83,7 @@ async function sendThousandLikes(
             visit_id: '',
         };
 
-        // 获取WBI签名（带上用户cookie）
+        // 获取 WBI 签名（带上用户 cookie）
         const wbiKeys = await getWbiKeys(ctx, cookie, Number(uid));
         if (!wbiKeys) {
             return '🌸 获取 WBI 签名失败，请稍后重试';
@@ -120,7 +120,7 @@ async function sendThousandLikes(
             return `🌸 千赞请求失败：${response.data?.message || '未知错误'}`;
         }
     } catch (error) {
-        ctx.logger('bili-thousand-likes').error('千赞请求异常:', error);
+        ctx.logger('bili-thousand-likes').error('千赞请求异常：', error);
         return `🌸 千赞请求过程中出现错误：${error instanceof Error ? error.message : '未知错误'}`;
     }
 }

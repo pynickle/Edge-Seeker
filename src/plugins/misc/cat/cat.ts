@@ -17,7 +17,7 @@ export function cat(ctx: Context) {
                 const response = await axios.get(
                     'https://api.thecatapi.com/v1/images/search',
                     {
-                        timeout: 5000, // 5秒超时
+                        timeout: 5000, // 5 秒超时
                     }
                 );
                 const catImageUrl = response.data[0].url;
@@ -41,11 +41,11 @@ export function cat(ctx: Context) {
                 ) {
                     errorMessage = '请求超时了，网络可能不稳定，再试一次？';
                 } else if (error.response) {
-                    // API返回错误（如4xx/5xx）
+                    // API 返回错误（如 4xx/5xx）
                     errorMessage = `API 错误：${error.response.status} - ${error.response.statusText}`;
                 } else if (error.request) {
                     // 请求发出但无响应（网络问题）
-                    errorMessage = '网络连接问题，无法访问API。';
+                    errorMessage = '网络连接问题，无法访问 API。';
                 }
             }
 

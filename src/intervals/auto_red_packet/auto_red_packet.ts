@@ -132,7 +132,7 @@ export function auto_red_packet(ctx: Context, cfg: Config) {
                     const amount = randomInt(minAmount, maxAmount);
                     const count = randomInt(minCount, maxCount);
 
-                    // 使用Bot的ID作为创建者
+                    // 使用 Bot 的 ID 作为创建者
                     const botId = bot.userId;
                     const platform = bot.platform;
                     const now = Date.now();

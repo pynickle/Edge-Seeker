@@ -5,7 +5,7 @@ import { StarCoinHelper } from '../../../utils/starcoin_helper';
 
 export interface UserMarketItem {
     id: number; // 自增主键
-    userId: string; // 上传者用户ID
+    userId: string; // 上传者用户 ID
     content: string; // 上架的消息内容
     price: number; // 价格（星币）
     createTime: string; // 创建时间
@@ -13,8 +13,8 @@ export interface UserMarketItem {
 
 export interface UserMarketItemInGroup {
     id: number; // 自增主键
-    itemId: number; // 关联的商品ID
-    channelId: string; // 群聊ID
+    itemId: number; // 关联的商品 ID
+    channelId: string; // 群聊 ID
     createTime: string; // 添加到群聊的时间
 }
 
@@ -51,7 +51,7 @@ class UserMarketPlugin {
             }
         );
 
-        // 设置商品-群聊关联表
+        // 设置商品 - 群聊关联表
         this.ctx.model.extend(
             'user_market_items_in_group',
             {
@@ -141,7 +141,7 @@ class UserMarketPlugin {
                         return '❌ 未找到该商品或你没有权限删除该商品！';
                     }
 
-                    // 删除商品-群聊关联
+                    // 删除商品 - 群聊关联
                     await this.ctx.database.remove(
                         'user_market_items_in_group',
                         { itemId }
@@ -152,7 +152,7 @@ class UserMarketPlugin {
                         id: itemId,
                     });
 
-                    return `✅ 商品ID ${itemId} 已彻底删除！`;
+                    return `✅ 商品 ID ${itemId} 已彻底删除！`;
                 } catch (error) {
                     this.ctx.logger.warn('删除商品失败:', error);
                     return '❌ 删除商品失败，请稍后重试！';
@@ -196,11 +196,11 @@ class UserMarketPlugin {
                                 session,
                                 item.userId
                             );
-                            return `${index + 1}. 商品ID: ${item.id}\n   卖家: ${sellerName}\n   价格: ${item.price} 星币\n   上架时间: ${item.createTime.split('T')[0]}`;
+                            return `${index + 1}. 商品 ID: ${item.id}\n   卖家：${sellerName}\n   价格：${item.price} 星币\n   上架时间：${item.createTime.split('T')[0]}`;
                         })
                     );
 
-                    return `🛒 当前群聊商城商品列表：\n\n${itemList.join('\n\n')}\n\n使用 market.buy <商品ID> 购买商品！`;
+                    return `🛒 当前群聊商城商品列表：\n\n${itemList.join('\n\n')}\n\n使用 market.buy <商品 ID> 购买商品！`;
                 } catch (error) {
                     this.ctx.logger.warn('获取商品列表失败:', error);
                     return '❌ 获取商品列表失败，请稍后重试！';
@@ -235,7 +235,7 @@ class UserMarketPlugin {
 
                     const item = items[0];
 
-                    // 检查用户权限（上传者或authority>3）
+                    // 检查用户权限（上传者或 authority>3）
                     const user = await this.ctx.database.getUser(
                         session.platform,
                         session.userId
@@ -265,7 +265,7 @@ class UserMarketPlugin {
                         }
                     );
 
-                    return `✅ 商品ID ${itemId} 已成功添加到本群商城！`;
+                    return `✅ 商品 ID ${itemId} 已成功添加到本群商城！`;
                 } catch (error) {
                     this.ctx.logger.warn('添加商品到群聊失败:', error);
                     return '❌ 添加商品到群聊失败，请稍后重试！';
@@ -300,7 +300,7 @@ class UserMarketPlugin {
 
                     const item = items[0];
 
-                    // 检查用户权限（上传者或authority>3）
+                    // 检查用户权限（上传者或 authority>3）
                     const user = await this.ctx.database.getUser(
                         session.platform,
                         session.userId
@@ -326,7 +326,7 @@ class UserMarketPlugin {
                         { itemId, channelId }
                     );
 
-                    return `✅ 商品ID ${itemId} 已从本群商城移除！`;
+                    return `✅ 商品 ID ${itemId} 已从本群商城移除！`;
                 } catch (error) {
                     this.ctx.logger.warn('从群聊移除商品失败:', error);
                     return '❌ 从群聊移除商品失败，请稍后重试！';
@@ -392,7 +392,7 @@ class UserMarketPlugin {
                     }
 
                     // 计算手续费和实际支付金额
-                    const fee = Math.max(1, Math.floor(item.price * 0.2)); // 20%手续费，至少1星币
+                    const fee = Math.max(1, Math.floor(item.price * 0.2)); // 20% 手续费，至少 1 星币
                     const actualAmount = item.price - fee;
 
                     // 检查是否为好友关系
@@ -437,7 +437,7 @@ class UserMarketPlugin {
                         try {
                             await session.onebot.sendPrivateMsg(
                                 userId,
-                                `🎉 你成功购买了商品ID ${itemId}！\n支付：${item.price} 星币\n手续费：${fee} 星币\n实际支付给卖家：${actualAmount} 星币\n商品内容：`
+                                `🎉 你成功购买了商品 ID ${itemId}！\n支付：${item.price} 星币\n手续费：${fee} 星币\n实际支付给卖家：${actualAmount} 星币\n商品内容：`
                             );
                             await session.onebot.sendPrivateMsg(
                                 userId,
@@ -463,7 +463,7 @@ class UserMarketPlugin {
                         userId
                     );
 
-                    return `✅ ${buyerName} 成功购买了 ${sellerName} 的商品ID ${itemId}！\n商品内容已通过私信发送给你。`;
+                    return `✅ ${buyerName} 成功购买了 ${sellerName} 的商品 ID ${itemId}！\n商品内容已通过私信发送给你。`;
                 } catch (error) {
                     this.ctx.logger.warn('购买商品失败:', error);
                     return '❌ 购买商品失败，请稍后重试！';

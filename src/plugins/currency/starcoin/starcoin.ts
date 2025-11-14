@@ -265,7 +265,7 @@ class StarCoinPlugin {
             .select('sign_in')
             .where({ channelId: session.channelId })
             .orderBy('starCoin', 'desc')
-            .limit(20) // 限制显示前20名
+            .limit(20) // 限制显示前 20 名
             .execute();
 
         if (users.length === 0) {

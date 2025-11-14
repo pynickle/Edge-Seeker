@@ -9,11 +9,11 @@ export interface Item {
     type: 'consumable' | 'buff' | 'other';
     effect?: string;
     usageInstructions?: string; // 使用说明，适用于需要特定命令使用的道具
-    // 以下为buff类型道具的配置参数
+    // 以下为 buff 类型道具的配置参数
     buffConfig?: {
         durationDays: number; // 持续天数
         maxDurationDays: number; // 最大叠加天数
-        buffType: BuffType; // 对应的BuffType
+        buffType: BuffType; // 对应的 BuffType
     };
 }
 

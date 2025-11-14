@@ -6,7 +6,7 @@ export const name = 'friend_code';
 
 export function friend_code(ctx: Context) {
     const userVerificationCodes = new Map<string, number>();
-    // 存储用户的定时器ID，防止重复设置定时器
+    // 存储用户的定时器 ID，防止重复设置定时器
     const userTimers = new Map<string, NodeJS.Timeout>();
 
     // 验证验证码是否有效
@@ -23,10 +23,10 @@ export function friend_code(ctx: Context) {
             const storedCode = userVerificationCodes.get(userId)!;
 
             ctx.logger.warn(
-                `用户 ${userId} 提交的验证码: ${code}, 存储的验证码: ${storedCode}`
+                `用户 ${userId} 提交的验证码：${code}, 存储的验证码：${storedCode}`
             );
             userVerificationCodes.forEach((user, code) =>
-                ctx.logger.warn(`存储的验证码 - 用户: ${user}, 验证码: ${code}`)
+                ctx.logger.warn(`存储的验证码 - 用户：${user}, 验证码：${code}`)
             );
 
             // 检查验证码是否匹配
@@ -44,13 +44,13 @@ export function friend_code(ctx: Context) {
             userVerificationCodes.delete(userId);
             return true;
         } catch (error) {
-            ctx.logger.error('验证验证码失败:', error);
+            ctx.logger.error('验证验证码失败：', error);
             return false;
         }
     }
 
     // 注册生成验证码的命令
-    ctx.command('friend', '获取加好友验证码（有效期1分钟）').action(
+    ctx.command('friend', '获取加好友验证码（有效期 1 分钟）').action(
         async ({ session }) => {
             if (!session.onebot) {
                 return '❌ 此命令仅支持 OneBot 适配器！';
@@ -58,7 +58,7 @@ export function friend_code(ctx: Context) {
 
             const { userId } = session;
             Date.now();
-            const code = randomInt(100000, 999999); // 1分钟有效期
+            const code = randomInt(100000, 999999); // 1 分钟有效期
 
             try {
                 // 清除用户之前的验证码和定时器（如果存在）
@@ -72,11 +72,11 @@ export function friend_code(ctx: Context) {
 
                 userVerificationCodes.forEach((user, code) =>
                     ctx.logger.warn(
-                        `存储的验证码222 - 用户: ${user}, 验证码: ${code}`
+                        `存储的验证码 222 - 用户：${user}, 验证码：${code}`
                     )
                 );
 
-                // 设置1分钟后自动清理验证码的定时器
+                // 设置 1 分钟后自动清理验证码的定时器
                 const timerId = setTimeout(() => {
                     if (userVerificationCodes.has(userId)) {
                         userVerificationCodes.delete(userId);
@@ -85,21 +85,21 @@ export function friend_code(ctx: Context) {
                             `已自动清理用户 ${userId} 的过期验证码`
                         );
                     }
-                }, 60000); // 1分钟 = 60000毫秒
+                }, 60000); // 1 分钟 = 60000 毫秒
 
                 userVerificationCodes.forEach((user, code) =>
                     ctx.logger.warn(
-                        `存储的验证码333 - 用户: ${user}, 验证码: ${code}`
+                        `存储的验证码 333 - 用户：${user}, 验证码：${code}`
                     )
                 );
 
-                // 保存定时器ID
+                // 保存定时器 ID
                 userTimers.set(userId, timerId);
 
                 // 发送验证码
-                return `${await getUserName(ctx, session, userId)}，您的加好友验证码是：${code}\n有效期1分钟，请在添加机器人好友时将此验证码作为验证信息发送。`;
+                return `${await getUserName(ctx, session, userId)}，您的加好友验证码是：${code}\n有效期 1 分钟，请在添加机器人好友时将此验证码作为验证信息发送。`;
             } catch (error) {
-                ctx.logger.error('生成验证码失败:', error);
+                ctx.logger.error('生成验证码失败：', error);
                 return '❌ 生成验证码失败，请稍后重试！';
             }
         }

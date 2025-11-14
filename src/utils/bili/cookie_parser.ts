@@ -1,13 +1,13 @@
 ﻿/**
  * Bilibili Cookie 提取工具（单值专用版）
  *
- * 为了避免无谓的全量提取，这里为每个常见Cookie键提供专用提取函数。
+ * 为了避免无谓的全量提取，这里为每个常见 Cookie 键提供专用提取函数。
  * 每个函数只搜索并返回对应值，高效且专注。
  *
  * 通用逻辑：
- * - 用 ';' 分割Cookie字符串。
+ * - 用 ';' 分割 Cookie 字符串。
  * - 遍历每个部分，trim() 后用 '=' 分割键值。
- * - 匹配特定键时，提取值并返回（保持URL编码原样）。
+ * - 匹配特定键时，提取值并返回（保持 URL 编码原样）。
  * - 未找到返回 undefined。
  *
  * 如果需要解码值，可在函数末尾加：return value ? decodeURIComponent(value) : undefined;
@@ -26,7 +26,7 @@ export interface BiliCookies {
 }
 
 /**
- * 通用辅助函数：从Cookie字符串中提取指定键的值
+ * 通用辅助函数：从 Cookie 字符串中提取指定键的值
  * @param cookieString - Cookie 字符串
  * @param key - 要提取的键名
  * @returns 值字符串或 undefined

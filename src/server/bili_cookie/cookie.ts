@@ -32,7 +32,7 @@ declare module 'koishi' {
     }
 }
 
-// Cookie转换
+// Cookie 转换
 async function convertCookies(cookie: string): Promise<Cookie[]> {
     try {
         const response = await fetch('http://47.117.27.240:3000/api/convert', {
@@ -171,10 +171,10 @@ export function cookie(ctx: Context, config: Config) {
                     bindCode: record.bindCode,
                 });
                 ctx.logger('cookie').info(
-                    `自动清理过期绑定码: ${record.bindCode}`
+                    `自动清理过期绑定码：${record.bindCode}`
                 );
             }
         },
         7 * 24 * 60 * 60 * 1000
-    ); // 每7天运行一次
+    ); // 每 7 天运行一次
 }

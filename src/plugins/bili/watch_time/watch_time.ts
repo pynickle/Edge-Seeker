@@ -138,7 +138,7 @@ export function watch_time(ctx: Context) {
                         break;
                     case -403:
                         errorMsg +=
-                            '账号异常，请确定你使用网页cookie绑定B站账号';
+                            '账号异常，请确定你使用网页 cookie 绑定 B 站账号';
                         break;
                     case 400:
                         errorMsg += '请求错误，请检查参数';
@@ -149,7 +149,10 @@ export function watch_time(ctx: Context) {
                 return errorMsg;
             }
         } catch (error) {
-            ctx.logger('bili-watch-time').error('观看时长查询请求失败:', error);
+            ctx.logger('bili-watch-time').error(
+                '观看时长查询请求失败：',
+                error
+            );
             ctx.logger('bili-watch-time').info(error.message);
             return `查询失败：${error instanceof Error ? error.message : '未知错误'}`;
         }

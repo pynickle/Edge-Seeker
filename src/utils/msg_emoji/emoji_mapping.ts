@@ -1,6 +1,6 @@
 ﻿/**
- * QQ表情映射
- * 按照表情ID的数字顺序排列
+ * QQ 表情映射
+ * 按照表情 ID 的数字顺序排列
  */
 export const EMOJI_MAP: Record<string, string> = {
     惊讶: '0',

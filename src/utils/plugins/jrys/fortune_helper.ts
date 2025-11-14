@@ -147,7 +147,7 @@ export async function calculateFortune(
 }
 
 /**
- * 获取图片并转换为base64格式，支持超时和备用图片
+ * 获取图片并转换为 base64 格式，支持超时和备用图片
  */
 export async function getFortuneImageBase64(
     randomNum: number
@@ -285,7 +285,7 @@ export async function buildFortuneHtml(
     </div>
     <div class="content">
         <div class="content-inner">
-            <p class="title is-4"><i class="fas fa-chart-line icon"></i>运势指数: ${fortuneData.score}</p>
+            <p class="title is-4"><i class="fas fa-chart-line icon"></i>运势指数：${fortuneData.score}</p>
             <p class="subtitle is-6 mt-4 mb-1"><i class="fas fa-quote-left icon"></i>${fortuneData.sentence}</p>
             <p class="is-7">—— ${fortuneData.sentenceFrom}</p>
             <p class="mt-4"><i class="fas fa-dice icon"></i><strong>幸运数字:</strong> ${fortuneData.luckyNumber}</p>

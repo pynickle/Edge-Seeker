@@ -183,7 +183,7 @@ export async function getWbiKeys(
             sub_key,
         };
     } catch (error) {
-        ctx.logger('bili-wbi').error('获取 WBI Keys 失败:', error);
+        ctx.logger('bili-wbi').error('获取 WBI Keys 失败：', error);
         return null;
     }
 }
@@ -202,10 +202,10 @@ export async function generateSignedUrl(
     img_key: string,
     sub_key: string
 ): Promise<string> {
-    // 构造带签名的请求URL
+    // 构造带签名的请求 URL
     let signedQuery = encWbi(params, img_key, sub_key);
 
-    // 计算MD5签名
+    // 计算 MD5 签名
     const crypto = await import('crypto');
     const md5 = crypto
         .createHash('md5')

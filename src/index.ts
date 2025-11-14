@@ -12,6 +12,7 @@ import { red_packet } from './plugins/currency/red_packet/red_packet';
 import { roll } from './plugins/currency/roll/roll';
 import StarCoinPlugin from './plugins/currency/starcoin/starcoin';
 import UserMarketPlugin from './plugins/currency/user_market/user_market';
+import { daily_baka } from './plugins/daily-baka';
 import ForeseePlugin from './plugins/fortune/foresee/foresee';
 import JrrpPlugin from './plugins/fortune/jrrp/jrrp';
 import JrysPlugin from './plugins/fortune/jrys/jrys';
@@ -90,6 +91,12 @@ export interface Config {
             expiryHours: number;
         }>;
     };
+    daily_doofus: {
+        enabledGroups: string[];
+        apiKey: string;
+        apiUrl: string;
+        dailyMessageLimit: number;
+    };
 }
 
 export const Config: Schema<Config> = Schema.object({
@@ -147,11 +154,21 @@ export const Config: Schema<Config> = Schema.object({
                 maxAmount: Schema.number().default(50),
                 minCount: Schema.number().default(3),
                 maxCount: Schema.number().default(5),
-                minInterval: Schema.number().default(24), // 最小发送间隔（小时）
-                maxInterval: Schema.number().default(72), // 最大发送间隔（小时）
+                minInterval: Schema.number().default(24),
+                maxInterval: Schema.number().default(72),
                 expiryHours: Schema.number().default(2),
             })
         ).default([]),
+    }),
+    daily_doofus: Schema.object({
+        enabledGroups: Schema.array(Schema.string()),
+        apiKey: Schema.string().role('secret'),
+        apiUrl: Schema.string().default(
+            'https://api.openai.com/v1/chat/completions'
+        ),
+        dailyMessageLimit: Schema.number()
+            .default(2)
+            .description('每人每日最大消息次数'),
     }),
 }).i18n({
     'zh-CN': require('./locales/zh-CN.schema.yml'),
@@ -203,4 +220,7 @@ export function apply(ctx: Context, cfg: Config) {
     ctx.plugin(cors, cfg);
     ctx.plugin(cookie, cfg);
     ctx.plugin(nav_user_info, cfg);
+
+    // daily baka
+    ctx.plugin(daily_baka, cfg);
 }

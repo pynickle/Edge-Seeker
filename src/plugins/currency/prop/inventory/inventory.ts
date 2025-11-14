@@ -16,7 +16,7 @@ export interface UserItem {
 // 定义 Buff 类型枚举
 export enum BuffType {
     LUCKY_CARD = 'lucky_card',
-    // 可以添加更多类型的buff
+    // 可以添加更多类型的 buff
 }
 
 // 定义通用 Buff 效果接口
@@ -26,7 +26,7 @@ export interface BuffEffect {
     buffType: BuffType;
     startDate: string; // YYYY-MM-DD 格式
     endDate: string; // YYYY-MM-DD 格式
-    data?: Record<string, any>; // 存储特定buff需要的额外数据
+    data?: Record<string, any>; // 存储特定 buff 需要的额外数据
 }
 
 declare module 'koishi' {
@@ -73,7 +73,7 @@ class InventoryPlugin {
                 buffType: 'string',
                 startDate: 'string',
                 endDate: 'string',
-                data: 'json', // JSON格式存储额外数据
+                data: 'json', // JSON 格式存储额外数据
             },
             {
                 primary: 'id',
@@ -127,7 +127,7 @@ class InventoryPlugin {
                     : '';
                 let itemLine = `${itemInfo.name} x${item.quantity} ${expireInfo}`;
 
-                // 如果是other类型且有使用说明，添加使用说明标记
+                // 如果是 other 类型且有使用说明，添加使用说明标记
                 if (itemInfo.type === 'other' && itemInfo.usageInstructions) {
                     itemLine += ' 💡';
                 }
@@ -144,7 +144,7 @@ class InventoryPlugin {
         // 生成道具库消息
         const inventoryMessage = [`🎒 @${username} 的道具库：`];
 
-        // 添加buff类型道具
+        // 添加 buff 类型道具
         if (buffItems.length > 0) {
             inventoryMessage.push('\n✨ 增益道具：');
             inventoryMessage.push(...buffItems);
@@ -212,13 +212,13 @@ class InventoryPlugin {
             return await useBuffItem(session, this.ctx, item);
         }
 
-        // 为other类型的道具提供更人性化的提示
+        // 为 other 类型的道具提供更人性化的提示
         if (item.type === 'other') {
             if (item.usageInstructions) {
-                return `@${username}，"${item.name}" 不能通过use命令直接使用。\n${item.usageInstructions}`;
+                return `@${username}，"${item.name}" 不能通过 use 命令直接使用。\n${item.usageInstructions}`;
             }
 
-            return `@${username}，"${item.name}" 道具不能通过use命令直接使用。\n请查看道具描述了解如何使用。`;
+            return `@${username}，"${item.name}" 道具不能通过 use 命令直接使用。\n请查看道具描述了解如何使用。`;
         }
 
         return `@${username}，道具 "${item.name}" 的使用功能还未实现。`;

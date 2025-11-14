@@ -68,3 +68,11 @@ auto_red_packet:
         minInterval: 红包最小发送间隔（小时）
         maxInterval: 红包最大发送间隔（小时）
         expiryHours: 红包有效期（小时）
+
+daily_doofus:
+  $desc: 每日笨蛋配置
+  $inner:
+    apiKey: 每日笨蛋 API 密钥
+    apiUrl: 每日笨蛋 API 地址
+    maxDailyMessages: 每人每日最大消息次数
+    starCoinCostPerMessage: 每次 AI 对话消耗星币数量

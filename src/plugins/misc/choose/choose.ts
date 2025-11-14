@@ -67,7 +67,7 @@ function validateOptions(options: string[]): string[] {
 export function choose(ctx: Context) {
     ctx.command('choose <...options:string>', '从多个选项中随机选择一个')
         .usage(
-            '用法：choose 选项1 选项2 选项3 ...\n示例：choose 吃饭 睡觉 打游戏'
+            '用法：choose 选项 1 选项 2 选项 3 ...\n示例：choose 吃饭 睡觉 打游戏'
         )
         .action(async (_, ...options: string[]) => {
             if (options.some((option) => option.includes('茉莉'))) {

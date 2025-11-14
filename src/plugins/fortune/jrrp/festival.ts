@@ -16,23 +16,23 @@ function getAprilFoolsBonus(
     const seed = `${userId}${date}april_fools`;
     const hash = crypto.createHash('md5').update(seed).digest('hex');
     const random = parseInt(hash.substring(0, 8), 16) / 0xffffffff; // 0到1的随机数
-    const choice = Math.floor(random * 3); // 随机选择0, 1, 2
+    const choice = Math.floor(random * 3); // 随机选择 0, 1, 2
 
     switch (choice) {
         case 0: // 小数加成
-            const decimalBonus = Number((random * 1.9 + 0.1).toFixed(1)); // 0.1到2.0
+            const decimalBonus = Number((random * 1.9 + 0.1).toFixed(1)); // 0.1 到 2.0
             return {
                 bonus: decimalBonus,
                 description: `愚人节的奇妙魔法，运气增加${decimalBonus}点！`,
             };
         case 1: // 负数加成
-            const negativeBonus = -Math.floor(random * 10 + 1); // -1到-10
+            const negativeBonus = -Math.floor(random * 10 + 1); // -1 到 -10
             return {
                 bonus: negativeBonus,
                 description: `被愚人节恶作剧整蛊，运气下降${-negativeBonus}点！`,
             };
         case 2: // 超高加成
-            const highBonus = Math.floor(random * 31) + 20; // +20到+50
+            const highBonus = Math.floor(random * 31) + 20; // +20 到 +50
             return {
                 bonus: highBonus,
                 description: `愚人节反整蛊成功，运气爆棚+${highBonus}！`,
@@ -70,7 +70,7 @@ export function getFestivalBonus(
     if (monthDay in festivals) {
         return {
             bonus: 10,
-            description: `因${festivals[monthDay]}获得+10人品值！`,
+            description: `因${festivals[monthDay]}获得 +10 人品值！`,
         };
     }
     return { bonus: 0, description: '' };

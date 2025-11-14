@@ -14,10 +14,10 @@ export class ConfirmationManager {
 
     /**
      * 创建一个确认请求
-     * @param ctx Koishi上下文
+     * @param ctx Koishi 上下文
      * @param session 会话对象
      * @param timeout 超时时间（秒）
-     * @returns Promise<boolean> 确认结果，true表示确认，false表示取消或超时
+     * @returns Promise<boolean> 确认结果，true 表示确认，false 表示取消或超时
      */
     createConfirmation(
         ctx: Context,
@@ -68,7 +68,7 @@ export class ConfirmationManager {
 
 /**
  * 确认辅助函数，用于插件快速注册确认功能
- * @param ctx Koishi上下文
+ * @param ctx Koishi 上下文
  * @returns ConfirmationManager 确认管理器实例
  */
 export function useConfirmationHelper(ctx: Context): ConfirmationManager {

@@ -41,7 +41,7 @@ export function hitokoto(ctx: Context, config: Config) {
     ctx.command('hitokoto', '获取一句随机的箴言或诗句')
         .option(
             'type',
-            '-t <type:string> 句子类型：a动画/b漫画/c游戏/d文学/e原创/f网络/g其他/h影视/i诗词/j网易云/k哲学/l抖机灵'
+            '-t <type:string> 句子类型：a 动画/b 漫画/c 游戏/d 文学/e 原创/f 网络/g 其他/h 影视/i 诗词/j 网易云/k 哲学/l 抖机灵'
         )
         .option('min', '-m <min:number> 最小长度')
         .option('max', '-M <max:number> 最大长度')
@@ -66,12 +66,12 @@ export function hitokoto(ctx: Context, config: Config) {
                     params.max_length = options.max;
                 }
 
-                // 发送请求到一言API
+                // 发送请求到一言 API
                 const response = await axios.get<HitokotoResponse>(
                     'http://hitokoto_api:8000',
                     {
                         params,
-                        timeout: 5000, // 10秒超时
+                        timeout: 5000, // 10 秒超时
                     }
                 );
 
@@ -93,7 +93,7 @@ export function hitokoto(ctx: Context, config: Config) {
 
                 return reply;
             } catch (error) {
-                ctx.logger.warn('获取一言失败:', error);
+                ctx.logger.warn('获取一言失败：', error);
                 return '获取一言失败，请稍后再试。';
             }
         });

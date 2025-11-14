@@ -86,7 +86,7 @@ export function guess_number(ctx: Context, config: Config) {
         };
     }
 
-    // 获取当天日期的YYYY-MM-DD格式
+    // 获取当天日期的 YYYY-MM-DD 格式
     function getTodayString(): string {
         const now = new Date();
         const year = now.getFullYear();
@@ -204,7 +204,7 @@ export function guess_number(ctx: Context, config: Config) {
 
             // 检查频道当日游戏次数是否达到上限
             if (channelGameCount >= MAX_CHANNEL_GAMES_PER_DAY) {
-                return `❌ 本频道今日游戏次数已达上限(${MAX_CHANNEL_GAMES_PER_DAY}次)，请明天再来！`;
+                return `❌ 本频道今日游戏次数已达上限 (${MAX_CHANNEL_GAMES_PER_DAY}次)，请明天再来！`;
             }
 
             // 确定用户每日游戏次数限制
@@ -221,7 +221,7 @@ export function guess_number(ctx: Context, config: Config) {
                     channelId
                 );
                 if (todayGameCount >= maxGamesPerDay) {
-                    return `❌ 您今天的游戏次数已达上限(${maxGamesPerDay}次)，请明天再来！`;
+                    return `❌ 您今天的游戏次数已达上限 (${maxGamesPerDay}次)，请明天再来！`;
                 }
             }
         }
@@ -242,7 +242,7 @@ export function guess_number(ctx: Context, config: Config) {
                 bonus = config.guess_number.firstBonus;
             }
 
-            // 检查用户是否有足够的星币支付10星币
+            // 检查用户是否有足够的星币支付 10 星币
             const userRecord = await ctx.database.get('sign_in', {
                 userId: session.userId,
                 channelId: channelId,
@@ -387,7 +387,7 @@ export function guess_number(ctx: Context, config: Config) {
         if (!isAuthorizedUser) {
             // 检查频道当日游戏次数是否达到上限
             if (channelGameCount >= MAX_CHANNEL_GAMES_PER_DAY) {
-                return `❌ 本频道今日游戏次数已达上限(${MAX_CHANNEL_GAMES_PER_DAY}次)，请明天再来！`;
+                return `❌ 本频道今日游戏次数已达上限 (${MAX_CHANNEL_GAMES_PER_DAY}次)，请明天再来！`;
             }
         }
 
@@ -485,7 +485,7 @@ export function guess_number(ctx: Context, config: Config) {
                 channelId
             );
             await session.send(
-                `❌ 您的星币不足，需要 ${entryFee} 星币才能参加游戏！当前星币: ${currentStarCoin}`
+                `❌ 您的星币不足，需要 ${entryFee} 星币才能参加游戏！当前星币：${currentStarCoin}`
             );
             return;
         }
@@ -792,14 +792,14 @@ export function guess_number(ctx: Context, config: Config) {
                 }
             }
 
-            // 检查游戏创建者是否是付费开启游戏的用户(authority < 3)
+            // 检查游戏创建者是否是付费开启游戏的用户 (authority < 3)
             try {
                 const creator = await ctx.database.getUser(
                     game.platform,
                     game.creatorId
                 );
                 if (creator && creator.authority < 3) {
-                    // 退还10个星币开启费用
+                    // 退还 10 个星币开启费用
                     refundPromises.push(
                         StarCoinHelper.addUserStarCoin(
                             ctx,

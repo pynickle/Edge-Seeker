@@ -31,7 +31,7 @@ class JrysPlugin {
             }
             return await this.renderToImage(fortuneData, session.userId);
         } catch (error) {
-            return '生成今日运势图片失败: ' + error.message;
+            return '生成今日运势图片失败：' + error.message;
         }
     }
 

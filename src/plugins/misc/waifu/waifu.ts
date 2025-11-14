@@ -7,7 +7,7 @@ export const name = 'waifu';
 // API 配置
 const API_CONFIG = {
     baseUrl: 'https://api.waifu.pics/sfw',
-    timeout: 10000, // 10秒超时
+    timeout: 10000, // 10 秒超时
 } as const;
 
 // 可用类别配置

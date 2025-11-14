@@ -30,6 +30,6 @@ export async function stickEmoji(
             await new Promise((r) => setTimeout(r, 500));
         }
     } catch (e) {
-        ctx.logger.warn('表情回应失败: ' + e);
+        ctx.logger.warn('表情回应失败：' + e);
     }
 }

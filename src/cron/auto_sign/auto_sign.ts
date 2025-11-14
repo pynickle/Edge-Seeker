@@ -5,7 +5,7 @@ import { Config } from '../../index';
 export const name = 'auto_sign';
 
 export function auto_sign(ctx: Context, config: Config) {
-    // 定义cron任务，每天0:00执行
+    // 定义 cron 任务，每天 0:00 执行
     ctx.cron('0 0 * * *', async () => {
         const bot = ctx.bots[0];
 

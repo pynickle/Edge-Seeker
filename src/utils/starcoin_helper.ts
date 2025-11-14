@@ -109,7 +109,7 @@ export class StarCoinHelper {
 
             return true;
         } catch (error) {
-            ctx.logger.warn('增加星币失败:', error);
+            ctx.logger.warn('增加星币失败：', error);
             return false;
         }
     }
@@ -125,6 +125,7 @@ export class StarCoinHelper {
     ): Promise<boolean> {
         // 验证星币数量
         if (amount <= 0 || !Number.isInteger(amount)) {
+            ctx.logger.info(amount);
             return false;
         }
 

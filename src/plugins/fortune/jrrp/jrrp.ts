@@ -90,7 +90,7 @@ class JrrpPlugin {
             .action(async ({ session }) => this.handleRankCommand(session));
 
         this.ctx
-            .command('jrrp.history', '查看最近7天的人品记录')
+            .command('jrrp.history', '查看最近 7 天的人品记录')
             .action(async ({ session }) => this.handleHistoryCommand(session));
     }
 
@@ -143,7 +143,7 @@ class JrrpPlugin {
                 );
                 groupMembers = members.map((member) => member.user_id);
             } catch (error) {
-                this.ctx.logger.warn('获取群成员列表失败:', error);
+                this.ctx.logger.warn('获取群成员列表失败：', error);
             }
         }
 
@@ -157,7 +157,7 @@ class JrrpPlugin {
             .orderBy('luck', 'desc');
 
         if (session.onebot && this.config.jrrp.rankUseForwardMsg) {
-            return await query.limit(50).execute(); // 限制最多50条，避免消息过长
+            return await query.limit(50).execute(); // 限制最多 50 条，避免消息过长
         } else {
             return await query
                 .limit(this.config.jrrp.rankLimit || 10)
@@ -226,7 +226,7 @@ class JrrpPlugin {
         );
 
         if (!history.length) {
-            return '最近7天内暂无人品记录。';
+            return '最近 7 天内暂无人品记录。';
         }
 
         return await this.formatHistoryMessage(session, history);
@@ -262,7 +262,7 @@ class JrrpPlugin {
         history: Jrrp[]
     ): Promise<string> {
         const userName = await getUserName(this.ctx, session, session.userId);
-        let output = `${h.escape(userName)} 最近7天的人品记录：\n`;
+        let output = `${h.escape(userName)} 最近 7 天的人品记录：\n`;
 
         for (const record of history) {
             output += `${record.date} - 人品值：${record.luck}\n`;

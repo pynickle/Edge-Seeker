@@ -54,7 +54,7 @@ export interface BaikeQuizState {
     answerD: string; // 答案 D
     correctAnswer: string; // 正确答案（A/B/C/D）
     analytic: string; // 答案解析
-    questionerId: string; // 出题用户ID
+    questionerId: string; // 出题用户 ID
     createTime: number; // 创建时间戳
     // 存储用户答题信息，用于申诉功能
     userAnswers: Map<string, string>; // userId -> answer
@@ -93,7 +93,7 @@ class BaikeQuizPlugin {
         private ctx: Context,
         private config: any
     ) {
-        // 扩展数据库，创建baike_quiz_record表
+        // 扩展数据库，创建 baike_quiz_record 表
         ctx.model.extend(
             'baike_quiz_record',
             {
@@ -199,13 +199,13 @@ class BaikeQuizPlugin {
             if (!session.guildId) return;
 
             const { userId, channelId, content } = session;
-            // 提取纯文本内容（去掉可能的at和特殊符号）
+            // 提取纯文本内容（去掉可能的 at 和特殊符号）
             const cleanContent = content
                 .replace(/@\S+/g, '')
                 .trim()
                 .toUpperCase();
 
-            // 检查是否是A/B/C/D回答
+            // 检查是否是 A/B/C/D 回答
             if (!['A', 'B', 'C', 'D'].includes(cleanContent)) return;
 
             // 检查是否有活跃的问答
@@ -258,7 +258,7 @@ class BaikeQuizPlugin {
      */
     private getQuizState(channelId: string): BaikeQuizState | null {
         const state = this.activeQuizStates.get(channelId);
-        // 检查是否已过期（10分钟）
+        // 检查是否已过期（10 分钟）
         if (state && state.createTime < Date.now() - 10 * 60 * 1000) {
             this.activeQuizStates.delete(channelId);
             return null;
@@ -352,7 +352,7 @@ class BaikeQuizPlugin {
     }
 
     /**
-     * 从API获取百科问答题目
+     * 从 API 获取百科问答题目
      */
     private async fetchQuizQuestion(): Promise<QuizResult | null> {
         if (!this.config.baike_quiz.apiKey) {
@@ -363,7 +363,7 @@ class BaikeQuizPlugin {
         }
 
         try {
-            // 最多尝试获取题目5次
+            // 最多尝试获取题目 5 次
             const maxRetries = 5;
             for (let i = 0; i < maxRetries; i++) {
                 const response = await axios.get<QuizResult>(this.API_URL, {
@@ -815,7 +815,7 @@ class BaikeQuizPlugin {
                 }
             }
         } catch (error) {
-            this.ctx.logger.warn('发送申诉通知失败:', error);
+            this.ctx.logger.warn('发送申诉通知失败：', error);
         }
     }
 
@@ -842,12 +842,12 @@ class BaikeQuizPlugin {
                 return await this.listAppeals();
             case 'approve':
                 if (!id) {
-                    return '❌ 请指定要批准的申诉ID！\n使用方法：\`quiz.admin.appeal approve <申诉ID>\`';
+                    return '❌ 请指定要批准的申诉 ID！\n使用方法：\`quiz.admin.appeal approve <申诉 ID>\`';
                 }
                 return await this.approveAppeal(session, id);
             case 'reject':
                 if (!id) {
-                    return '❌ 请指定要拒绝的申诉ID！\n使用方法：\`quiz.admin.appeal reject <申诉ID>\`';
+                    return '❌ 请指定要拒绝的申诉 ID！\n使用方法：\`quiz.admin.appeal reject <申诉 ID>\`';
                 }
                 return await this.rejectAppeal(id);
             default:
@@ -897,16 +897,16 @@ class BaikeQuizPlugin {
             if (history && history.length > 0) {
                 const quiz = history[0];
                 messages.push(
-                    `   选项A：${this.truncateText(quiz.answerA, 15)}`
+                    `   选项 A：${this.truncateText(quiz.answerA, 15)}`
                 );
                 messages.push(
-                    `   选项B：${this.truncateText(quiz.answerB, 15)}`
+                    `   选项 B：${this.truncateText(quiz.answerB, 15)}`
                 );
                 messages.push(
-                    `   选项C：${this.truncateText(quiz.answerC, 15)}`
+                    `   选项 C：${this.truncateText(quiz.answerC, 15)}`
                 );
                 messages.push(
-                    `   选项D：${this.truncateText(quiz.answerD, 15)}`
+                    `   选项 D：${this.truncateText(quiz.answerD, 15)}`
                 );
             }
 
@@ -917,7 +917,7 @@ class BaikeQuizPlugin {
         }
 
         messages.push(
-            '\n使用 \`quiz.admin.appeal approve/reject <申诉ID>\` 来处理申诉。'
+            '\n使用 \`quiz.admin.appeal approve/reject <申诉 ID>\` 来处理申诉。'
         );
         return messages.join('\n');
     }
@@ -936,7 +936,7 @@ class BaikeQuizPlugin {
             .execute();
 
         if (appeals.length === 0) {
-            return `❌ 未找到ID为 ${appealId} 的待处理申诉！`;
+            return `❌ 未找到 ID 为 ${appealId} 的待处理申诉！`;
         }
 
         const appeal = appeals[0];
@@ -948,7 +948,7 @@ class BaikeQuizPlugin {
             { status: 'approved' }
         );
 
-        // 退还用户扣除的星币加上赢得的星币（默认5+10）
+        // 退还用户扣除的星币加上赢得的星币（默认 5+10）
         const refundAmount =
             this.config.baike_quiz.penaltyStarCoin +
             this.config.baike_quiz.rewardStarCoin;
@@ -990,7 +990,7 @@ class BaikeQuizPlugin {
             .execute();
 
         if (appeals.length === 0) {
-            return `❌ 未找到ID为 ${appealId} 的待处理申诉！`;
+            return `❌ 未找到 ID 为 ${appealId} 的待处理申诉！`;
         }
 
         // 更新申诉状态为已拒绝
@@ -1029,7 +1029,7 @@ class BaikeQuizPlugin {
      * 获取用户名称（简化版，实际可能需要根据平台API获取）
      */
     private async getUserName(userId: string): Promise<string> {
-        // 这里简化处理，实际可能需要调用平台API获取用户名称
+        // 这里简化处理，实际可能需要调用平台 API 获取用户名称
         return userId;
     }
 
@@ -1059,22 +1059,22 @@ class BaikeQuizPlugin {
     }
 
     /**
-     * 设置定时清理任务，每7天清理30天以前的历史记录
+     * 设置定时清理任务，每 7 天清理 30 天以前的历史记录
      */
     private setupCleanupTask(): void {
-        // 每7天执行一次清理任务
+        // 每 7 天执行一次清理任务
         const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
 
         // 设置定时任务
         setInterval(() => {
             this.cleanupOldHistoryRecords().catch((error) => {
-                this.ctx.logger.warn('清理历史记录任务失败:', error);
+                this.ctx.logger.warn('清理历史记录任务失败：', error);
             });
         }, sevenDaysInMs);
     }
 
     /**
-     * 清理30天以前的历史记录
+     * 清理 30 天以前的历史记录
      */
     private async cleanupOldHistoryRecords(): Promise<void> {
         const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
@@ -1085,7 +1085,7 @@ class BaikeQuizPlugin {
             },
         });
 
-        this.ctx.logger.info(`成功清理30天以前的历史问答记录`);
+        this.ctx.logger.info(`成功清理 30 天以前的历史问答记录`);
     }
 }
 

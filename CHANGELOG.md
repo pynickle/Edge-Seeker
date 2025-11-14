@@ -20,13 +20,13 @@
 
 ## [1.7.2](https://github.com/pynickle/Edge-Seeker/compare/v1.7.1...v1.7.2) (2025-10-15)
 
-### 🐛 Bug修复
+### 🐛 Bug 修复
 
 * 修复 randomChoice 计算错误的问题 ([b040a6a](https://github.com/pynickle/Edge-Seeker/commit/b040a6a64682cda178e2909b540818b5fd4271a8))
 
 ## [1.7.1](https://github.com/pynickle/Edge-Seeker/compare/v1.7.0...v1.7.1) (2025-10-15)
 
-### 🐛 Bug修复
+### 🐛 Bug 修复
 
 * 修复今日运势图片不能正常显示的问题 ([091263e](https://github.com/pynickle/Edge-Seeker/commit/091263e526dcea0b90f52380f5928883e34c7d90))
 
@@ -38,13 +38,13 @@
 
 ## [1.6.2](https://github.com/pynickle/Edge-Seeker/compare/v1.6.1...v1.6.2) (2025-10-14)
 
-### 🐛 Bug修复
+### 🐛 Bug 修复
 
 * 修复错误的 uid 获取 ([39cb717](https://github.com/pynickle/Edge-Seeker/commit/39cb7176a0db694cbad1f8fecfadd5ac34ff2b15))
 
 ## [1.6.1](https://github.com/pynickle/Edge-Seeker/compare/v1.6.0...v1.6.1) (2025-10-14)
 
-### 🐛 Bug修复
+### 🐛 Bug 修复
 
 * 修复获取个人直播数据问题 ([17e66b3](https://github.com/pynickle/Edge-Seeker/commit/17e66b37cf27f3362ed3720d4664f5fa75b88712))
 
@@ -56,25 +56,25 @@
 
 ## [1.5.4](https://github.com/pynickle/Edge-Seeker/compare/v1.5.3...v1.5.4) (2025-10-14)
 
-### 🐛 Bug修复
+### 🐛 Bug 修复
 
 * 修复直播间状态判断错误 ([fa7fad7](https://github.com/pynickle/Edge-Seeker/commit/fa7fad7880226c149cd01cb5399d728aa7284192))
 
 ## [1.5.3](https://github.com/pynickle/Edge-Seeker/compare/v1.5.2...v1.5.3) (2025-10-14)
 
-### 🐛 Bug修复
+### 🐛 Bug 修复
 
 * 修复 referer ([a241991](https://github.com/pynickle/Edge-Seeker/commit/a241991019b4676a47951956c4a1e325d6a05c5d))
 
 ## [1.5.2](https://github.com/pynickle/Edge-Seeker/compare/v1.5.1...v1.5.2) (2025-10-14)
 
-### 🐛 Bug修复
+### 🐛 Bug 修复
 
 * 指定使用浏览器 cookie 请求一键三连 ([cf35d05](https://github.com/pynickle/Edge-Seeker/commit/cf35d05f545b9f8a2ad27141394b2af0564e8707))
 
 ## [1.5.1](https://github.com/pynickle/Edge-Seeker/compare/v1.5.0...v1.5.1) (2025-10-14)
 
-### 🐛 Bug修复
+### 🐛 Bug 修复
 
 * 修复千赞直播间信息网址问题 ([f29dbe9](https://github.com/pynickle/Edge-Seeker/commit/f29dbe9724d5564b1c81e48f82270946f11aee6b))
 
@@ -84,19 +84,19 @@
 
 * 加入获取 buvid3 方法 ([8a7de04](https://github.com/pynickle/Edge-Seeker/commit/8a7de04bdaa55e17ae80fc70b67af1f44d491c42))
 
-### 🐛 Bug修复
+### 🐛 Bug 修复
 
 * 修复千赞主播 id 不匹配的问题 ([6f00081](https://github.com/pynickle/Edge-Seeker/commit/6f000812d95127ad03a12574e846b21590d42cbe))
 
 ## [1.4.2](https://github.com/pynickle/Edge-Seeker/compare/v1.4.1...v1.4.2) (2025-10-14)
 
-### 🐛 Bug修复
+### 🐛 Bug 修复
 
 * 修复一键三连指令错误 ([8f873c0](https://github.com/pynickle/Edge-Seeker/commit/8f873c0e717e08337447f7506cc78becde438f30))
 
 ## [1.4.1](https://github.com/pynickle/Edge-Seeker/compare/v1.4.0...v1.4.1) (2025-10-14)
 
-### 🐛 Bug修复
+### 🐛 Bug 修复
 
 * 修复未注册的一键三连函数 ([dc1e22f](https://github.com/pynickle/Edge-Seeker/commit/dc1e22f5c81741c07780571ef232f7eb79cb7bdf))
 
@@ -120,13 +120,13 @@
 
 ## [1.2.2](https://github.com/pynickle/Edge-Seeker/compare/v1.2.1...v1.2.2) (2025-10-14)
 
-### 🐛 Bug修复
+### 🐛 Bug 修复
 
 * 修复无法获取 WBI Keys 的问题 ([78198b3](https://github.com/pynickle/Edge-Seeker/commit/78198b36db81c5f00b7080fde11309f8e83b0852))
 
 ## [1.2.1](https://github.com/pynickle/Edge-Seeker/compare/v1.2.0...v1.2.1) (2025-10-14)
 
-### 🐛 Bug修复
+### 🐛 Bug 修复
 
 * 修复 WBI 请求失败问题，去除 WBI 缓存 ([e2b3019](https://github.com/pynickle/Edge-Seeker/commit/e2b3019c9d1b033e6e7bb002bb093aad99fa146b))
 
@@ -138,20 +138,20 @@
 
 ## [1.1.6](https://github.com/pynickle/Edge-Seeker/compare/v1.1.5...v1.1.6) (2025-10-14)
 
-### 🐛 Bug修复
+### 🐛 Bug 修复
 
 * 修复首次绑定缺失保存字段 ([6b78c34](https://github.com/pynickle/Edge-Seeker/commit/6b78c34be9fd6f637c795296d88ff6409f5c3449))
 
 ## [1.1.5](https://github.com/pynickle/Edge-Seeker/compare/v1.1.4...v1.1.5) (2025-10-13)
 
-### 🐛 Bug修复
+### 🐛 Bug 修复
 
 * 修复错误的依赖 ([99df3c6](https://github.com/pynickle/Edge-Seeker/commit/99df3c645b36a4075f84177f2bf24e393f114f12))
 * 移除错误的导入 ([ba0b42b](https://github.com/pynickle/Edge-Seeker/commit/ba0b42b083407a40f731f52692859356dddf568c))
 
 ## [1.1.4](https://github.com/pynickle/Edge-Seeker/compare/v1.1.3...v1.1.4) (2025-10-13)
 
-### 🐛 Bug修复
+### 🐛 Bug 修复
 
 * 改为 cjs 尝试解决 ([84d1055](https://github.com/pynickle/Edge-Seeker/commit/84d1055d86b70bcd824fee0f20a4a06bc81888f1))
 
@@ -169,13 +169,13 @@
 
 ## [1.1.2](https://github.com/pynickle/Edge-Seeker/compare/v1.1.1...v1.1.2) (2025-10-13)
 
-### 🐛 Bug修复
+### 🐛 Bug 修复
 
 * 修复 type module 带来的问题 ([ff5efd2](https://github.com/pynickle/Edge-Seeker/commit/ff5efd24aa74fd419bbbb16b6ceb7d0823c4f22c))
 
 ## [1.1.1](https://github.com/pynickle/Edge-Seeker/compare/v1.1.0...v1.1.1) (2025-10-13)
 
-### 🐛 Bug修复
+### 🐛 Bug 修复
 
 * 使用具体地址而不是 regex 设置 cors ([4cc1837](https://github.com/pynickle/Edge-Seeker/commit/4cc1837e2ab2d966c19eaa01dc52ec1c652cf14a))
 

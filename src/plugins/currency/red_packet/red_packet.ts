@@ -349,7 +349,7 @@ export function red_packet(ctx: Context, config: Config) {
 
             // 构建状态消息
             const statusMessages = [
-                `红包ID：${packetId}`,
+                `红包 ID：${packetId}`,
                 `创建者：${(await getUserName(ctx, session, packet.creatorId)) || packet.creatorId}`,
                 `总金额：${packet.amount} 星币`,
                 `红包数量：${packet.totalCount} 个`,
@@ -385,7 +385,7 @@ export function red_packet(ctx: Context, config: Config) {
             const channelId = session.channelId;
             const now = Date.now();
 
-            // 查询当前频道中状态为active的红包
+            // 查询当前频道中状态为 active 的红包
             const activePackets = await ctx.database.get('red_packets', {
                 channelId,
                 status: 'active',
@@ -414,7 +414,7 @@ export function red_packet(ctx: Context, config: Config) {
                     ((packet.expiryTime - now) % (60 * 60 * 1000)) / (60 * 1000)
                 );
 
-                packetMessages.push(`🧧 【红包ID：${packet.id}】`);
+                packetMessages.push(`🧧 【红包 ID：${packet.id}】`);
                 packetMessages.push(`创建者：${creatorName}`);
                 packetMessages.push(
                     `总金额：${packet.amount} 星币，总数量：${packet.totalCount} 个`
@@ -482,7 +482,7 @@ export function red_packet(ctx: Context, config: Config) {
         const sigma = avg * 0.3;
         // 最小金额为 1
         const minAmount = 1;
-        // 最大金额不超过剩余金额减去剩余人数-1（确保剩下的人每人至少有1星币）
+        // 最大金额不超过剩余金额减去剩余人数 -1（确保剩下的人每人至少有 1 星币）
         const maxAmount = Math.min(
             Math.floor(2 * avg),
             packet.remainingAmount - (packet.remainingCount - 1)

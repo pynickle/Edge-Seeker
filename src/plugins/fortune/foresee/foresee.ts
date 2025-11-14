@@ -150,7 +150,7 @@ class ForeseePlugin {
             const html = await buildFortuneHtml(fortuneData, true);
             return await puppeteer.render(html);
         } catch (error) {
-            return `生成明日运势失败: ${error.message}`;
+            return `生成明日运势失败：${error.message}`;
         }
     }
 }
