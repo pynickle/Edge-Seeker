@@ -124,7 +124,7 @@ export class StarCoinHelper {
         amount: number
     ): Promise<boolean> {
         // 验证星币数量
-        if (amount <= 0 || !Number.isInteger(amount)) {
+        if (amount < 0 || !Number.isInteger(amount)) {
             ctx.logger.info(amount);
             return false;
         }
