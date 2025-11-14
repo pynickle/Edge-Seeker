@@ -1,6 +1,55 @@
 ﻿import axios from 'axios';
 import { MessageRecord, ProbabilityRecord } from '../utils/database';
 
+// 互斥锁管理器
+export class ChatLock {
+    private static locks = new Map<string, Promise<void>>();
+
+    static async acquire(
+        channelId: string,
+        userId: string,
+        username: string
+    ): Promise<{ acquired: boolean; waitTime?: number }> {
+        const lockKey = `daily-baka-chat-${channelId}`;
+        const startTime = Date.now();
+
+        // 如果已经有锁在等待，返回 false
+        if (this.locks.has(lockKey)) {
+            return { acquired: false };
+        }
+
+        // 创建新的 Promise 作为锁
+        let releaseLock: (() => void) | undefined;
+        const lockPromise = new Promise<void>((resolve) => {
+            releaseLock = resolve;
+        });
+
+        this.locks.set(lockKey, lockPromise);
+
+        const waitTime = Date.now() - startTime;
+        return { acquired: true, waitTime };
+    }
+
+    static async release(channelId: string): Promise<void> {
+        const lockKey = `daily-baka-chat-${channelId}`;
+        const lockPromise = this.locks.get(lockKey);
+
+        if (lockPromise) {
+            this.locks.delete(lockKey);
+            // 解决所有等待的 Promise
+            await Promise.resolve();
+        }
+    }
+
+    static async getLockStatus(channelId: string): Promise<string | null> {
+        const lockKey = `daily-baka-chat-${channelId}`;
+        if (this.locks.has(lockKey)) {
+            return '🔒 AI 对话中，请稍候...';
+        }
+        return null;
+    }
+}
+
 interface AIResponse {
     changes: { userId: string; probability: number }[];
     explanation: string;

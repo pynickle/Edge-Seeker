@@ -2,7 +2,7 @@
 import { Config } from '../../index';
 import { createTextMsgNode, getUserName } from '../../utils/onebot_helper';
 import { StarCoinHelper } from '../../utils/starcoin_helper';
-import { requestAIAdjustProbabilities } from './services/ai-service';
+import { ChatLock, requestAIAdjustProbabilities } from './services/ai-service';
 import { registerDailyJob } from './services/scheduler';
 import {
     MessageRecord,
@@ -125,111 +125,140 @@ export function daily_baka(ctx: Context, config: Config) {
             if (!config.daily_doofus.enabledGroups.includes(channelId))
                 return '🚫 此群未启用每日笨蛋功能哦～';
 
-            const count = (
-                await ctx.database.get('messages', {
-                    userId: userId,
-                    channelId,
-                    timestamp: { $gte: Date.now() - 24 * 3600 * 1000 },
-                })
-            ).length;
-            if (count >= config.daily_doofus.dailyMessageLimit)
-                return `😴 你今天的对话次数已用完啦～（${config.daily_doofus.dailyMessageLimit} 次）明天再来吧！`;
+            // 检查互斥锁状态
+            const lockStatus = await ChatLock.getLockStatus(channelId);
+            if (lockStatus) {
+                await session.send(lockStatus);
+                return;
+            }
 
-            const starsUsed = options.stars ?? 0;
-
-            const hasEnough = await StarCoinHelper.hasEnoughStarCoin(
-                ctx,
-                userId,
+            // 尝试获取互斥锁
+            const lockResult = await ChatLock.acquire(
                 channelId,
-                starsUsed
+                userId,
+                username
             );
-            if (!hasEnough) {
-                const currentStarCoin = await StarCoinHelper.getUserStarCoin(
+            if (!lockResult.acquired) {
+                await session.send('🔒 正在处理其他人的请求，请稍候再试～');
+                return;
+            }
+
+            try {
+                const count = (
+                    await ctx.database.get('messages', {
+                        userId: userId,
+                        channelId,
+                        timestamp: { $gte: Date.now() - 24 * 3600 * 1000 },
+                    })
+                ).length;
+                if (count >= config.daily_doofus.dailyMessageLimit)
+                    return `😴 你今天的对话次数已用完啦～（${config.daily_doofus.dailyMessageLimit} 次）明天再来吧！`;
+
+                const starsUsed = options.stars ?? 0;
+
+                const hasEnough = await StarCoinHelper.hasEnoughStarCoin(
                     ctx,
                     userId,
-                    channelId
+                    channelId,
+                    starsUsed
                 );
+                if (!hasEnough) {
+                    const currentStarCoin =
+                        await StarCoinHelper.getUserStarCoin(
+                            ctx,
+                            userId,
+                            channelId
+                        );
+                    await session.send(
+                        `💸 @${username}，星币不够啦～ 当前星币：${currentStarCoin}，需要：${starsUsed}，快去赚点星币吧！`
+                    );
+                    return;
+                }
+
+                // 扣除星币
+                const success = await StarCoinHelper.removeUserStarCoin(
+                    ctx,
+                    userId,
+                    channelId,
+                    starsUsed
+                );
+
+                if (!success) {
+                    await session.send(
+                        `😵 @${username}，星币扣除失败啦，请稍后再试哦～`
+                    );
+                    return;
+                }
+
+                const messages = await ctx.database.get('messages', {
+                    channelId,
+                });
+
+                const probs = await ctx.database.get('probability', {
+                    channelId,
+                });
+
+                // 记录原始概率
+                const originalProb =
+                    probs.find((p) => p.userId === userId)?.probability || 0;
+
+                await session.send('🤔 正在和 AI 沟通中，请稍候～');
+
+                const result = await requestAIAdjustProbabilities(
+                    config.daily_doofus.apiKey,
+                    config.daily_doofus.apiUrl,
+                    config.daily_doofus.model,
+                    userId,
+                    username,
+                    message,
+                    starsUsed,
+                    messages,
+                    probs,
+                    STAR_VALUE_PROMPT
+                );
+
+                await ctx.database.create('messages', {
+                    userId,
+                    channelId,
+                    content: message,
+                    timestamp: Date.now(),
+                    starsUsed,
+                });
+
+                for (const change of result.changes) {
+                    await ctx.database.set(
+                        'probability',
+                        { userId: change.userId, channelId: session.channelId },
+                        { probability: change.probability }
+                    );
+                }
+
+                // 获取更新后的概率
+                const updatedProb =
+                    result.changes.find((c) => c.userId === userId)
+                        ?.probability || originalProb;
+
+                const probChange = updatedProb - originalProb;
+                const changeText =
+                    probChange > 0
+                        ? `⬆️ 增加了 ${probChange.toFixed(2)}%`
+                        : probChange < 0
+                          ? `⬇️ 减少了 ${Math.abs(probChange).toFixed(2)}%`
+                          : '➡️ 没有变化';
+
+                const explanation = result.explanation
+                    ? `\n💬 对你说：${result.explanation}`
+                    : '';
+
                 await session.send(
-                    `💸 @${username}，星币不够啦～ 当前星币：${currentStarCoin}，需要：${starsUsed}，快去赚点星币吧！`
+                    `✨ AI 已完成分析！概率已更新\n📊 你的笨蛋概率：${originalProb.toFixed(2)}% → ${updatedProb.toFixed(2)}% (${changeText})${explanation}\n🎉 希望能逃过明天的"每日笨蛋"哦～`
                 );
-                return;
+            } catch (error) {
+                console.error('baka.chat error:', error);
+                await session.send(`😵 处理过程中出现错误，请稍后再试～`);
+            } finally {
+                // 释放互斥锁
+                await ChatLock.release(channelId);
             }
-
-            // 扣除星币
-            const success = await StarCoinHelper.removeUserStarCoin(
-                ctx,
-                userId,
-                channelId,
-                starsUsed
-            );
-
-            if (!success) {
-                await session.send(
-                    `😵 @${username}，星币扣除失败啦，请稍后再试哦～`
-                );
-                return;
-            }
-
-            const messages = await ctx.database.get('messages', {
-                channelId,
-            });
-
-            const probs = await ctx.database.get('probability', {
-                channelId,
-            });
-
-            // 记录原始概率
-            const originalProb =
-                probs.find((p) => p.userId === userId)?.probability || 0;
-
-            await session.send('🤔 正在和 AI 沟通中，请稍候～');
-
-            const result = await requestAIAdjustProbabilities(
-                config.daily_doofus.apiKey,
-                config.daily_doofus.apiUrl,
-                config.daily_doofus.model,
-                userId,
-                username,
-                message,
-                starsUsed,
-                messages,
-                probs,
-                STAR_VALUE_PROMPT
-            );
-
-            await ctx.database.create('messages', {
-                userId,
-                channelId,
-                content: message,
-                timestamp: Date.now(),
-                starsUsed,
-            });
-
-            for (const change of result.changes) {
-                await ctx.database.set(
-                    'probability',
-                    { userId: change.userId, channelId: session.channelId },
-                    { probability: change.probability }
-                );
-            }
-
-            // 获取更新后的概率
-            const updatedProb =
-                result.changes.find((c) => c.userId === userId)?.probability ||
-                originalProb;
-
-            const probChange = updatedProb - originalProb;
-            const changeText =
-                probChange > 0
-                    ? `⬆️ 增加了 ${probChange.toFixed(2)}%`
-                    : probChange < 0
-                      ? `⬇️ 减少了 ${Math.abs(probChange).toFixed(2)}%`
-                      : '➡️ 没有变化';
-
-            const explanation = result.explanation
-                ? `\n💬 对你说：${result.explanation}`
-                : '';
-
-            return `✨ AI 已完成分析！概率已更新\n📊 你的笨蛋概率：${originalProb.toFixed(2)}% → ${updatedProb.toFixed(2)}% (${changeText})${explanation}\n🎉 希望能逃过明天的"每日笨蛋"哦～`;
         });
 }
