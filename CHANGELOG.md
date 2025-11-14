@@ -1,3 +1,9 @@
+## [1.9.0](https://github.com/pynickle/Edge-Seeker/compare/v1.8.2...v1.9.0) (2025-11-14)
+
+### ✨ Features
+
+* add explanation for ai ([de41d9c](https://github.com/pynickle/Edge-Seeker/commit/de41d9ca29a3c1c30641fe4b01406990283bc6d3))
+
 ## [1.8.2](https://github.com/pynickle/Edge-Seeker/compare/v1.8.1...v1.8.2) (2025-11-14)
 
 ### 🐛 Bug Fixes
