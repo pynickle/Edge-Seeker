@@ -1,3 +1,9 @@
+## [1.13.0](https://github.com/pynickle/Edge-Seeker/compare/v1.12.0...v1.13.0) (2025-11-14)
+
+### ✨ Features
+
+* add manual trigger ([df2a6d5](https://github.com/pynickle/Edge-Seeker/commit/df2a6d5a9a32ed5d987383f5d29b7e68972d0a80))
+
 ## [1.12.0](https://github.com/pynickle/Edge-Seeker/compare/v1.11.2...v1.12.0) (2025-11-14)
 
 ### ✨ Features
