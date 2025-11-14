@@ -9,6 +9,7 @@ interface AIResponse {
 export async function requestAIAdjustProbabilities(
     apiKey: string,
     apiUrl: string,
+    model: string,
     userId: string,
     userName: string,
     message: string,
@@ -166,7 +167,7 @@ As 每日笨蛋概率分配 AI, you must follow the above Rules, execute tasks a
         const response = await axios.post(
             apiUrl,
             {
-                model: 'gpt-4o-mini',
+                model: model,
                 messages,
                 response_format: {
                     type: 'json_schema',

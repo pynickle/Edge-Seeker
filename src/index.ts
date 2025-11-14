@@ -95,6 +95,7 @@ export interface Config {
         enabledGroups: string[];
         apiKey: string;
         apiUrl: string;
+        model: string;
         dailyMessageLimit: number;
     };
 }
@@ -166,6 +167,7 @@ export const Config: Schema<Config> = Schema.object({
         apiUrl: Schema.string().default(
             'https://api.openai.com/v1/chat/completions'
         ),
+        model: Schema.string().default('gpt-5'),
         dailyMessageLimit: Schema.number()
             .default(2)
             .description('每人每日最大消息次数'),

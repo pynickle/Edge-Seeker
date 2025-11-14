@@ -187,6 +187,7 @@ export function daily_baka(ctx: Context, config: Config) {
             const result = await requestAIAdjustProbabilities(
                 config.daily_doofus.apiKey,
                 config.daily_doofus.apiUrl,
+                config.daily_doofus.model,
                 userId,
                 username,
                 message,
