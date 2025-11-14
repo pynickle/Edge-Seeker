@@ -48,7 +48,7 @@ export function formatProbabilityTable(
         (a, b) => b.probability - a.probability
     );
 
-    // 定义排名对应的emoji
+    // 定义排名对应的 emoji
     const rankEmojis = [
         '🥇',
         '🥈',
