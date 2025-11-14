@@ -1,3 +1,9 @@
+## [1.10.0](https://github.com/pynickle/Edge-Seeker/compare/v1.9.1...v1.10.0) (2025-11-14)
+
+### ✨ Features
+
+* add custom ai model ([c4c9783](https://github.com/pynickle/Edge-Seeker/commit/c4c9783afe6861a467cb58306a9de85621d0e181))
+
 ## [1.9.1](https://github.com/pynickle/Edge-Seeker/compare/v1.9.0...v1.9.1) (2025-11-14)
 
 ### 🚀 Improvements
