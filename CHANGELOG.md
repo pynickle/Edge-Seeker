@@ -1,3 +1,9 @@
+## [1.11.0](https://github.com/pynickle/Edge-Seeker/compare/v1.10.0...v1.11.0) (2025-11-14)
+
+### ✨ Features
+
+* add chat lock ([37c5ff6](https://github.com/pynickle/Edge-Seeker/commit/37c5ff61ae24d0b454bf2c014109fcf31204ee9e))
+
 ## [1.10.0](https://github.com/pynickle/Edge-Seeker/compare/v1.9.1...v1.10.0) (2025-11-14)
 
 ### ✨ Features
