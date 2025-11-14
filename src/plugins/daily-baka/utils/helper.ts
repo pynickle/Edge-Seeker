@@ -33,7 +33,7 @@ export async function generateInitialProbabilitiesWithoutSession(
             userName: await getUserNameWithoutSession(
                 ctx,
                 channelId,
-                userId.toString()
+                userId
             ),
             probability: base,
         }))

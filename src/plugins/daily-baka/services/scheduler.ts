@@ -54,7 +54,7 @@ export async function finalizeDailySelection(ctx: Context, channelId: string) {
     const newProbs = await generateInitialProbabilitiesWithoutSession(
         ctx,
         channelId,
-        users.map((u) => u.user_id)
+        users.map((u) => u.user_id.toString())
     );
 
     // 移除旧概率
