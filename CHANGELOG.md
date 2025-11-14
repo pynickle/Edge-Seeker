@@ -1,3 +1,9 @@
+## [1.8.2](https://github.com/pynickle/Edge-Seeker/compare/v1.8.1...v1.8.2) (2025-11-14)
+
+### 🐛 Bug Fixes
+
+* fix remove star coin not working ([5728f9b](https://github.com/pynickle/Edge-Seeker/commit/5728f9b54d11bb35f84030f3e66ab03910f47f63))
+
 ## [1.8.1](https://github.com/pynickle/Edge-Seeker/compare/v1.8.0...v1.8.1) (2025-11-14)
 
 ### 🚀 Improvements
