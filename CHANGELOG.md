@@ -1,3 +1,13 @@
+## [1.8.0](https://github.com/pynickle/Edge-Seeker/compare/v1.7.4...v1.8.0) (2025-11-14)
+
+### ✨ Features
+
+* add daily baka ([85ec4ee](https://github.com/pynickle/Edge-Seeker/commit/85ec4ee2624562058fd9edab6decb5c58adddd14))
+
+### 🐛 Bug Fixes
+
+* add missing depencency ([fb14695](https://github.com/pynickle/Edge-Seeker/commit/fb14695cc7083a9fc7660c7b312b2454bad37392))
+
 ## [1.7.4](https://github.com/pynickle/Edge-Seeker/compare/v1.7.3...v1.7.4) (2025-10-27)
 
 ### ♻️ Code Refactoring
