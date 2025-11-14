@@ -225,6 +225,10 @@ export function daily_baka(ctx: Context, config: Config) {
                       ? `⬇️ 减少了 ${Math.abs(probChange).toFixed(2)}%`
                       : '➡️ 没有变化';
 
-            return `✨ AI 已完成分析！概率已更新\n📊 你的笨蛋概率：${originalProb.toFixed(2)}% → ${updatedProb.toFixed(2)}% (${changeText})\n🎉 希望能逃过明天的"每日笨蛋"哦～`;
+            const explanation = result.explanation
+                ? `\n💬 对你说：${result.explanation}`
+                : '';
+
+            return `✨ AI 已完成分析！概率已更新\n📊 你的笨蛋概率：${originalProb.toFixed(2)}% → ${updatedProb.toFixed(2)}% (${changeText})${explanation}\n🎉 希望能逃过明天的"每日笨蛋"哦～`;
         });
 }
