@@ -1,3 +1,9 @@
+## [1.13.3](https://github.com/pynickle/Edge-Seeker/compare/v1.13.2...v1.13.3) (2025-11-14)
+
+### 🐛 Bug Fixes
+
+* fix ([c701c71](https://github.com/pynickle/Edge-Seeker/commit/c701c71512c4d1add8c11a9cb6a117f6f953a542))
+
 ## [1.13.2](https://github.com/pynickle/Edge-Seeker/compare/v1.13.1...v1.13.2) (2025-11-14)
 
 ### 🐛 Bug Fixes
