@@ -46,7 +46,7 @@ async function sendDailyPreview(ctx: Context, channelId: string) {
 }
 
 // 正式公布功能
-async function finalizeDailySelection(ctx: Context, channelId: string) {
+export async function finalizeDailySelection(ctx: Context, channelId: string) {
     const bot = ctx.bots[0];
     if (!bot) return;
 

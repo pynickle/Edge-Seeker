@@ -3,7 +3,7 @@ import { Config } from '../../index';
 import { createTextMsgNode, getUserName } from '../../utils/onebot_helper';
 import { StarCoinHelper } from '../../utils/starcoin_helper';
 import { ChatLock, requestAIAdjustProbabilities } from './services/ai-service';
-import { registerDailyJob } from './services/scheduler';
+import { finalizeDailySelection, registerDailyJob } from './services/scheduler';
 import {
     MessageRecord,
     ProbabilityRecord,
@@ -114,6 +114,12 @@ export function daily_baka(ctx: Context, config: Config) {
             ]);
         }
     );
+
+    ctx.command('baka.cron', '手动触发结算').action(async ({ session }) => {
+        for (const channelId of config.daily_doofus.enabledGroups) {
+            await finalizeDailySelection(ctx, channelId);
+        }
+    });
 
     ctx.command('baka.chat <message:text>', '与每日笨蛋 AI 对话')
         .option('stars', '-s <stars:number> 消耗星币数量')
