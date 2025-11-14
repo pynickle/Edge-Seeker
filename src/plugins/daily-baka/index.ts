@@ -30,7 +30,7 @@ export function daily_baka(ctx: Context, config: Config) {
     const STAR_VALUE_PROMPT = `- 50 星币 ≈ 一句特别有影响力或改变性强的话。\n- 100 星币 ≈ 明显改变一个人的概率。\n- 300 星币 ≈ 强烈影响最终分配结果。`;
 
     // 手动生成初始概率
-    ctx.command('baka.init', '生成初始概率', { authority: 4 }).action(
+    ctx.command('baka.refresh', '重置为初始概率', { authority: 4 }).action(
         async ({ session }) => {
             const { channelId } = session;
 
@@ -76,7 +76,6 @@ export function daily_baka(ctx: Context, config: Config) {
         }
     );
 
-    // 查看自己概率
     ctx.command('baka.prob', '查看自己的笨蛋概率').action(
         async ({ session }) => {
             const { userId, channelId } = session;
@@ -91,8 +90,7 @@ export function daily_baka(ctx: Context, config: Config) {
         }
     );
 
-    // 管理员查看全体概率
-    ctx.command('baka.prob.all', '查看全体笨蛋概率', { authority: 4 }).action(
+    ctx.command('baka.prob.all', '查看全体笨蛋概率').action(
         async ({ session }) => {
             const botName =
                 (await getUserName(this.ctx, session, session.bot?.userId)) ||
