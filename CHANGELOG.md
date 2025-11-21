@@ -1,3 +1,9 @@
+## [1.13.4](https://github.com/pynickle/Edge-Seeker/compare/v1.13.3...v1.13.4) (2025-11-21)
+
+### 🚀 Improvements
+
+* add more image for jrys ([19ab91b](https://github.com/pynickle/Edge-Seeker/commit/19ab91bdf6e74cc23322dca347dfa4aeb8bd1738))
+
 ## [1.13.3](https://github.com/pynickle/Edge-Seeker/compare/v1.13.2...v1.13.3) (2025-11-14)
 
 ### 🐛 Bug Fixes
