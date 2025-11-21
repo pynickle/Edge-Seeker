@@ -162,7 +162,7 @@ export async function getFortuneImageBase64(
         const base64 = response.data.toString('base64');
         return `data:image/jpeg;base64,${base64}`;
     } catch (error) {
-        const randomImageNum = randomInt(1, 5, randomNum.toString());
+        const randomImageNum = randomInt(1, 50, randomNum.toString());
         const backupUrl = `http://47.117.27.240:5140/files/${randomImageNum}.jpg`;
         try {
             const backupResponse = await axios.get(backupUrl, {
