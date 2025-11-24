@@ -687,7 +687,7 @@ class BaikeQuizPlugin {
 
         // 验证申诉理由是否为空
         if (!reason || reason.trim().length === 0) {
-            return '请提供申诉理由！格式：\`quiz.appeal 你的理由\`';
+            return '请提供申诉理由！格式：`quiz.appeal 你的理由`';
         }
 
         // 获取最近一次的问答记录
@@ -842,12 +842,12 @@ class BaikeQuizPlugin {
                 return await this.listAppeals();
             case 'approve':
                 if (!id) {
-                    return '❌ 请指定要批准的申诉 ID！\n使用方法：\`quiz.admin.appeal approve <申诉 ID>\`';
+                    return '❌ 请指定要批准的申诉 ID！\n使用方法：`quiz.admin.appeal approve <申诉 ID>`';
                 }
                 return await this.approveAppeal(session, id);
             case 'reject':
                 if (!id) {
-                    return '❌ 请指定要拒绝的申诉 ID！\n使用方法：\`quiz.admin.appeal reject <申诉 ID>\`';
+                    return '❌ 请指定要拒绝的申诉 ID！\n使用方法：`quiz.admin.appeal reject <申诉 ID>`';
                 }
                 return await this.rejectAppeal(id);
             default:
@@ -917,7 +917,7 @@ class BaikeQuizPlugin {
         }
 
         messages.push(
-            '\n使用 \`quiz.admin.appeal approve/reject <申诉 ID>\` 来处理申诉。'
+            '\n使用 `quiz.admin.appeal approve/reject <申诉 ID>` 来处理申诉。'
         );
         return messages.join('\n');
     }

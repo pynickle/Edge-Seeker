@@ -30,11 +30,7 @@ export async function generateInitialProbabilitiesWithoutSession(
     return Promise.all(
         users.map(async (userId) => ({
             userId,
-            userName: await getUserNameWithoutSession(
-                ctx,
-                channelId,
-                userId
-            ),
+            userName: await getUserNameWithoutSession(ctx, channelId, userId),
             probability: base,
         }))
     );
