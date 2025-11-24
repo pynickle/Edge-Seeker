@@ -1,3 +1,11 @@
+## [1.13.5](https://github.com/pynickle/Edge-Seeker/compare/v1.13.4...v1.13.5) (2025-11-24)
+
+### 🔧 Miscellaneous Changes
+
+* fix missing dependency ([82a2c1e](https://github.com/pynickle/Edge-Seeker/commit/82a2c1ebfd7e5678a8acf5291e620a9e9f1698d7))
+* fix missing external dependency ([a08ea10](https://github.com/pynickle/Edge-Seeker/commit/a08ea108e513603ca784385c833d0c87da4d8c0c))
+* use pnpm and oxlint ([b6eee26](https://github.com/pynickle/Edge-Seeker/commit/b6eee2635293adb0f179c7b35fac49ea640aa6a6))
+
 ## [1.13.4](https://github.com/pynickle/Edge-Seeker/compare/v1.13.3...v1.13.4) (2025-11-21)
 
 ### 🚀 Improvements
