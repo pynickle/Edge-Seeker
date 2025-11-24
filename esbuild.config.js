@@ -17,6 +17,7 @@ await build({
         'whoiser',
         'koishi-plugin-puppeteer',
         'koishi-plugin-adapter-onebot',
+        '@koishijs/plugin-server',
     ],
     plugins: [yamlPlugin.yamlPlugin({})],
 })
