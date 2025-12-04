@@ -19,8 +19,9 @@
     "plugin"
   ],
   "scripts": {
-    "lint": "npx oxlint ./src && eslint ./src --ext .ts",
-    "lint:fix": "npx oxlint ./src --fix && eslint ./src --ext .ts --fix",
+    "lint": "npx oxlint ./src",
+    "lint:fix": "npx oxlint ./src --fix",
+    "fmt": "npx oxfmt ./src",
     "build": "node esbuild.config.js && tsc --emitDeclarationOnly",
     "release": "semantic-release"
   },
@@ -42,15 +43,15 @@
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/git": "^10.0.1",
-    "@semantic-release/npm": "^13.1.1",
+    "@semantic-release/npm": "^13.1.2",
     "@semantic-release/release-notes-generator": "^14.1.0",
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",
     "@types/node": "^24.10.1",
     "conventional-changelog-conventionalcommits": "^9.1.0",
-    "esbuild": "^0.27.0",
+    "esbuild": "^0.27.1",
     "esbuild-plugin-yaml": "^0.0.1",
-    "oxlint": "^1.30.0",
-    "prettier": "^3.6.2",
+    "oxfmt": "^0.16.0",
+    "oxlint": "^1.31.0",
     "semantic-release": "^25.0.2",
     "typescript": "^5.9.3"
   }
