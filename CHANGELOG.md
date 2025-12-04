@@ -1,3 +1,11 @@
+## [1.13.6](https://github.com/pynickle/Edge-Seeker/compare/v1.13.5...v1.13.6) (2025-12-04)
+
+### 🔧 Miscellaneous Changes
+
+* add new pnpm lock ([eba1cb4](https://github.com/pynickle/Edge-Seeker/commit/eba1cb4d022c90c40c8d5acc9f28ab6fb8a8387e))
+* fix pnpm lock ([327e1e3](https://github.com/pynickle/Edge-Seeker/commit/327e1e3fd7f5be09ca72abbb5539eeb4a27c0603))
+* use oxfmt ([d527b7c](https://github.com/pynickle/Edge-Seeker/commit/d527b7c46b4761c254822e57eabc8e19719f839e))
+
 ## [1.13.5](https://github.com/pynickle/Edge-Seeker/compare/v1.13.4...v1.13.5) (2025-11-24)
 
 ### 🔧 Miscellaneous Changes
