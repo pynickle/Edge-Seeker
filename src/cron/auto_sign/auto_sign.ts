@@ -12,7 +12,7 @@ export function auto_sign(ctx: Context, config: Config) {
         if (bot.internal?.sendGroupSign) {
             for (const groupId of config.auto_sign.groupIds) {
                 try {
-                    await bot.internal._request('set_group_sign', { groupId });
+                    await bot.internal._request('set_group_sign', { group_id: groupId });
                     ctx.logger.info(`已在群 ${groupId} 发送打卡请求`);
                 } catch (error) {
                     ctx.logger.warn(`自动打卡失败（群 ${groupId}）: ${error}`);
