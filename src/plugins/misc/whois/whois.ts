@@ -1,9 +1,9 @@
-﻿import dayjs from 'dayjs';
+import { stickEmoji } from '../../../utils/msg_emoji/emoji_helper';
+import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import { Context } from 'koishi';
 import whoiser from 'whoiser';
-import { stickEmoji } from '../../../utils/msg_emoji/emoji_helper';
 
 // 启用 UTC 和时区插件
 dayjs.extend(utc);
@@ -69,9 +69,7 @@ export function whois(ctx: Context) {
                     ? `注册局域名 ID: ${mainWhois['Registry Domain ID']}\n`
                     : '';
 
-                output += mainWhois['DNSSEC']
-                    ? `DNSSEC: ${mainWhois['DNSSEC']}\n`
-                    : '';
+                output += mainWhois['DNSSEC'] ? `DNSSEC: ${mainWhois['DNSSEC']}\n` : '';
 
                 return output;
             } catch (error) {

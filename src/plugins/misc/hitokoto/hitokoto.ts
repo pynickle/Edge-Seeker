@@ -1,6 +1,6 @@
+import { Config } from '../../../index';
 import axios from 'axios';
 import { Context } from 'koishi';
-import { Config } from '../../../index';
 
 // 一言类型映射
 export const HitokotoTypeMap: Record<string, string> = {
@@ -67,13 +67,10 @@ export function hitokoto(ctx: Context, config: Config) {
                 }
 
                 // 发送请求到一言 API
-                const response = await axios.get<HitokotoResponse>(
-                    'http://hitokoto_api:8000',
-                    {
-                        params,
-                        timeout: 5000, // 10 秒超时
-                    }
-                );
+                const response = await axios.get<HitokotoResponse>('http://hitokoto_api:8000', {
+                    params,
+                    timeout: 5000, // 10 秒超时
+                });
 
                 const data = response.data;
 

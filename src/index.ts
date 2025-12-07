@@ -1,4 +1,3 @@
-import { Context, Schema } from 'koishi';
 import { auto_red_packet } from './intervals/auto_red_packet/auto_red_packet';
 import { gh_url } from './message/github/gh_url';
 import { bind } from './plugins/bili/bind/bind';
@@ -27,6 +26,7 @@ import { zanwo } from './plugins/platform/zanwo/zanwo';
 import { cookie } from './server/bili_cookie/cookie';
 import { nav_user_info } from './server/bili_nav_user_info/nav_user_info';
 import { cors } from './server/cors';
+import { Context, Schema } from 'koishi';
 
 export const inject = ['database', 'puppeteer', 'cron', 'server'];
 
@@ -164,13 +164,9 @@ export const Config: Schema<Config> = Schema.object({
     daily_doofus: Schema.object({
         enabledGroups: Schema.array(Schema.string()),
         apiKey: Schema.string().role('secret'),
-        apiUrl: Schema.string().default(
-            'https://api.openai.com/v1/chat/completions'
-        ),
+        apiUrl: Schema.string().default('https://api.openai.com/v1/chat/completions'),
         model: Schema.string().default('gpt-5'),
-        dailyMessageLimit: Schema.number()
-            .default(2)
-            .description('每人每日最大消息次数'),
+        dailyMessageLimit: Schema.number().default(2).description('每人每日最大消息次数'),
     }),
 }).i18n({
     'zh-CN': require('./locales/zh-CN.schema.yml'),

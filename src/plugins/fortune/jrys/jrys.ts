@@ -1,12 +1,12 @@
-import { Context, Session } from 'koishi';
-import 'koishi-plugin-puppeteer';
 import { stickEmoji } from '../../../utils/msg_emoji/emoji_helper';
+import 'koishi-plugin-puppeteer';
 import {
     FortuneData,
     buildFortuneHtml,
     calculateFortune,
     getFortuneImageBase64,
 } from '../../../utils/plugins/jrys/fortune_helper';
+import { Context, Session } from 'koishi';
 
 class JrysPlugin {
     constructor(private ctx: Context) {
@@ -20,11 +20,7 @@ class JrysPlugin {
     }
 
     private async handleJrysCommand(session: Session): Promise<string> {
-        const fortuneData = await calculateFortune(
-            this.ctx,
-            session.userId,
-            new Date()
-        );
+        const fortuneData = await calculateFortune(this.ctx, session.userId, new Date());
         try {
             if (session.onebot) {
                 await stickEmoji(this.ctx, session, ['棒棒糖']);
@@ -35,10 +31,7 @@ class JrysPlugin {
         }
     }
 
-    private async renderToImage(
-        fortuneData: FortuneData,
-        userId: string
-    ): Promise<string> {
+    private async renderToImage(fortuneData: FortuneData, userId: string): Promise<string> {
         const { puppeteer } = this.ctx;
 
         if (!puppeteer) {

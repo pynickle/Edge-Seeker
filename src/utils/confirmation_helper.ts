@@ -19,11 +19,7 @@ export class ConfirmationManager {
      * @param timeout 超时时间（秒）
      * @returns Promise<boolean> 确认结果，true 表示确认，false 表示取消或超时
      */
-    createConfirmation(
-        ctx: Context,
-        session: Session,
-        timeout: number
-    ): Promise<boolean> {
+    createConfirmation(ctx: Context, session: Session, timeout: number): Promise<boolean> {
         const key = `${session.platform}:${session.userId}`;
 
         // 如果已经有未确认的请求，拒绝新请求
@@ -51,10 +47,7 @@ export class ConfirmationManager {
             const key = `${session.platform}:${session.userId}`;
             const confirmation = manager.pendingConfirmations.get(key);
 
-            if (
-                confirmation &&
-                /^(确认|取消)$/.test(session.content?.trim() || '')
-            ) {
+            if (confirmation && /^(确认|取消)$/.test(session.content?.trim() || '')) {
                 clearTimeout(confirmation.timer);
                 manager.pendingConfirmations.delete(key);
                 confirmation.resolve(session.content.trim() === '确认');

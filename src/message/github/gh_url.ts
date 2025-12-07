@@ -1,5 +1,5 @@
-﻿import { Context, h } from 'koishi';
 import { Config } from '../../index';
+import { Context, h } from 'koishi';
 
 export const name = 'gh_url';
 
@@ -12,9 +12,7 @@ async function generateHash(url: string): Promise<string> {
         const data = encoder.encode(url);
         const hashBuffer = await crypto.subtle.digest('SHA-256', data);
         const hashArray = new Uint8Array(hashBuffer);
-        return Array.from(hashArray, (byte) =>
-            byte.toString(16).padStart(2, '0')
-        ).join('');
+        return Array.from(hashArray, (byte) => byte.toString(16).padStart(2, '0')).join('');
     } catch (error) {
         throw new Error('无法生成 URL 哈希');
     }
@@ -26,10 +24,7 @@ async function generateHash(url: string): Promise<string> {
 function isValidGitHubUrl(url: string): boolean {
     try {
         const urlObj = new URL(url);
-        return (
-            urlObj.hostname === 'github.com' &&
-            urlObj.pathname.split('/').length >= 3
-        );
+        return urlObj.hostname === 'github.com' && urlObj.pathname.split('/').length >= 3;
     } catch {
         return false;
     }
@@ -56,9 +51,7 @@ function isValidRepoFormat(input: string): boolean {
 /**
  * 解析 GitHub URL 或仓库名称，返回 owner 和 repo
  */
-function parseGitHubInfo(
-    input: string
-): { owner: string; repo: string } | null {
+function parseGitHubInfo(input: string): { owner: string; repo: string } | null {
     // 处理完整 URL
     if (isValidGitHubUrl(input)) {
         try {
@@ -105,17 +98,13 @@ export function gh_url(ctx: Context, config: Config) {
     ctx.on('message', async (session) => {
         try {
             // 提取文本内容
-            const textContent = h
-                .select(session.elements, 'text')
-                .join('')
-                .trim();
+            const textContent = h.select(session.elements, 'text').join('').trim();
 
             if (!textContent) return;
 
             // 检查是否为 GitHub 相关内容
             const isGitHubUrl = textContent.startsWith('https://github.com/');
-            const isRepoName =
-                config.github.enableShortName && isValidRepoFormat(textContent);
+            const isRepoName = config.github.enableShortName && isValidRepoFormat(textContent);
 
             if (!isGitHubUrl && !isRepoName) return;
 

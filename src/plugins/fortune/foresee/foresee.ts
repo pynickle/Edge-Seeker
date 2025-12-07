@@ -1,19 +1,13 @@
-import { Context, Session } from 'koishi';
+import { ConfirmationManager, useConfirmationHelper } from '../../../utils/confirmation_helper';
 import 'koishi-plugin-puppeteer';
-import {
-    ConfirmationManager,
-    useConfirmationHelper,
-} from '../../../utils/confirmation_helper';
 import { stickEmoji } from '../../../utils/msg_emoji/emoji_helper';
 import {
     calculateAndStoreLuck,
     formatLuckMessage,
 } from '../../../utils/plugins/jrrp/random_luck_helper';
-import {
-    buildFortuneHtml,
-    calculateFortune,
-} from '../../../utils/plugins/jrys/fortune_helper';
+import { buildFortuneHtml, calculateFortune } from '../../../utils/plugins/jrys/fortune_helper';
 import { getTomorrowString } from '../../../utils/time_helper';
+import { Context, Session } from 'koishi';
 
 class ForeseePlugin {
     private confirmationManager: ConfirmationManager;
@@ -76,11 +70,7 @@ class ForeseePlugin {
 请发送「确认」继续，「取消」放弃操作（20 秒后自动取消）`);
 
         // 创建确认 Promise
-        const confirmed = await this.confirmationManager.createConfirmation(
-            this.ctx,
-            session,
-            20
-        );
+        const confirmed = await this.confirmationManager.createConfirmation(this.ctx, session, 20);
         if (!confirmed) {
             await session.send('❌ 操作已取消或超时');
             return false;
@@ -133,11 +123,7 @@ class ForeseePlugin {
             tomorrow.setDate(tomorrow.getDate() + 1);
 
             // 计算明日运势数据
-            const fortuneData = await calculateFortune(
-                this.ctx,
-                session.userId,
-                tomorrow
-            );
+            const fortuneData = await calculateFortune(this.ctx, session.userId, tomorrow);
 
             // 添加表情
             if (session.onebot) {

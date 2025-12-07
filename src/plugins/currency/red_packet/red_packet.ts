@@ -1,9 +1,9 @@
-import { Context } from 'koishi';
 import { Config } from '../../../index';
 import { useConfirmationHelper } from '../../../utils/confirmation_helper';
 import { createTextMsgNode, getUserName } from '../../../utils/onebot_helper';
 import { normalRandom } from '../../../utils/pseudo_random_helper';
 import { StarCoinHelper } from '../../../utils/starcoin_helper';
+import { Context } from 'koishi';
 
 interface RedPacket {
     id: number;
@@ -149,8 +149,7 @@ export function red_packet(ctx: Context, config: Config) {
 
                 // 计算过期时间
                 const now = Date.now();
-                const expiryTime =
-                    now + config.red_packet.packetExpiryTime * 60 * 60 * 1000;
+                const expiryTime = now + config.red_packet.packetExpiryTime * 60 * 60 * 1000;
 
                 // 创建红包记录
                 const packet = await ctx.database.create('red_packets', {
@@ -220,11 +219,7 @@ export function red_packet(ctx: Context, config: Config) {
 
             // 检查是否过期
             if (now > packet.expiryTime) {
-                await ctx.database.set(
-                    'red_packets',
-                    { id: packetId },
-                    { status: 'expired' }
-                );
+                await ctx.database.set('red_packets', { id: packetId }, { status: 'expired' });
                 return '❌ 红包已过期';
             }
 
@@ -239,19 +234,12 @@ export function red_packet(ctx: Context, config: Config) {
 
             // 检查红包是否已被领完
             if (packet.remainingAmount <= 0 || packet.remainingCount <= 0) {
-                await ctx.database.set(
-                    'red_packets',
-                    { id: packetId },
-                    { status: 'completed' }
-                );
+                await ctx.database.set('red_packets', { id: packetId }, { status: 'completed' });
                 return '❌ 红包已被领完';
             }
 
             // 计算领取金额（使用正态分布）
-            const claimAmount = calculateClaimAmount(
-                packet,
-                `${packetId}_${userId}_${now}`
-            );
+            const claimAmount = calculateClaimAmount(packet, `${packetId}_${userId}_${now}`);
 
             // 判断是否是最后一个红包
             const isLastPacket = packet.remainingCount === 1;
@@ -276,12 +264,7 @@ export function red_packet(ctx: Context, config: Config) {
             });
 
             // 增加用户星币
-            await StarCoinHelper.addUserStarCoin(
-                ctx,
-                userId,
-                channelId,
-                claimAmount
-            );
+            await StarCoinHelper.addUserStarCoin(ctx, userId, channelId, claimAmount);
 
             // 通知发送者
             const creatorName = session.bot
@@ -290,11 +273,7 @@ export function red_packet(ctx: Context, config: Config) {
             const receiverName = session.username || userId;
 
             // 获取领取后的星币数量
-            const remainingStarCoin = await StarCoinHelper.getUserStarCoin(
-                ctx,
-                userId,
-                channelId
-            );
+            const remainingStarCoin = await StarCoinHelper.getUserStarCoin(ctx, userId, channelId);
 
             // 构建合并后的通知消息
             let notificationMessage = '';
@@ -338,9 +317,7 @@ export function red_packet(ctx: Context, config: Config) {
             const now = Date.now();
             let remainingTime = '';
             if (packet.status === 'active' && now < packet.expiryTime) {
-                const hoursLeft = Math.floor(
-                    (packet.expiryTime - now) / (60 * 60 * 1000)
-                );
+                const hoursLeft = Math.floor((packet.expiryTime - now) / (60 * 60 * 1000));
                 const minutesLeft = Math.floor(
                     ((packet.expiryTime - now) % (60 * 60 * 1000)) / (60 * 1000)
                 );
@@ -364,13 +341,10 @@ export function red_packet(ctx: Context, config: Config) {
             if (claims.length > 0) {
                 statusMessages.push('领取明细：');
                 // 按金额排序，显示手气最佳
-                const sortedClaims = [...claims].sort(
-                    (a, b) => b.amount - a.amount
-                );
+                const sortedClaims = [...claims].sort((a, b) => b.amount - a.amount);
                 for (const claim of sortedClaims) {
                     const userName =
-                        (await getUserName(ctx, session, claim.userId)) ||
-                        claim.userId;
+                        (await getUserName(ctx, session, claim.userId)) || claim.userId;
                     statusMessages.push(`- ${userName}：${claim.amount} 星币`);
                 }
             }
@@ -380,80 +354,61 @@ export function red_packet(ctx: Context, config: Config) {
     );
 
     // 查看当前频道可领取的红包命令
-    ctx.command('redpacket.remain', '查看当前频道可领取的红包').action(
-        async ({ session }) => {
-            const channelId = session.channelId;
-            const now = Date.now();
+    ctx.command('redpacket.remain', '查看当前频道可领取的红包').action(async ({ session }) => {
+        const channelId = session.channelId;
+        const now = Date.now();
 
-            // 查询当前频道中状态为 active 的红包
-            const activePackets = await ctx.database.get('red_packets', {
-                channelId,
-                status: 'active',
-                expiryTime: { $gt: now },
-                remainingCount: { $gt: 0 },
-                remainingAmount: { $gt: 0 },
-            });
+        // 查询当前频道中状态为 active 的红包
+        const activePackets = await ctx.database.get('red_packets', {
+            channelId,
+            status: 'active',
+            expiryTime: { $gt: now },
+            remainingCount: { $gt: 0 },
+            remainingAmount: { $gt: 0 },
+        });
 
-            if (activePackets.length === 0) {
-                return '🎈 当前频道没有可领取的红包';
-            }
-
-            // 按创建时间降序排列（最新的红包在前）
-            activePackets.sort((a, b) => b.createTime - a.createTime);
-
-            // 构建红包列表消息
-            const packetMessages = ['🎉 当前频道可领取的红包：'];
-            for (const packet of activePackets) {
-                const creatorName =
-                    (await getUserName(ctx, session, packet.creatorId)) ||
-                    packet.creatorId;
-                const hoursLeft = Math.floor(
-                    (packet.expiryTime - now) / (60 * 60 * 1000)
-                );
-                const minutesLeft = Math.floor(
-                    ((packet.expiryTime - now) % (60 * 60 * 1000)) / (60 * 1000)
-                );
-
-                packetMessages.push(`🧧 【红包 ID：${packet.id}】`);
-                packetMessages.push(`创建者：${creatorName}`);
-                packetMessages.push(
-                    `总金额：${packet.amount} 星币，总数量：${packet.totalCount} 个`
-                );
-                packetMessages.push(
-                    `剩余：${packet.remainingAmount} 星币，${packet.remainingCount} 个`
-                );
-                packetMessages.push(
-                    `有效期：${hoursLeft}小时${minutesLeft}分钟`
-                );
-            }
-
-            const botName =
-                (await getUserName(this.ctx, session, session.bot?.userId)) ||
-                'Bot';
-
-            // 抢红包提示文本
-            const claimHint = '💡 发送 [抢红包 红包 ID] 来领取红包！';
-
-            if (session.onebot) {
-                await session.onebot.sendGroupForwardMsg(channelId, [
-                    createTextMsgNode(
-                        session.bot?.userId,
-                        botName,
-                        '🎉 当前频道可领取的红包：'
-                    ),
-                    createTextMsgNode(
-                        session.bot?.userId,
-                        botName,
-                        packetMessages.slice(1).join('\n')
-                    ),
-                    createTextMsgNode(session.bot?.userId, botName, claimHint),
-                ]);
-            } else {
-                packetMessages.push(claimHint);
-                return packetMessages.join('\n');
-            }
+        if (activePackets.length === 0) {
+            return '🎈 当前频道没有可领取的红包';
         }
-    );
+
+        // 按创建时间降序排列（最新的红包在前）
+        activePackets.sort((a, b) => b.createTime - a.createTime);
+
+        // 构建红包列表消息
+        const packetMessages = ['🎉 当前频道可领取的红包：'];
+        for (const packet of activePackets) {
+            const creatorName =
+                (await getUserName(ctx, session, packet.creatorId)) || packet.creatorId;
+            const hoursLeft = Math.floor((packet.expiryTime - now) / (60 * 60 * 1000));
+            const minutesLeft = Math.floor(
+                ((packet.expiryTime - now) % (60 * 60 * 1000)) / (60 * 1000)
+            );
+
+            packetMessages.push(`🧧 【红包 ID：${packet.id}】`);
+            packetMessages.push(`创建者：${creatorName}`);
+            packetMessages.push(`总金额：${packet.amount} 星币，总数量：${packet.totalCount} 个`);
+            packetMessages.push(
+                `剩余：${packet.remainingAmount} 星币，${packet.remainingCount} 个`
+            );
+            packetMessages.push(`有效期：${hoursLeft}小时${minutesLeft}分钟`);
+        }
+
+        const botName = (await getUserName(this.ctx, session, session.bot?.userId)) || 'Bot';
+
+        // 抢红包提示文本
+        const claimHint = '💡 发送 [抢红包 红包 ID] 来领取红包！';
+
+        if (session.onebot) {
+            await session.onebot.sendGroupForwardMsg(channelId, [
+                createTextMsgNode(session.bot?.userId, botName, '🎉 当前频道可领取的红包：'),
+                createTextMsgNode(session.bot?.userId, botName, packetMessages.slice(1).join('\n')),
+                createTextMsgNode(session.bot?.userId, botName, claimHint),
+            ]);
+        } else {
+            packetMessages.push(claimHint);
+            return packetMessages.join('\n');
+        }
+    });
 
     // 辅助函数：获取状态文本
     function getStatusText(status: string): string {
@@ -509,11 +464,7 @@ export function red_packet(ctx: Context, config: Config) {
 
             for (const packet of expiredPackets) {
                 // 更新红包状态为过期
-                await ctx.database.set(
-                    'red_packets',
-                    { id: packet.id },
-                    { status: 'expired' }
-                );
+                await ctx.database.set('red_packets', { id: packet.id }, { status: 'expired' });
 
                 // 如果红包还有剩余金额，可以选择退还，但当前需求没有明确要求，所以这里暂时不处理
                 if (packet.remainingAmount > 0) {

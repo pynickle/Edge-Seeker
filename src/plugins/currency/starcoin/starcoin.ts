@@ -1,8 +1,8 @@
-import { Context, Time } from 'koishi';
-import * as emoji from 'node-emoji';
 import { createTextMsgNode, getUserName } from '../../../utils/onebot_helper';
 import { randomInt } from '../../../utils/pseudo_random_helper';
 import { StarCoinHelper } from '../../../utils/starcoin_helper';
+import { Context, Time } from 'koishi';
+import * as emoji from 'node-emoji';
 
 // 定义数据库表结构
 export interface SignIn {
@@ -56,10 +56,7 @@ class StarCoinPlugin {
     /**
      * 获取用户签到记录
      */
-    private async getUserRecord(
-        userId: string,
-        channelId: string
-    ): Promise<SignIn | null> {
+    private async getUserRecord(userId: string, channelId: string): Promise<SignIn | null> {
         const records = await this.ctx.database
             .select('sign_in')
             .where({ userId, channelId })
@@ -142,9 +139,7 @@ class StarCoinPlugin {
             .action(this.handleMyStarCoin.bind(this));
 
         // 星币排行榜命令
-        this.ctx
-            .command('starcoin.rank', '查看群内星币排行')
-            .action(this.handleRank.bind(this));
+        this.ctx.command('starcoin.rank', '查看群内星币排行').action(this.handleRank.bind(this));
 
         // 设置用户星币命令（需要管理员权限）
         this.ctx
@@ -181,11 +176,7 @@ class StarCoinPlugin {
 
         const { userId, channelId, username } = session;
         const now = new Date();
-        const today = new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate()
-        );
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
         // 获取用户记录
         const userRecord = await this.getUserRecord(userId, channelId);
@@ -213,24 +204,17 @@ class StarCoinPlugin {
         const baseCoin = randomInt(10, 50, Date.now().toString());
 
         // 随机事件
-        const { earnedCoin, eventMessage } =
-            this.calculateRandomEvent(baseCoin);
+        const { earnedCoin, eventMessage } = this.calculateRandomEvent(baseCoin);
 
         starCoin += earnedCoin;
         consecutiveDays += 1;
 
         // 连续签到奖励
-        const { bonus, bonusMessage } =
-            this.calculateConsecutiveBonus(consecutiveDays);
+        const { bonus, bonusMessage } = this.calculateConsecutiveBonus(consecutiveDays);
         starCoin += bonus;
 
         // 更新数据库 - 先更新星币数量
-        await StarCoinHelper.setUserStarCoin(
-            this.ctx,
-            userId,
-            channelId,
-            starCoin
-        );
+        await StarCoinHelper.setUserStarCoin(this.ctx, userId, channelId, starCoin);
 
         // 更新连续签到天数和最后签到时间
         await this.ctx.database.set(
@@ -241,8 +225,7 @@ class StarCoinPlugin {
 
         // 生成响应
         const randomEmoji = emoji.random().emoji;
-        const randomPrompt =
-            this.prompts[Math.floor(Math.random() * this.prompts.length)];
+        const randomPrompt = this.prompts[Math.floor(Math.random() * this.prompts.length)];
 
         return [
             `${randomPrompt} @${username}`,
@@ -252,11 +235,7 @@ class StarCoinPlugin {
         ].join('\n');
     }
 
-    private async handleRank({
-        session,
-    }: {
-        session: any;
-    }): Promise<string | void> {
+    private async handleRank({ session }: { session: any }): Promise<string | void> {
         if (!session.guildId) {
             return '请在群聊中使用排行榜命令哦！😺';
         }
@@ -275,43 +254,25 @@ class StarCoinPlugin {
         try {
             const rankEntries = await Promise.all(
                 users.map(async (user, index) => {
-                    const userName = await getUserName(
-                        this.ctx,
-                        session,
-                        user.userId
-                    );
+                    const userName = await getUserName(this.ctx, session, user.userId);
                     return `${index + 1}. ${userName} - ${user.starCoin} 星币`;
                 })
             );
 
             const rankStr = rankEntries.join('\n');
-            const botName =
-                (await getUserName(this.ctx, session, session.bot?.userId)) ||
-                'Bot';
+            const botName = (await getUserName(this.ctx, session, session.bot?.userId)) || 'Bot';
 
             await session.onebot.sendGroupForwardMsg(session.onebot.group_id, [
-                createTextMsgNode(
-                    session.bot?.userId,
-                    botName,
-                    '🌟 群内星币排行榜 🌟'
-                ),
+                createTextMsgNode(session.bot?.userId, botName, '🌟 群内星币排行榜 🌟'),
                 createTextMsgNode(session.bot?.userId, botName, rankStr),
-                createTextMsgNode(
-                    session.bot?.userId,
-                    botName,
-                    '快签到冲上榜单吧！🎉'
-                ),
+                createTextMsgNode(session.bot?.userId, botName, '快签到冲上榜单吧！🎉'),
             ]);
         } catch (error) {
             return '获取排行榜失败，请稍后重试！';
         }
     }
 
-    private async handleMyStarCoin({
-        session,
-    }: {
-        session: any;
-    }): Promise<string> {
+    private async handleMyStarCoin({ session }: { session: any }): Promise<string> {
         const { userId, channelId, username } = session;
         const userRecord = await this.getUserRecord(userId, channelId);
 
@@ -326,9 +287,7 @@ class StarCoinPlugin {
             `@${username} 的星币记录 ${randomEmoji}`,
             `当前星币：${starCoin}`,
             `连续签到：${consecutiveDays} 天`,
-            consecutiveDays >= 7
-                ? '你已经是个签到达人啦！🎉'
-                : '继续签到，7 天有额外奖励哦！',
+            consecutiveDays >= 7 ? '你已经是个签到达人啦！🎉' : '继续签到，7 天有额外奖励哦！',
         ].join('\n');
     }
 

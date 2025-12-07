@@ -1,5 +1,5 @@
-﻿import { Context } from 'koishi';
 import { Config } from '../../../index';
+import { Context } from 'koishi';
 
 // 定义数据库表结构
 interface UserBiliInfo {
@@ -137,34 +137,32 @@ export async function bind(ctx: Context, config: Config) {
     });
 
     // 注册查询绑定状态指令
-    ctx.command('bili.status', '查询 B 站账号绑定状态').action(
-        async ({ session }) => {
-            if (!session.guildId) {
-                return '🌸 请在群聊中使用查询命令哦！';
-            }
-
-            const { userId } = session;
-
-            try {
-                const existingBind = await ctx.database
-                    .select('user_bili_info')
-                    .where({ userId })
-                    .execute();
-
-                if (existingBind.length === 0) {
-                    return '🌸 你还没有绑定 B 站账号！\n✨ 使用命令：bili.bind 绑定码 来绑定账号\n🌐 访问 http://47.117.27.240:5000/ 获取绑定码';
-                }
-
-                const bindInfo = existingBind[0];
-                const bindTime = new Date(bindInfo.bindTime).toLocaleString();
-                const userName = bindInfo.userName || '未知用户';
-                const mid = bindInfo.mid || '未知 UID';
-
-                return `✨ B 站账号绑定状态：已绑定 ✨\n👤 用户名：${userName}\n🆔 用户 UID：${mid}\n⏰ 绑定时间：${bindTime}\n💖 感谢您的绑定！`;
-            } catch (error) {
-                ctx.logger('bili-bind').error('查询绑定状态失败：', error);
-                return '🌸 查询过程中出现错误，请稍后重试！';
-            }
+    ctx.command('bili.status', '查询 B 站账号绑定状态').action(async ({ session }) => {
+        if (!session.guildId) {
+            return '🌸 请在群聊中使用查询命令哦！';
         }
-    );
+
+        const { userId } = session;
+
+        try {
+            const existingBind = await ctx.database
+                .select('user_bili_info')
+                .where({ userId })
+                .execute();
+
+            if (existingBind.length === 0) {
+                return '🌸 你还没有绑定 B 站账号！\n✨ 使用命令：bili.bind 绑定码 来绑定账号\n🌐 访问 http://47.117.27.240:5000/ 获取绑定码';
+            }
+
+            const bindInfo = existingBind[0];
+            const bindTime = new Date(bindInfo.bindTime).toLocaleString();
+            const userName = bindInfo.userName || '未知用户';
+            const mid = bindInfo.mid || '未知 UID';
+
+            return `✨ B 站账号绑定状态：已绑定 ✨\n👤 用户名：${userName}\n🆔 用户 UID：${mid}\n⏰ 绑定时间：${bindTime}\n💖 感谢您的绑定！`;
+        } catch (error) {
+            ctx.logger('bili-bind').error('查询绑定状态失败：', error);
+            return '🌸 查询过程中出现错误，请稍后重试！';
+        }
+    });
 }

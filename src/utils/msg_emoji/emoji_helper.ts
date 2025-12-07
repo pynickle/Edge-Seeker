@@ -1,26 +1,18 @@
-﻿import { Context, Session } from 'koishi';
 import { EMOJI_MAP } from './emoji_mapping';
+import { Context, Session } from 'koishi';
 
 function resolveEmojiId(input: string): string | null {
     if (EMOJI_MAP[input]) return EMOJI_MAP[input];
 }
 
-async function addReaction(
-    session: Session,
-    messageId: number | string,
-    emojiId: string
-) {
+async function addReaction(session: Session, messageId: number | string, emojiId: string) {
     await session.onebot._request('set_msg_emoji_like', {
         message_id: messageId,
         emoji_id: emojiId,
     });
 }
 
-export async function stickEmoji(
-    ctx: Context,
-    session: Session,
-    emojis: string[]
-) {
+export async function stickEmoji(ctx: Context, session: Session, emojis: string[]) {
     try {
         const targetId = session.messageId;
 

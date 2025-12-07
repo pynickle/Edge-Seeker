@@ -1,12 +1,7 @@
 import { createHash } from 'crypto';
 
 export type RandomAlgorithm = 'xoshiro256pp' | 'pcg64';
-export type BiasType =
-    | 'slight_up'
-    | 'moderate_up'
-    | 'none'
-    | 'slight_down'
-    | 'moderate_down';
+export type BiasType = 'slight_up' | 'moderate_up' | 'none' | 'slight_down' | 'moderate_down';
 
 export interface RandomOptions {
     algorithm?: RandomAlgorithm;
@@ -56,9 +51,7 @@ export function randomBool(
     probability: number = 0.5,
     options: RandomOptions = {}
 ): boolean {
-    return (
-        (seed.length > 0 ? random(seed, options) : Math.random()) < probability
-    );
+    return (seed.length > 0 ? random(seed, options) : Math.random()) < probability;
 }
 
 /**
@@ -70,9 +63,7 @@ export function randomChoice<T>(
     options: RandomOptions = {}
 ): T {
     const index = Math.floor(
-        seed.length > 0
-            ? random(seed, options) * array.length
-            : Math.random() * array.length
+        seed.length > 0 ? random(seed, options) * array.length : Math.random() * array.length
     );
     return array[index];
 }
@@ -106,10 +97,7 @@ export function normalRandom(
 /**
  * 创建随机数生成器
  */
-export function createGenerator(
-    seed: string,
-    options: RandomOptions
-): () => number {
+export function createGenerator(seed: string, options: RandomOptions): () => number {
     const { algorithm = 'xoshiro256pp', bias = 'none' } = options;
 
     let baseGenerator: () => number;
@@ -164,17 +152,14 @@ function createXoshiro256ppGenerator(seed: string): () => number {
 // 目前有问题，先用 xoshiro256pp 代替
 function createPcg64Generator(seed: string): () => number {
     const hash = createHash('sha256').update(seed).digest();
-    let state: bigint =
-        (BigInt(hash.readBigUInt64BE(0)) << 64n) |
-        BigInt(hash.readBigUInt64BE(8));
+    let state: bigint = (BigInt(hash.readBigUInt64BE(0)) << 64n) | BigInt(hash.readBigUInt64BE(8));
     let inc: bigint = (BigInt(hash.readBigUInt64BE(16)) << 1n) | 1n; // 确保奇数
 
     if (state === 0n) {
         state = 1n;
     }
 
-    const PCG_DEFAULT_MULTIPLIER_128 =
-        2549297995355413924n * 4865540591571396615n;
+    const PCG_DEFAULT_MULTIPLIER_128 = 2549297995355413924n * 4865540591571396615n;
     const PCG_DEFAULT_INCREMENT_128 = inc;
 
     const rotr = (value: bigint, rot: bigint): bigint => {
@@ -185,8 +170,7 @@ function createPcg64Generator(seed: string): () => number {
     return () => {
         const oldState = state;
         state =
-            (oldState * PCG_DEFAULT_MULTIPLIER_128 +
-                PCG_DEFAULT_INCREMENT_128) &
+            (oldState * PCG_DEFAULT_MULTIPLIER_128 + PCG_DEFAULT_INCREMENT_128) &
             ((1n << 128n) - 1n);
         const word = ((oldState >> 64n) ^ oldState) & ((1n << 64n) - 1n);
         const rot = oldState >> 122n;
@@ -197,10 +181,7 @@ function createPcg64Generator(seed: string): () => number {
     };
 }
 
-export function applyBias(
-    generator: () => number,
-    bias: BiasType | number
-): () => number {
+export function applyBias(generator: () => number, bias: BiasType | number): () => number {
     let power: number;
 
     if (typeof bias === 'number') {

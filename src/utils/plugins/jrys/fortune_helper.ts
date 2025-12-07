@@ -1,15 +1,10 @@
-import axios from 'axios';
-import { Context } from 'koishi';
-import 'koishi-plugin-puppeteer';
-import { Solar } from 'lunar-typescript';
 import { BuffType } from '../../../plugins/currency/prop/inventory/inventory';
 import { hasActiveBuff } from '../../prop_helper';
-import {
-    BiasType,
-    random,
-    randomChoice,
-    randomInt,
-} from '../../pseudo_random_helper';
+import 'koishi-plugin-puppeteer';
+import { BiasType, random, randomChoice, randomInt } from '../../pseudo_random_helper';
+import axios from 'axios';
+import { Context } from 'koishi';
+import { Solar } from 'lunar-typescript';
 
 export interface FortuneData {
     score: number; // 运势分数
@@ -79,11 +74,7 @@ export async function calculateFortune(
     let bias: BiasType = 'none';
     if (!isTomorrow) {
         // 只有今日运势才考虑幸运卡效果
-        const hasLuckyCard = await hasActiveBuff(
-            ctx,
-            userId,
-            BuffType.LUCKY_CARD
-        );
+        const hasLuckyCard = await hasActiveBuff(ctx, userId, BuffType.LUCKY_CARD);
         if (hasLuckyCard) {
             bias = 'slight_up';
         }
@@ -149,9 +140,7 @@ export async function calculateFortune(
 /**
  * 获取图片并转换为 base64 格式，支持超时和备用图片
  */
-export async function getFortuneImageBase64(
-    randomNum: number
-): Promise<string> {
+export async function getFortuneImageBase64(randomNum: number): Promise<string> {
     const picsumUrl = `https://picsum.photos/seed/${randomNum}/400/120`;
 
     try {
@@ -310,9 +299,7 @@ export function getColorValue(colorName: string): string {
     }
 
     // 如果传入的是中文名称，查找对应的英文键
-    const englishKey = Object.keys(COLOR_NAME_MAP).find(
-        (key) => COLOR_NAME_MAP[key] === colorName
-    );
+    const englishKey = Object.keys(COLOR_NAME_MAP).find((key) => COLOR_NAME_MAP[key] === colorName);
     if (englishKey) {
         return COLOR_MAP[englishKey] || '#000000';
     }

@@ -1,6 +1,6 @@
-import { Context } from 'koishi';
 import { Config } from '../../index';
 import { randomInt } from '../../utils/pseudo_random_helper';
+import { Context } from 'koishi';
 
 // 声明数据表，用于存储上次发送红包的信息
 export interface AutoRedPacketRecord {
@@ -41,10 +41,7 @@ export function auto_red_packet(ctx: Context, cfg: Config) {
     };
 
     // 更新上次发送红包的时间
-    const updateLastSendTime = async (
-        channelId: string,
-        time: number
-    ): Promise<void> => {
+    const updateLastSendTime = async (channelId: string, time: number): Promise<void> => {
         const records = await ctx.database.get('auto_red_packet_record', {
             channelId,
         });
@@ -89,10 +86,7 @@ export function auto_red_packet(ctx: Context, cfg: Config) {
         const elapsedTime = now - lastSendTime;
 
         // 首次发送或超过随机间隔时间
-        return (
-            lastSendTime === 0 ||
-            elapsedTime >= randomInt(minInterval, maxInterval)
-        );
+        return lastSendTime === 0 || elapsedTime >= randomInt(minInterval, maxInterval);
     };
 
     // 自动发送红包

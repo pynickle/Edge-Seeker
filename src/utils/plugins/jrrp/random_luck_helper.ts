@@ -1,9 +1,6 @@
-import { Context, Session } from 'koishi';
-import {
-    getFestivalBonus,
-    getFestivals,
-} from '../../../plugins/fortune/jrrp/festival';
+import { getFestivalBonus, getFestivals } from '../../../plugins/fortune/jrrp/festival';
 import { randomInt } from '../../pseudo_random_helper';
+import { Context, Session } from 'koishi';
 
 // 运势等级配置接口
 export interface LuckLevel {
@@ -219,11 +216,7 @@ export function formatLuckMessage(
 /**
  * 格式化今日人品消息 - 为 jrrp 插件使用
  */
-export function formatTodayLuckMessage(
-    userId: string,
-    date: string,
-    luck: number
-): string {
+export function formatTodayLuckMessage(userId: string, date: string, luck: number): string {
     const luckLevel = LUCK_LEVELS.find((level) => luck >= level.min);
     let message = luckLevel?.message(luck) || `今日人品值：${luck}`;
 

@@ -1,6 +1,6 @@
-import { Context, Session } from 'koishi';
 import { StarCoinHelper } from '../../../../utils/starcoin_helper';
 import { ITEMS } from '../item_mapping';
+import { Context, Session } from 'koishi';
 
 // 商店会话状态接口
 interface MarketSession {
@@ -37,11 +37,7 @@ class MarketPlugin {
                 const content = session.content.trim();
 
                 // 处理退出商店
-                if (
-                    content === '退出' ||
-                    content === 'quit' ||
-                    content === 'exit'
-                ) {
+                if (content === '退出' || content === 'quit' || content === 'exit') {
                     this.closeMarketSession(sessionKey);
                     await session.send(`🛒 已退出商店。`);
                     return;
@@ -49,11 +45,7 @@ class MarketPlugin {
 
                 // 处理购买请求
                 const itemIndex = parseInt(content) - 1;
-                if (
-                    !isNaN(itemIndex) &&
-                    itemIndex >= 0 &&
-                    itemIndex < ITEMS.length
-                ) {
+                if (!isNaN(itemIndex) && itemIndex >= 0 && itemIndex < ITEMS.length) {
                     await this.handlePurchase(session, itemIndex);
                     return;
                 }
@@ -103,10 +95,7 @@ class MarketPlugin {
         ];
 
         // 按道具类型分组
-        const itemsByType: Record<
-            string,
-            Array<{ index: number; item: (typeof ITEMS)[0] }>
-        > = {
+        const itemsByType: Record<string, Array<{ index: number; item: (typeof ITEMS)[0] }>> = {
             buff: [],
             other: [],
             consumable: [],
@@ -132,9 +121,7 @@ class MarketPlugin {
             if (items && items.length > 0) {
                 marketMessage.push(`\n${typeNames[type]}：`);
                 items.forEach(({ index, item }) => {
-                    marketMessage.push(
-                        `${index}. ${item.name} - ${item.price}星币`
-                    );
+                    marketMessage.push(`${index}. ${item.name} - ${item.price}星币`);
                     marketMessage.push(`   ${item.description}`);
                 });
             }
@@ -142,10 +129,7 @@ class MarketPlugin {
 
         return marketMessage.join('\n');
     }
-    private async handlePurchase(
-        session: Session,
-        itemIndex: number
-    ): Promise<void> {
+    private async handlePurchase(session: Session, itemIndex: number): Promise<void> {
         const { userId, channelId, username } = session;
         const sessionKey = `${channelId}:${userId}`;
         const item = ITEMS[itemIndex];
@@ -219,15 +203,8 @@ class MarketPlugin {
         }
     }
 
-    private async getUserStarCoins(
-        userId: string,
-        channelId: string
-    ): Promise<number> {
-        return await StarCoinHelper.getUserStarCoin(
-            this.ctx,
-            userId,
-            channelId
-        );
+    private async getUserStarCoins(userId: string, channelId: string): Promise<number> {
+        return await StarCoinHelper.getUserStarCoin(this.ctx, userId, channelId);
     }
 }
 

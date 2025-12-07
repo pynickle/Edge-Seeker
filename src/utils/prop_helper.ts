@@ -1,14 +1,10 @@
-// 通用方法：使用 buff 类型道具
-import { Context, Session } from 'koishi';
 import { BuffType } from '../plugins/currency/prop/inventory/inventory';
 import { Item } from '../plugins/currency/prop/item_mapping';
 import { formatDate } from './time_helper';
+// 通用方法：使用 buff 类型道具
+import { Context, Session } from 'koishi';
 
-export async function useBuffItem(
-    session: Session,
-    ctx: Context,
-    item: Item
-): Promise<string> {
+export async function useBuffItem(session: Session, ctx: Context, item: Item): Promise<string> {
     const { userId, channelId, username } = session;
     const { id: itemId, name: itemName, buffConfig } = item;
 
@@ -28,11 +24,7 @@ export async function useBuffItem(
     }
 
     // 获取当前 buff 的剩余天数和最大结束日期
-    const currentRemainingDays = await getBuffRemainingDays(
-        ctx,
-        userId,
-        buffTypeEnum
-    );
+    const currentRemainingDays = await getBuffRemainingDays(ctx, userId, buffTypeEnum);
     const totalDuration = currentRemainingDays + durationDays;
 
     // 检查是否超过最大叠加天数
@@ -47,20 +39,13 @@ export async function useBuffItem(
     }
 
     // 添加或更新 buff 效果
-    const newEndDate = await addOrUpdateBuffEffect(
-        ctx,
-        userId,
-        buffTypeEnum,
-        durationDays
-    );
+    const newEndDate = await addOrUpdateBuffEffect(ctx, userId, buffTypeEnum, durationDays);
 
     // 获取日期信息用于反馈消息
     const today = new Date();
     const endDateStr = formatDate(newEndDate);
     const totalDays =
-        Math.ceil(
-            (newEndDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-        ) + 1;
+        Math.ceil((newEndDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
     // 检查是否是过期后重新使用
     const hadExpired = currentRemainingDays === 0;

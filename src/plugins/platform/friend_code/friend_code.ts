@@ -1,6 +1,6 @@
-import { Context } from 'koishi';
 import { getUserName } from '../../../utils/onebot_helper';
 import { randomInt } from '../../../utils/pseudo_random_helper';
+import { Context } from 'koishi';
 
 export const name = 'friend_code';
 
@@ -10,10 +10,7 @@ export function friend_code(ctx: Context) {
     const userTimers = new Map<string, NodeJS.Timeout>();
 
     // 验证验证码是否有效
-    async function validateCode(
-        userId: string,
-        code: string
-    ): Promise<boolean> {
+    async function validateCode(userId: string, code: string): Promise<boolean> {
         try {
             // 检查用户是否有验证码记录
             if (!userVerificationCodes.has(userId)) {
@@ -22,9 +19,7 @@ export function friend_code(ctx: Context) {
 
             const storedCode = userVerificationCodes.get(userId)!;
 
-            ctx.logger.warn(
-                `用户 ${userId} 提交的验证码：${code}, 存储的验证码：${storedCode}`
-            );
+            ctx.logger.warn(`用户 ${userId} 提交的验证码：${code}, 存储的验证码：${storedCode}`);
             userVerificationCodes.forEach((user, code) =>
                 ctx.logger.warn(`存储的验证码 - 用户：${user}, 验证码：${code}`)
             );
@@ -50,60 +45,52 @@ export function friend_code(ctx: Context) {
     }
 
     // 注册生成验证码的命令
-    ctx.command('friend', '获取加好友验证码（有效期 1 分钟）').action(
-        async ({ session }) => {
-            if (!session.onebot) {
-                return '❌ 此命令仅支持 OneBot 适配器！';
-            }
-
-            const { userId } = session;
-            Date.now();
-            const code = randomInt(100000, 999999); // 1 分钟有效期
-
-            try {
-                // 清除用户之前的验证码和定时器（如果存在）
-                if (userTimers.has(userId)) {
-                    clearTimeout(userTimers.get(userId)!);
-                    userTimers.delete(userId);
-                }
-
-                // 存储新的验证码
-                userVerificationCodes.set(userId, code);
-
-                userVerificationCodes.forEach((user, code) =>
-                    ctx.logger.warn(
-                        `存储的验证码 222 - 用户：${user}, 验证码：${code}`
-                    )
-                );
-
-                // 设置 1 分钟后自动清理验证码的定时器
-                const timerId = setTimeout(() => {
-                    if (userVerificationCodes.has(userId)) {
-                        userVerificationCodes.delete(userId);
-                        userTimers.delete(userId);
-                        ctx.logger.debug(
-                            `已自动清理用户 ${userId} 的过期验证码`
-                        );
-                    }
-                }, 60000); // 1 分钟 = 60000 毫秒
-
-                userVerificationCodes.forEach((user, code) =>
-                    ctx.logger.warn(
-                        `存储的验证码 333 - 用户：${user}, 验证码：${code}`
-                    )
-                );
-
-                // 保存定时器 ID
-                userTimers.set(userId, timerId);
-
-                // 发送验证码
-                return `${await getUserName(ctx, session, userId)}，您的加好友验证码是：${code}\n有效期 1 分钟，请在添加机器人好友时将此验证码作为验证信息发送。`;
-            } catch (error) {
-                ctx.logger.error('生成验证码失败：', error);
-                return '❌ 生成验证码失败，请稍后重试！';
-            }
+    ctx.command('friend', '获取加好友验证码（有效期 1 分钟）').action(async ({ session }) => {
+        if (!session.onebot) {
+            return '❌ 此命令仅支持 OneBot 适配器！';
         }
-    );
+
+        const { userId } = session;
+        Date.now();
+        const code = randomInt(100000, 999999); // 1 分钟有效期
+
+        try {
+            // 清除用户之前的验证码和定时器（如果存在）
+            if (userTimers.has(userId)) {
+                clearTimeout(userTimers.get(userId)!);
+                userTimers.delete(userId);
+            }
+
+            // 存储新的验证码
+            userVerificationCodes.set(userId, code);
+
+            userVerificationCodes.forEach((user, code) =>
+                ctx.logger.warn(`存储的验证码 222 - 用户：${user}, 验证码：${code}`)
+            );
+
+            // 设置 1 分钟后自动清理验证码的定时器
+            const timerId = setTimeout(() => {
+                if (userVerificationCodes.has(userId)) {
+                    userVerificationCodes.delete(userId);
+                    userTimers.delete(userId);
+                    ctx.logger.debug(`已自动清理用户 ${userId} 的过期验证码`);
+                }
+            }, 60000); // 1 分钟 = 60000 毫秒
+
+            userVerificationCodes.forEach((user, code) =>
+                ctx.logger.warn(`存储的验证码 333 - 用户：${user}, 验证码：${code}`)
+            );
+
+            // 保存定时器 ID
+            userTimers.set(userId, timerId);
+
+            // 发送验证码
+            return `${await getUserName(ctx, session, userId)}，您的加好友验证码是：${code}\n有效期 1 分钟，请在添加机器人好友时将此验证码作为验证信息发送。`;
+        } catch (error) {
+            ctx.logger.error('生成验证码失败：', error);
+            return '❌ 生成验证码失败，请稍后重试！';
+        }
+    });
 
     // 处理好友请求
     ctx.on('friend-request', async (session) => {

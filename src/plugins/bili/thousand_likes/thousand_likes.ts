@@ -1,19 +1,11 @@
+import { extractBiliJct } from '../../../utils/bili/cookie_parser';
+import { encWbi, getWbiKeys, initWbiKeysCache } from '../../../utils/bili/wbi_helper';
+import { getRandomUserAgent } from '../../../utils/web/web_helper';
 import axios from 'axios';
 import { Context } from 'koishi';
-import { extractBiliJct } from '../../../utils/bili/cookie_parser';
-import {
-    encWbi,
-    getWbiKeys,
-    initWbiKeysCache,
-} from '../../../utils/bili/wbi_helper';
-import { getRandomUserAgent } from '../../../utils/web/web_helper';
 
 // 发送千赞请求的核心函数
-async function sendThousandLikes(
-    ctx: Context,
-    userId: string,
-    roomId: string
-): Promise<string> {
+async function sendThousandLikes(ctx: Context, userId: string, roomId: string): Promise<string> {
     try {
         // 从数据库获取用户绑定的 B 站信息
         const userBiliInfo = await ctx.database
@@ -94,10 +86,7 @@ async function sendThousandLikes(
 
         // 计算 MD5 签名
         const crypto = await import('crypto');
-        const md5 = crypto
-            .createHash('md5')
-            .update(signedQuery.slice(0, -8))
-            .digest('hex');
+        const md5 = crypto.createHash('md5').update(signedQuery.slice(0, -8)).digest('hex');
         signedQuery = signedQuery.slice(0, -8) + md5;
 
         const requestUrl = `${baseUrl}?${signedQuery}`;
@@ -130,10 +119,7 @@ export const name = 'bili-thousand-likes';
 export async function thousand_likes(ctx: Context) {
     initWbiKeysCache(ctx);
 
-    ctx.command(
-        'bili.thousand-likes <roomId:string>',
-        '向指定直播间发送 1000 次点赞'
-    )
+    ctx.command('bili.thousand-likes <roomId:string>', '向指定直播间发送 1000 次点赞')
         .alias('bili.qz')
         .action(async ({ session }, roomId) => {
             const { userId } = session;

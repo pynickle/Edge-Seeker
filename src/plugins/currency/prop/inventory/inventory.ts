@@ -1,7 +1,7 @@
-import { Context, Session } from 'koishi';
 import { Config } from '../../../../index';
 import { useBuffItem } from '../../../../utils/prop_helper';
 import { ITEMS } from '../item_mapping';
+import { Context, Session } from 'koishi';
 
 // 定义用户道具接口
 export interface UserItem {
@@ -87,9 +87,7 @@ class InventoryPlugin {
         // 查看道具库命令
         this.ctx
             .command('inventory', '查看你的道具库')
-            .action(async ({ session }) =>
-                this.handleInventoryCommand(session)
-            );
+            .action(async ({ session }) => this.handleInventoryCommand(session));
 
         // 使用道具命令
         this.ctx
@@ -158,11 +156,7 @@ class InventoryPlugin {
             // 查找是否有带使用说明的道具
             const hasInstructions = userItems.some((item) => {
                 const itemInfo = items.find((i) => i.id === item.itemId);
-                return (
-                    itemInfo &&
-                    itemInfo.type === 'other' &&
-                    itemInfo.usageInstructions
-                );
+                return itemInfo && itemInfo.type === 'other' && itemInfo.usageInstructions;
             });
 
             if (hasInstructions) {
@@ -172,26 +166,19 @@ class InventoryPlugin {
             }
         }
 
-        inventoryMessage.push(
-            '\n输入 "use 道具名" 使用道具，例如 "use 幸运卡"'
-        );
+        inventoryMessage.push('\n输入 "use 道具名" 使用道具，例如 "use 幸运卡"');
 
         return inventoryMessage.join('\n');
     }
 
-    private async handleUseItemCommand(
-        session: Session,
-        itemName: string
-    ): Promise<string> {
+    private async handleUseItemCommand(session: Session, itemName: string): Promise<string> {
         const { userId, channelId, username } = session;
 
         // 获取道具列表
         const items = [...ITEMS];
 
         // 查找对应的道具
-        const item = items.find(
-            (i) => i.name.includes(itemName) || itemName.includes(i.name)
-        );
+        const item = items.find((i) => i.name.includes(itemName) || itemName.includes(i.name));
 
         if (!item) {
             return `@${username}，找不到名为 "${itemName}" 的道具。`;

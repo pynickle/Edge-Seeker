@@ -1,8 +1,8 @@
 ﻿import '@koishijs/plugin-server';
-import crypto from 'crypto';
-import { Context } from 'koishi';
 import { Config } from '../../index';
 import { randomInt } from '../../utils/pseudo_random_helper';
+import crypto from 'crypto';
+import { Context } from 'koishi';
 
 export const name = 'cookie-binder';
 
@@ -97,10 +97,7 @@ export function cookie(ctx: Context, config: Config) {
                 hmac.update(original);
                 computedHash = hmac.digest('hex');
             } else {
-                computedHash = crypto
-                    .createHash('md5')
-                    .update(original)
-                    .digest('hex'); // 优化：明确纯 MD5
+                computedHash = crypto.createHash('md5').update(original).digest('hex'); // 优化：明确纯 MD5
             }
 
             if (computedHash !== md5) {
@@ -170,9 +167,7 @@ export function cookie(ctx: Context, config: Config) {
                 await ctx.database.remove('bili_bind', {
                     bindCode: record.bindCode,
                 });
-                ctx.logger('cookie').info(
-                    `自动清理过期绑定码：${record.bindCode}`
-                );
+                ctx.logger('cookie').info(`自动清理过期绑定码：${record.bindCode}`);
             }
         },
         7 * 24 * 60 * 60 * 1000

@@ -1,6 +1,6 @@
-import { Context, Session, h } from 'koishi';
 import { stickEmoji } from '../../../utils/msg_emoji/emoji_helper';
 import { randomChoice } from '../../../utils/pseudo_random_helper';
+import { Context, Session, h } from 'koishi';
 
 export const name = 'waifu';
 

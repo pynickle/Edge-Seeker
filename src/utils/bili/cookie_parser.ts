@@ -68,9 +68,7 @@ export function extractDedeUserID(cookieString: string): string | undefined {
     return extractValue(cookieString, 'DedeUserID');
 }
 
-export function extractDedeUserIDCkMd5(
-    cookieString: string
-): string | undefined {
+export function extractDedeUserIDCkMd5(cookieString: string): string | undefined {
     return extractValue(cookieString, 'DedeUserID__ckMd5');
 }
 
@@ -78,9 +76,7 @@ export function extractSid(cookieString: string): string | undefined {
     return extractValue(cookieString, 'sid');
 }
 
-export function parseAllBiliCookies(
-    cookieString: string
-): Partial<BiliCookies> {
+export function parseAllBiliCookies(cookieString: string): Partial<BiliCookies> {
     return {
         buvid3: extractBuvid3(cookieString),
         SESSDATA: extractSESSDATA(cookieString),

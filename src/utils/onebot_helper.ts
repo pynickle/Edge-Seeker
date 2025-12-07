@@ -1,18 +1,11 @@
 import { Context, Session } from 'koishi';
 import 'koishi-plugin-adapter-onebot';
 
-export async function getUserName(
-    ctx: Context,
-    session: Session,
-    userId: string
-): Promise<string> {
+export async function getUserName(ctx: Context, session: Session, userId: string): Promise<string> {
     let userName: string;
     if (session.onebot) {
         try {
-            const memberInfo = await session.onebot.getGroupMemberInfo(
-                session.channelId,
-                userId
-            );
+            const memberInfo = await session.onebot.getGroupMemberInfo(session.channelId, userId);
             userName = memberInfo.card || memberInfo.nickname || userId; // 优先群名片，其次昵称，最后 QQ 号
         } catch (error) {
             ctx.logger.warn(`获取群成员信息失败（userId: ${userId}）：`, error);
@@ -36,10 +29,7 @@ export async function getUserNameWithoutSession(
 
     const bot = ctx.bots[0];
     try {
-        const memberInfo = await bot.internal.getGroupMemberInfo(
-            channelId,
-            userId
-        );
+        const memberInfo = await bot.internal.getGroupMemberInfo(channelId, userId);
         userName = memberInfo.card || memberInfo.nickname || userId; // 优先群名片，其次昵称，最后 QQ 号
     } catch (error) {
         ctx.logger.warn(`获取群成员信息失败（userId: ${userId}）：`, error);
@@ -49,11 +39,7 @@ export async function getUserNameWithoutSession(
     return userName;
 }
 
-export function createTextMsgNode(
-    userId: string,
-    nickname: string,
-    content: string
-) {
+export function createTextMsgNode(userId: string, nickname: string, content: string) {
     return {
         type: 'node',
         data: {

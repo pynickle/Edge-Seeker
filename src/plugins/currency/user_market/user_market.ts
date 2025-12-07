@@ -1,7 +1,7 @@
-import { Context } from 'koishi';
 import { Config } from '../../../index';
 import { getUserName } from '../../../utils/onebot_helper';
 import { StarCoinHelper } from '../../../utils/starcoin_helper';
+import { Context } from 'koishi';
 
 export interface UserMarketItem {
     id: number; // 自增主键
@@ -71,11 +71,7 @@ class UserMarketPlugin {
     private registerCommands(): void {
         // 私聊指令：上架商品
         this.ctx
-            .command(
-                'market.sell <price:number>',
-                '上架一条消息到商城（仅私聊）',
-                { authority: 1 }
-            )
+            .command('market.sell <price:number>', '上架一条消息到商城（仅私聊）', { authority: 1 })
             .action(async ({ session }, price) => {
                 // 只允许在私聊中使用
                 if (session.guildId) {
@@ -98,15 +94,12 @@ class UserMarketPlugin {
 
                 try {
                     // 创建商品记录
-                    const result = await this.ctx.database.create(
-                        'user_market_items',
-                        {
-                            userId,
-                            content,
-                            price,
-                            createTime,
-                        }
-                    );
+                    const result = await this.ctx.database.create('user_market_items', {
+                        userId,
+                        content,
+                        price,
+                        createTime,
+                    });
 
                     return `✅ 商品上架成功！\n商品ID：${result.id}\n价格：${price} 星币\n请前往你想要上架该商品的群聊，使用 market.add ${result.id} 命令将商品添加到群聊商城。`;
                 } catch (error) {
@@ -117,11 +110,9 @@ class UserMarketPlugin {
 
         // 私聊指令：彻底删除商品
         this.ctx
-            .command(
-                'market.delete <itemId:number>',
-                '彻底删除你上架的商品（仅私聊）',
-                { authority: 1 }
-            )
+            .command('market.delete <itemId:number>', '彻底删除你上架的商品（仅私聊）', {
+                authority: 1,
+            })
             .action(async ({ session }, itemId) => {
                 // 只允许在私聊中使用
                 if (session.guildId) {
@@ -142,10 +133,7 @@ class UserMarketPlugin {
                     }
 
                     // 删除商品 - 群聊关联
-                    await this.ctx.database.remove(
-                        'user_market_items_in_group',
-                        { itemId }
-                    );
+                    await this.ctx.database.remove('user_market_items_in_group', { itemId });
 
                     // 删除商品
                     await this.ctx.database.remove('user_market_items', {
@@ -191,11 +179,7 @@ class UserMarketPlugin {
                     // 生成商品列表
                     const itemList = await Promise.all(
                         items.map(async (item, index) => {
-                            const sellerName = await getUserName(
-                                this.ctx,
-                                session,
-                                item.userId
-                            );
+                            const sellerName = await getUserName(this.ctx, session, item.userId);
                             return `${index + 1}. 商品 ID: ${item.id}\n   卖家：${sellerName}\n   价格：${item.price} 星币\n   上架时间：${item.createTime.split('T')[0]}`;
                         })
                     );
@@ -236,10 +220,7 @@ class UserMarketPlugin {
                     const item = items[0];
 
                     // 检查用户权限（上传者或 authority>3）
-                    const user = await this.ctx.database.getUser(
-                        session.platform,
-                        session.userId
-                    );
+                    const user = await this.ctx.database.getUser(session.platform, session.userId);
                     const userAuthority = user.authority;
                     if (item.userId !== userId && userAuthority <= 3) {
                         return '❌ 你没有权限添加该商品到本群！';
@@ -256,14 +237,11 @@ class UserMarketPlugin {
                     }
 
                     // 添加商品到群聊
-                    await this.ctx.database.create(
-                        'user_market_items_in_group',
-                        {
-                            itemId,
-                            channelId,
-                            createTime: new Date().toISOString(),
-                        }
-                    );
+                    await this.ctx.database.create('user_market_items_in_group', {
+                        itemId,
+                        channelId,
+                        createTime: new Date().toISOString(),
+                    });
 
                     return `✅ 商品 ID ${itemId} 已成功添加到本群商城！`;
                 } catch (error) {
@@ -301,10 +279,7 @@ class UserMarketPlugin {
                     const item = items[0];
 
                     // 检查用户权限（上传者或 authority>3）
-                    const user = await this.ctx.database.getUser(
-                        session.platform,
-                        session.userId
-                    );
+                    const user = await this.ctx.database.getUser(session.platform, session.userId);
                     const userAuthority = user.authority;
                     if (item.userId !== userId && userAuthority <= 3) {
                         return '❌ 你没有权限从本群移除该商品！';
@@ -321,10 +296,10 @@ class UserMarketPlugin {
                     }
 
                     // 从群聊中移除商品
-                    await this.ctx.database.remove(
-                        'user_market_items_in_group',
-                        { itemId, channelId }
-                    );
+                    await this.ctx.database.remove('user_market_items_in_group', {
+                        itemId,
+                        channelId,
+                    });
 
                     return `✅ 商品 ID ${itemId} 已从本群商城移除！`;
                 } catch (error) {
@@ -382,12 +357,11 @@ class UserMarketPlugin {
                         item.price
                     );
                     if (!hasEnough) {
-                        const currentStarCoin =
-                            await StarCoinHelper.getUserStarCoin(
-                                this.ctx,
-                                userId,
-                                channelId
-                            );
+                        const currentStarCoin = await StarCoinHelper.getUserStarCoin(
+                            this.ctx,
+                            userId,
+                            channelId
+                        );
                         return `❌ 你的星币不足！当前星币：${currentStarCoin}，需要：${item.price}`;
                     }
 
@@ -399,8 +373,7 @@ class UserMarketPlugin {
                     let isFriend = false;
                     if (session.onebot) {
                         try {
-                            const friendList =
-                                await session.onebot.getFriendList();
+                            const friendList = await session.onebot.getFriendList();
                             isFriend = friendList.some(
                                 (friend) => friend.user_id.toString() == userId
                             );
@@ -439,29 +412,15 @@ class UserMarketPlugin {
                                 userId,
                                 `🎉 你成功购买了商品 ID ${itemId}！\n支付：${item.price} 星币\n手续费：${fee} 星币\n实际支付给卖家：${actualAmount} 星币\n商品内容：`
                             );
-                            await session.onebot.sendPrivateMsg(
-                                userId,
-                                item.content
-                            );
+                            await session.onebot.sendPrivateMsg(userId, item.content);
                         } catch (error) {
-                            this.ctx.logger.warn(
-                                '发送商品内容给买家失败:',
-                                error
-                            );
+                            this.ctx.logger.warn('发送商品内容给买家失败:', error);
                         }
                     }
 
                     // 获取卖家名称
-                    const sellerName = await getUserName(
-                        this.ctx,
-                        session,
-                        item.userId
-                    );
-                    const buyerName = await getUserName(
-                        this.ctx,
-                        session,
-                        userId
-                    );
+                    const sellerName = await getUserName(this.ctx, session, item.userId);
+                    const buyerName = await getUserName(this.ctx, session, userId);
 
                     return `✅ ${buyerName} 成功购买了 ${sellerName} 的商品 ID ${itemId}！\n商品内容已通过私信发送给你。`;
                 } catch (error) {

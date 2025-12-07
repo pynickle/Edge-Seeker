@@ -1,9 +1,9 @@
-import { Context, Session } from 'koishi';
 import { Config } from '../../../index';
 import { useConfirmationHelper } from '../../../utils/confirmation_helper';
 import { randomFloat, randomInt } from '../../../utils/pseudo_random_helper';
 import { StarCoinHelper } from '../../../utils/starcoin_helper';
 import { getTodayString } from '../../../utils/time_helper';
+import { Context, Session } from 'koishi';
 
 // 定义抽奖记录表结构
 interface RollRecord {
@@ -67,15 +67,13 @@ export function roll(ctx: Context, config: Config) {
                 min: 100,
                 max: 100,
                 weight: 10,
-                message: (amount: number) =>
-                    `获得 ${amount} 星币，再试一次吧！`,
+                message: (amount: number) => `获得 ${amount} 星币，再试一次吧！`,
             },
             {
                 min: 150,
                 max: 150,
                 weight: 15,
-                message: (amount: number) =>
-                    `获得 ${amount} 星币，差一点点就回本了！`,
+                message: (amount: number) => `获得 ${amount} 星币，差一点点就回本了！`,
             },
             {
                 min: 200,
@@ -87,36 +85,31 @@ export function roll(ctx: Context, config: Config) {
                 min: 250,
                 max: 250,
                 weight: 15,
-                message: (amount: number) =>
-                    `获得 ${amount} 星币，接近回本了！`,
+                message: (amount: number) => `获得 ${amount} 星币，接近回本了！`,
             },
             {
                 min: 300,
                 max: 300,
                 weight: 15,
-                message: (amount: number) =>
-                    `恭喜获得 ${amount} 星币，刚好回本！`,
+                message: (amount: number) => `恭喜获得 ${amount} 星币，刚好回本！`,
             },
             {
                 min: 400,
                 max: 400,
                 weight: 10,
-                message: (amount: number) =>
-                    `恭喜获得 ${amount} 星币！小赚一笔！`,
+                message: (amount: number) => `恭喜获得 ${amount} 星币！小赚一笔！`,
             },
             {
                 min: 600,
                 max: 600,
                 weight: 5,
-                message: (amount: number) =>
-                    `恭喜获得 ${amount} 星币！大赚特赚！欧皇附体！`,
+                message: (amount: number) => `恭喜获得 ${amount} 星币！大赚特赚！欧皇附体！`,
             },
             {
                 min: 800,
                 max: 800,
                 weight: 5,
-                message: (amount: number) =>
-                    `恭喜获得 ${amount} 星币！超级大赚！欧皇降临！`,
+                message: (amount: number) => `恭喜获得 ${amount} 星币！超级大赚！欧皇降临！`,
             },
         ],
     };
@@ -183,10 +176,7 @@ export function roll(ctx: Context, config: Config) {
      * 根据权重随机选择奖励
      */
     function selectReward(rewards: RollConfig['rewards']): (typeof rewards)[0] {
-        const totalWeight = rewards.reduce(
-            (sum, reward) => sum + reward.weight,
-            0
-        );
+        const totalWeight = rewards.reduce((sum, reward) => sum + reward.weight, 0);
         let random = randomFloat(0, totalWeight);
 
         for (const reward of rewards) {
@@ -203,32 +193,19 @@ export function roll(ctx: Context, config: Config) {
     /**
      * 执行抽奖
      */
-    async function doRoll(
-        ctx: Context,
-        session: Session,
-        cost: number
-    ): Promise<string> {
+    async function doRoll(ctx: Context, session: Session, cost: number): Promise<string> {
         const { userId, channelId } = session;
         const today = getTodayString();
         const dailyLimit = config.roll?.dailyLimit || 1;
 
         // 检查今日抽奖次数是否已达上限
-        const todayRolls = await countUserRollsToday(
-            ctx,
-            userId,
-            channelId,
-            today
-        );
+        const todayRolls = await countUserRollsToday(ctx, userId, channelId, today);
         if (todayRolls >= dailyLimit) {
             return `你今天已经抽奖${todayRolls}次了，已达到每日${dailyLimit}次的上限，请明天再来！`;
         }
 
         // 检查星币是否足够
-        const currentStarCoin = await StarCoinHelper.getUserStarCoin(
-            ctx,
-            userId,
-            channelId
-        );
+        const currentStarCoin = await StarCoinHelper.getUserStarCoin(ctx, userId, channelId);
         if (currentStarCoin < cost) {
             return `星币不足，抽奖需要 ${cost} 星币，你当前有 ${currentStarCoin} 星币！`;
         }
@@ -239,11 +216,7 @@ export function roll(ctx: Context, config: Config) {
             await session.send(
                 `今日剩余抽奖次数：${remainingRolls}次\n确认花费 ${cost} 星币进行抽奖吗？请回复「确认」或「取消」（30秒内有效）`
             );
-            const confirmed = await confirmationManager.createConfirmation(
-                ctx,
-                session,
-                30
-            );
+            const confirmed = await confirmationManager.createConfirmation(ctx, session, 30);
 
             if (!confirmed) {
                 return '抽奖已取消！';
@@ -281,22 +254,11 @@ export function roll(ctx: Context, config: Config) {
             }
 
             // 保存记录
-            await saveRollRecord(
-                ctx,
-                userId,
-                channelId,
-                today,
-                cost,
-                rewardAmount
-            );
+            await saveRollRecord(ctx, userId, channelId, today, cost, rewardAmount);
 
             // 返回结果
             const resultMessage = rewardType.message(rewardAmount);
-            const finalStarCoin = await StarCoinHelper.getUserStarCoin(
-                ctx,
-                userId,
-                channelId
-            );
+            const finalStarCoin = await StarCoinHelper.getUserStarCoin(ctx, userId, channelId);
             // 显示剩余抽奖次数
             const remainingRollsAfter = dailyLimit - (todayRolls + 1);
             return `${resultMessage}\n当前星币余额：${finalStarCoin} 星币\n今日剩余抽奖次数：${remainingRollsAfter}次`;
@@ -307,12 +269,10 @@ export function roll(ctx: Context, config: Config) {
     }
 
     // 注册抽奖命令
-    ctx.command('roll', '消耗星币进行抽奖，每天每群每人限抽一次').action(
-        async ({ session }) => {
-            if (!session) return '无法在当前环境中使用此命令';
+    ctx.command('roll', '消耗星币进行抽奖，每天每群每人限抽一次').action(async ({ session }) => {
+        if (!session) return '无法在当前环境中使用此命令';
 
-            const cost = config.roll?.cost || 300;
-            return doRoll(ctx, session, cost);
-        }
-    );
+        const cost = config.roll?.cost || 300;
+        return doRoll(ctx, session, cost);
+    });
 }

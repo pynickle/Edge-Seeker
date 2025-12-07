@@ -1,5 +1,5 @@
-import { Context } from 'koishi';
 import { randomChoice } from '../../../utils/pseudo_random_helper';
+import { Context } from 'koishi';
 
 export const name = 'choose';
 
@@ -59,16 +59,12 @@ function generateCoinResponse(): string {
  * 验证并过滤选项
  */
 function validateOptions(options: string[]): string[] {
-    return options
-        .filter((option) => option.trim())
-        .map((option) => option.trim());
+    return options.filter((option) => option.trim()).map((option) => option.trim());
 }
 
 export function choose(ctx: Context) {
     ctx.command('choose <...options:string>', '从多个选项中随机选择一个')
-        .usage(
-            '用法：choose 选项 1 选项 2 选项 3 ...\n示例：choose 吃饭 睡觉 打游戏'
-        )
+        .usage('用法：choose 选项 1 选项 2 选项 3 ...\n示例：choose 吃饭 睡觉 打游戏')
         .action(async (_, ...options: string[]) => {
             if (options.some((option) => option.includes('茉莉'))) {
                 return '选项中包含不当内容，请重新输入。';

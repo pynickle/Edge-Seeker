@@ -1,6 +1,6 @@
-﻿import axios from 'axios';
-import { Context } from 'koishi';
 import { Config } from '../../index';
+import axios from 'axios';
+import { Context } from 'koishi';
 
 export const name = 'nav-user-info';
 
@@ -78,9 +78,7 @@ async function loadImageAsBase64(imageUrl: string): Promise<string> {
         const mimeType = response.headers['content-type'] || 'image/png';
 
         // Step 3: 将 buffer 转换为 base64，并构造完整 data URL
-        const base64Data = Buffer.from(response.data, 'binary').toString(
-            'base64'
-        );
+        const base64Data = Buffer.from(response.data, 'binary').toString('base64');
         return `data:${mimeType};base64,${base64Data}`;
     } catch (error) {
         console.error('Error loading image:', error);

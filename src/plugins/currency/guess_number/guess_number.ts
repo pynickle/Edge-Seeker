@@ -1,7 +1,7 @@
-import { Context, Session } from 'koishi';
 import { Config } from '../../../index';
 import { useConfirmationHelper } from '../../../utils/confirmation_helper';
 import { StarCoinHelper } from '../../../utils/starcoin_helper';
+import { Context, Session } from 'koishi';
 
 export const name = 'guess-number';
 
@@ -65,11 +65,7 @@ export function guess_number(ctx: Context, config: Config) {
     const confirmationManager = useConfirmationHelper(ctx);
 
     // 游戏数据结构
-    function createGame(
-        channelId: string,
-        creatorId: string,
-        rewardCoins: number = 100
-    ): GameData {
+    function createGame(channelId: string, creatorId: string, rewardCoins: number = 100): GameData {
         return {
             channelId,
             platform: '', // 稍后设置
@@ -96,10 +92,7 @@ export function guess_number(ctx: Context, config: Config) {
     }
 
     // 获取用户当天的游戏次数
-    async function getUserGameCount(
-        userId: string,
-        channelId: string
-    ): Promise<number> {
+    async function getUserGameCount(userId: string, channelId: string): Promise<number> {
         const today = getTodayString();
         const records = await ctx.database.get('guess_daily_counts', {
             userId: userId,
@@ -127,10 +120,7 @@ export function guess_number(ctx: Context, config: Config) {
     }
 
     // 增加用户当天的游戏次数
-    async function incrementGameCount(
-        userId: string,
-        channelId: string
-    ): Promise<void> {
+    async function incrementGameCount(userId: string, channelId: string): Promise<void> {
         const today = getTodayString();
         const records = await ctx.database.get('guess_daily_counts', {
             userId: userId,
@@ -159,293 +149,265 @@ export function guess_number(ctx: Context, config: Config) {
         return confirmationManager.createConfirmation(ctx, session, 15);
     }
 
-    ctx.command(
-        'guess [dynamicBonus:number]',
-        '开启动态计算星币的猜数字游戏'
-    ).action(async ({ session }, dynamicBonus?: number) => {
-        if (!session.guildId) {
-            return '请在群聊中使用 guess 命令哦！';
-        }
-
-        const channelId = session.channelId;
-        const platform = session.platform;
-
-        if (games.has(channelId)) {
-            const existingGame = games.get(channelId);
-            if (existingGame.gameState === 'confirming') {
-                return '当前频道有用户正在确认开启游戏，请稍候再试！';
-            } else {
-                return '当前频道已有进行中的游戏！';
+    ctx.command('guess [dynamicBonus:number]', '开启动态计算星币的猜数字游戏').action(
+        async ({ session }, dynamicBonus?: number) => {
+            if (!session.guildId) {
+                return '请在群聊中使用 guess 命令哦！';
             }
-        }
 
-        // 检查用户权限
-        const user = await ctx.database.getUser(
-            session.platform,
-            session.userId
-        );
-        const userAuthority = user.authority;
+            const channelId = session.channelId;
+            const platform = session.platform;
 
-        // 特权用户标记（authority>3）
-        const isAuthorizedUser = userAuthority > 3;
-
-        // 确定用户每日游戏次数限制
-        let maxGamesPerDay = 0; // 默认为无限制
-        let todayGameCount = 0;
-
-        const channelGameCount = await getChannelGameCount(channelId);
-
-        // 只有非特权用户才受限制
-        if (!isAuthorizedUser) {
-            // 计算频道每日游戏次数上限 - 使用配置的前五次和额外五次
-            const MAX_CHANNEL_GAMES_PER_DAY =
-                config.guess_number.firstDailyAttempts +
-                config.guess_number.extraDailyAttempts;
-
-            // 检查频道当日游戏次数是否达到上限
-            if (channelGameCount >= MAX_CHANNEL_GAMES_PER_DAY) {
-                return `❌ 本频道今日游戏次数已达上限 (${MAX_CHANNEL_GAMES_PER_DAY}次)，请明天再来！`;
+            if (games.has(channelId)) {
+                const existingGame = games.get(channelId);
+                if (existingGame.gameState === 'confirming') {
+                    return '当前频道有用户正在确认开启游戏，请稍候再试！';
+                } else {
+                    return '当前频道已有进行中的游戏！';
+                }
             }
+
+            // 检查用户权限
+            const user = await ctx.database.getUser(session.platform, session.userId);
+            const userAuthority = user.authority;
+
+            // 特权用户标记（authority>3）
+            const isAuthorizedUser = userAuthority > 3;
 
             // 确定用户每日游戏次数限制
-            if (userAuthority === 3) {
-                maxGamesPerDay = 5;
-            } else if (userAuthority < 3) {
-                maxGamesPerDay = 2;
-            }
-
-            // 检查每日游戏次数限制
-            if (maxGamesPerDay > 0) {
-                todayGameCount = await getUserGameCount(
-                    session.userId,
-                    channelId
-                );
-                if (todayGameCount >= maxGamesPerDay) {
-                    return `❌ 您今天的游戏次数已达上限 (${maxGamesPerDay}次)，请明天再来！`;
-                }
-            }
-        }
-
-        // 确定动态奖励加法值
-        let bonus = config.guess_number.defaultDynamicBonus;
-
-        // 处理低于 authority3 的用户
-        if (userAuthority < 3) {
-            // 如果指定了值，提示不允许
-            if (dynamicBonus) {
-                return '❌ 权限不足，您不能指定数值！';
-            }
-
-            if (channelGameCount > config.guess_number.firstDailyAttempts) {
-                bonus = config.guess_number.extraBonus;
-            } else {
-                bonus = config.guess_number.firstBonus;
-            }
-
-            // 检查用户是否有足够的星币支付 10 星币
-            const userRecord = await ctx.database.get('sign_in', {
-                userId: session.userId,
-                channelId: channelId,
-            });
-
-            if (userRecord.length === 0 || userRecord[0].starCoin < 10) {
-                return '❌ 您的星币不足10个，无法开启游戏！';
-            }
-
-            // 提示用户扣除10星币前，先在 games 中创建一个临时标记，防止其他用户同时开启游戏
-            // 创建一个临时游戏对象作为标记
-            const tempGame = createGame(
-                channelId,
-                session.userId,
-                config.guess_number.defaultStarCoin
-            );
-            tempGame.platform = platform;
-            tempGame.gameState = 'confirming'; // 添加确认状态
-            games.set(channelId, tempGame);
-
-            await session.send(
-                `💸 开启游戏需要扣除10个星币，15秒内回复"确认"继续，回复"取消"放弃。`
-            );
-
-            // 等待用户确认
-            const confirmed = await waitForConfirmation(session);
-
-            if (!confirmed) {
-                // 用户取消，删除临时游戏标记
-                games.delete(channelId);
-                return '❌ 游戏已取消！';
-            }
-
-            // 扣除10星币
-            await StarCoinHelper.removeUserStarCoin(
-                ctx,
-                session.userId,
-                channelId,
-                10
-            );
-
-            // 确认成功，删除临时游戏标记（会在后面重新创建正式游戏）
-            games.delete(channelId);
-        }
-        // 处理 authority=3 的用户
-        else if (userAuthority === 3) {
-            if (dynamicBonus) {
-                if (dynamicBonus < -30 || dynamicBonus > 30) {
-                    return '❌ 您只能指定 -30 到 30 之间的数值！';
-                }
-                bonus = dynamicBonus;
-            }
-        }
-        // 处理 authority > 3 的用户
-        else if (userAuthority > 3) {
-            if (dynamicBonus) {
-                bonus = dynamicBonus;
-            }
-        }
-
-        // 增加用户当天的游戏次数（特权用户不计入）
-        let updatedGameCount = 0;
-        if (!isAuthorizedUser && maxGamesPerDay > 0) {
-            await incrementGameCount(session.userId, channelId);
-            updatedGameCount = todayGameCount + 1;
-        }
-
-        // 获取并显示频道剩余游戏次数
-        const currentChannelGameCount = await getChannelGameCount(channelId);
-        const MAX_CHANNEL_GAMES_PER_DAY =
-            config.guess_number.firstDailyAttempts +
-            config.guess_number.extraDailyAttempts;
-        const remainingChannelGames =
-            MAX_CHANNEL_GAMES_PER_DAY - currentChannelGameCount;
-
-        // 保存乘数信息到游戏数据中
-        const game = createGame(
-            channelId,
-            session.userId,
-            config.guess_number.defaultStarCoin
-        );
-        game.platform = platform;
-        games.set(channelId, game);
-        game.dynamicBonus = bonus; // 保存动态乘数
-
-        // 设置报名倒计时
-        game.signUpTimer = setTimeout(() => {
-            startGame(channelId);
-        }, config.guess_number.signUpTime * 1000);
-
-        const remainingGames =
-            maxGamesPerDay > 0
-                ? `\n💡 今日剩余游戏次数：${maxGamesPerDay - updatedGameCount}`
-                : '';
-        const channelRemainingInfo = `\n📢 本频道今日剩余游戏次数：${remainingChannelGames}`;
-
-        return [
-            '🎮 动态奖励猜数字游戏开始报名！',
-            `📝 报名时间：${config.guess_number.signUpTime}秒`,
-            '🎯 游戏规则：系统会在 2-99 (包含两边的数字) 之间随机选择一个数字',
-            '💡 发送"参加游戏"来参加比赛',
-            `⏰ 每轮限时 ${config.guess_number.guessTimeout} 秒，连续 ${config.guess_number.maxSkips} 次超时将被踢出`,
-            bonus >= 0
-                ? `💰 获胜奖励：动态计算（报名费总和 + ${bonus} 星币）`
-                : `💰 获胜奖励：动态计算（报名费总和 - ${Math.abs(bonus)} 星币）`,
-            `💸 报名费用：${config.guess_number.entryFee} 星币`,
-            remainingGames,
-            channelRemainingInfo,
-        ].join('\n');
-    });
-
-    ctx.command(
-        'guess.party [rewardCoins:number]',
-        '开启固定星币奖励的猜数字游戏派对'
-    ).action(async ({ session }, rewardCoins?: number) => {
-        if (!session.guildId) {
-            return '请在群聊中使用 guess.party 命令哦！';
-        }
-
-        const channelId = session.channelId;
-        const platform = session.platform;
-
-        if (games.has(channelId)) {
-            return '当前频道已有进行中的游戏！';
-        }
-
-        // 检查用户权限
-        const user = await ctx.database.getUser(
-            session.platform,
-            session.userId
-        );
-        const userAuthority = user.authority;
-
-        // 特权用户标记（authority>3）
-        const isAuthorizedUser = userAuthority > 3;
-
-        // 只有非特权用户才受限制
-        const channelGameCount = await getChannelGameCount(channelId);
-        const MAX_CHANNEL_GAMES_PER_DAY =
-            config.guess_number.firstDailyAttempts +
-            config.guess_number.extraDailyAttempts;
-        if (!isAuthorizedUser) {
-            // 检查频道当日游戏次数是否达到上限
-            if (channelGameCount >= MAX_CHANNEL_GAMES_PER_DAY) {
-                return `❌ 本频道今日游戏次数已达上限 (${MAX_CHANNEL_GAMES_PER_DAY}次)，请明天再来！`;
-            }
-        }
-
-        // 确定奖励星币数量
-        if (rewardCoins) {
-            // 验证奖励数量是否为有效数字且合理
-            if (rewardCoins <= 0 || rewardCoins > 1000) {
-                return '请输入 1-1000 之间的有效数字作为星币奖励！';
-            }
-        } else {
-            rewardCoins = config.guess_number.defaultStarCoin;
-        }
-
-        const game = createGame(channelId, session.userId, rewardCoins);
-        game.platform = platform;
-        games.set(channelId, game);
-
-        // 设置报名倒计时
-        game.signUpTimer = setTimeout(() => {
-            startGame(channelId);
-        }, config.guess_number.signUpTime * 1000);
-
-        // 增加用户当天的游戏次数（特权用户不计入）
-        if (!isAuthorizedUser) {
             let maxGamesPerDay = 0; // 默认为无限制
-            if (userAuthority === 3) {
-                maxGamesPerDay = 5;
-            } else if (userAuthority < 3) {
-                maxGamesPerDay = 2;
-            }
+            let todayGameCount = 0;
 
-            if (maxGamesPerDay > 0) {
-                const todayGameCount = await getUserGameCount(
-                    session.userId,
-                    channelId
-                );
-                if (todayGameCount < maxGamesPerDay) {
-                    await incrementGameCount(session.userId, channelId);
+            const channelGameCount = await getChannelGameCount(channelId);
+
+            // 只有非特权用户才受限制
+            if (!isAuthorizedUser) {
+                // 计算频道每日游戏次数上限 - 使用配置的前五次和额外五次
+                const MAX_CHANNEL_GAMES_PER_DAY =
+                    config.guess_number.firstDailyAttempts + config.guess_number.extraDailyAttempts;
+
+                // 检查频道当日游戏次数是否达到上限
+                if (channelGameCount >= MAX_CHANNEL_GAMES_PER_DAY) {
+                    return `❌ 本频道今日游戏次数已达上限 (${MAX_CHANNEL_GAMES_PER_DAY}次)，请明天再来！`;
+                }
+
+                // 确定用户每日游戏次数限制
+                if (userAuthority === 3) {
+                    maxGamesPerDay = 5;
+                } else if (userAuthority < 3) {
+                    maxGamesPerDay = 2;
+                }
+
+                // 检查每日游戏次数限制
+                if (maxGamesPerDay > 0) {
+                    todayGameCount = await getUserGameCount(session.userId, channelId);
+                    if (todayGameCount >= maxGamesPerDay) {
+                        return `❌ 您今天的游戏次数已达上限 (${maxGamesPerDay}次)，请明天再来！`;
+                    }
                 }
             }
+
+            // 确定动态奖励加法值
+            let bonus = config.guess_number.defaultDynamicBonus;
+
+            // 处理低于 authority3 的用户
+            if (userAuthority < 3) {
+                // 如果指定了值，提示不允许
+                if (dynamicBonus) {
+                    return '❌ 权限不足，您不能指定数值！';
+                }
+
+                if (channelGameCount > config.guess_number.firstDailyAttempts) {
+                    bonus = config.guess_number.extraBonus;
+                } else {
+                    bonus = config.guess_number.firstBonus;
+                }
+
+                // 检查用户是否有足够的星币支付 10 星币
+                const userRecord = await ctx.database.get('sign_in', {
+                    userId: session.userId,
+                    channelId: channelId,
+                });
+
+                if (userRecord.length === 0 || userRecord[0].starCoin < 10) {
+                    return '❌ 您的星币不足10个，无法开启游戏！';
+                }
+
+                // 提示用户扣除10星币前，先在 games 中创建一个临时标记，防止其他用户同时开启游戏
+                // 创建一个临时游戏对象作为标记
+                const tempGame = createGame(
+                    channelId,
+                    session.userId,
+                    config.guess_number.defaultStarCoin
+                );
+                tempGame.platform = platform;
+                tempGame.gameState = 'confirming'; // 添加确认状态
+                games.set(channelId, tempGame);
+
+                await session.send(
+                    `💸 开启游戏需要扣除10个星币，15秒内回复"确认"继续，回复"取消"放弃。`
+                );
+
+                // 等待用户确认
+                const confirmed = await waitForConfirmation(session);
+
+                if (!confirmed) {
+                    // 用户取消，删除临时游戏标记
+                    games.delete(channelId);
+                    return '❌ 游戏已取消！';
+                }
+
+                // 扣除10星币
+                await StarCoinHelper.removeUserStarCoin(ctx, session.userId, channelId, 10);
+
+                // 确认成功，删除临时游戏标记（会在后面重新创建正式游戏）
+                games.delete(channelId);
+            }
+            // 处理 authority=3 的用户
+            else if (userAuthority === 3) {
+                if (dynamicBonus) {
+                    if (dynamicBonus < -30 || dynamicBonus > 30) {
+                        return '❌ 您只能指定 -30 到 30 之间的数值！';
+                    }
+                    bonus = dynamicBonus;
+                }
+            }
+            // 处理 authority > 3 的用户
+            else if (userAuthority > 3) {
+                if (dynamicBonus) {
+                    bonus = dynamicBonus;
+                }
+            }
+
+            // 增加用户当天的游戏次数（特权用户不计入）
+            let updatedGameCount = 0;
+            if (!isAuthorizedUser && maxGamesPerDay > 0) {
+                await incrementGameCount(session.userId, channelId);
+                updatedGameCount = todayGameCount + 1;
+            }
+
+            // 获取并显示频道剩余游戏次数
+            const currentChannelGameCount = await getChannelGameCount(channelId);
+            const MAX_CHANNEL_GAMES_PER_DAY =
+                config.guess_number.firstDailyAttempts + config.guess_number.extraDailyAttempts;
+            const remainingChannelGames = MAX_CHANNEL_GAMES_PER_DAY - currentChannelGameCount;
+
+            // 保存乘数信息到游戏数据中
+            const game = createGame(channelId, session.userId, config.guess_number.defaultStarCoin);
+            game.platform = platform;
+            games.set(channelId, game);
+            game.dynamicBonus = bonus; // 保存动态乘数
+
+            // 设置报名倒计时
+            game.signUpTimer = setTimeout(() => {
+                startGame(channelId);
+            }, config.guess_number.signUpTime * 1000);
+
+            const remainingGames =
+                maxGamesPerDay > 0
+                    ? `\n💡 今日剩余游戏次数：${maxGamesPerDay - updatedGameCount}`
+                    : '';
+            const channelRemainingInfo = `\n📢 本频道今日剩余游戏次数：${remainingChannelGames}`;
+
+            return [
+                '🎮 动态奖励猜数字游戏开始报名！',
+                `📝 报名时间：${config.guess_number.signUpTime}秒`,
+                '🎯 游戏规则：系统会在 2-99 (包含两边的数字) 之间随机选择一个数字',
+                '💡 发送"参加游戏"来参加比赛',
+                `⏰ 每轮限时 ${config.guess_number.guessTimeout} 秒，连续 ${config.guess_number.maxSkips} 次超时将被踢出`,
+                bonus >= 0
+                    ? `💰 获胜奖励：动态计算（报名费总和 + ${bonus} 星币）`
+                    : `💰 获胜奖励：动态计算（报名费总和 - ${Math.abs(bonus)} 星币）`,
+                `💸 报名费用：${config.guess_number.entryFee} 星币`,
+                remainingGames,
+                channelRemainingInfo,
+            ].join('\n');
         }
+    );
 
-        // 获取并显示频道剩余游戏次数
-        const currentChannelGameCount = channelGameCount + 1; // 包括当前游戏
-        const remainingChannelGames =
-            MAX_CHANNEL_GAMES_PER_DAY - currentChannelGameCount;
+    ctx.command('guess.party [rewardCoins:number]', '开启固定星币奖励的猜数字游戏派对').action(
+        async ({ session }, rewardCoins?: number) => {
+            if (!session.guildId) {
+                return '请在群聊中使用 guess.party 命令哦！';
+            }
 
-        return [
-            '🎉 固定奖励猜数字游戏派对开始报名！',
-            `📝 报名时间：${config.guess_number.signUpTime}秒`,
-            '🎯 游戏规则：系统会在 2-99 (包含两边的数字) 之间随机选择一个数字',
-            '💡 发送"参加游戏"来参加比赛',
-            `⏰ 每轮限时 ${config.guess_number.guessTimeout} 秒，连续 ${config.guess_number.maxSkips} 次超时将被踢出`,
-            `💰 获胜奖励：${rewardCoins} 星币！`,
-            `💸 报名费用：${config.guess_number.entryFee} 星币`,
-            `📢 本频道今日剩余游戏次数：${remainingChannelGames}`,
-        ].join('\n');
-    });
+            const channelId = session.channelId;
+            const platform = session.platform;
+
+            if (games.has(channelId)) {
+                return '当前频道已有进行中的游戏！';
+            }
+
+            // 检查用户权限
+            const user = await ctx.database.getUser(session.platform, session.userId);
+            const userAuthority = user.authority;
+
+            // 特权用户标记（authority>3）
+            const isAuthorizedUser = userAuthority > 3;
+
+            // 只有非特权用户才受限制
+            const channelGameCount = await getChannelGameCount(channelId);
+            const MAX_CHANNEL_GAMES_PER_DAY =
+                config.guess_number.firstDailyAttempts + config.guess_number.extraDailyAttempts;
+            if (!isAuthorizedUser) {
+                // 检查频道当日游戏次数是否达到上限
+                if (channelGameCount >= MAX_CHANNEL_GAMES_PER_DAY) {
+                    return `❌ 本频道今日游戏次数已达上限 (${MAX_CHANNEL_GAMES_PER_DAY}次)，请明天再来！`;
+                }
+            }
+
+            // 确定奖励星币数量
+            if (rewardCoins) {
+                // 验证奖励数量是否为有效数字且合理
+                if (rewardCoins <= 0 || rewardCoins > 1000) {
+                    return '请输入 1-1000 之间的有效数字作为星币奖励！';
+                }
+            } else {
+                rewardCoins = config.guess_number.defaultStarCoin;
+            }
+
+            const game = createGame(channelId, session.userId, rewardCoins);
+            game.platform = platform;
+            games.set(channelId, game);
+
+            // 设置报名倒计时
+            game.signUpTimer = setTimeout(() => {
+                startGame(channelId);
+            }, config.guess_number.signUpTime * 1000);
+
+            // 增加用户当天的游戏次数（特权用户不计入）
+            if (!isAuthorizedUser) {
+                let maxGamesPerDay = 0; // 默认为无限制
+                if (userAuthority === 3) {
+                    maxGamesPerDay = 5;
+                } else if (userAuthority < 3) {
+                    maxGamesPerDay = 2;
+                }
+
+                if (maxGamesPerDay > 0) {
+                    const todayGameCount = await getUserGameCount(session.userId, channelId);
+                    if (todayGameCount < maxGamesPerDay) {
+                        await incrementGameCount(session.userId, channelId);
+                    }
+                }
+            }
+
+            // 获取并显示频道剩余游戏次数
+            const currentChannelGameCount = channelGameCount + 1; // 包括当前游戏
+            const remainingChannelGames = MAX_CHANNEL_GAMES_PER_DAY - currentChannelGameCount;
+
+            return [
+                '🎉 固定奖励猜数字游戏派对开始报名！',
+                `📝 报名时间：${config.guess_number.signUpTime}秒`,
+                '🎯 游戏规则：系统会在 2-99 (包含两边的数字) 之间随机选择一个数字',
+                '💡 发送"参加游戏"来参加比赛',
+                `⏰ 每轮限时 ${config.guess_number.guessTimeout} 秒，连续 ${config.guess_number.maxSkips} 次超时将被踢出`,
+                `💰 获胜奖励：${rewardCoins} 星币！`,
+                `💸 报名费用：${config.guess_number.entryFee} 星币`,
+                `📢 本频道今日剩余游戏次数：${remainingChannelGames}`,
+            ].join('\n');
+        }
+    );
 
     // 监听参加游戏的消息
     ctx.middleware(async (session, next) => {
@@ -454,12 +416,7 @@ export function guess_number(ctx: Context, config: Config) {
         const content = session.content?.trim();
 
         // 只有当消息包含'参加游戏'且存在进行中的报名阶段游戏时才处理
-        if (
-            !content ||
-            !content.includes('参加游戏') ||
-            !game ||
-            game.gameState !== 'signup'
-        ) {
+        if (!content || !content.includes('参加游戏') || !game || game.gameState !== 'signup') {
             return next();
         }
 
@@ -521,24 +478,22 @@ export function guess_number(ctx: Context, config: Config) {
         return;
     });
 
-    ctx.command('guess.quit', '终止游戏（仅限创建者）').action(
-        async ({ session }) => {
-            const channelId = session.channelId;
-            const game = games.get(channelId);
+    ctx.command('guess.quit', '终止游戏（仅限创建者）').action(async ({ session }) => {
+        const channelId = session.channelId;
+        const game = games.get(channelId);
 
-            if (!game) {
-                return '当前没有进行中的游戏';
-            }
-
-            if (session.userId !== game.creatorId) {
-                return '只有游戏创建者可以结束游戏';
-            }
-
-            // 判断是否需要退还报名费（游戏还在报名阶段或刚创建不久）
-            await endGame(channelId, '游戏被创建者终止', true);
-            return '游戏已终止，已退还所有报名者的报名费';
+        if (!game) {
+            return '当前没有进行中的游戏';
         }
-    );
+
+        if (session.userId !== game.creatorId) {
+            return '只有游戏创建者可以结束游戏';
+        }
+
+        // 判断是否需要退还报名费（游戏还在报名阶段或刚创建不久）
+        await endGame(channelId, '游戏被创建者终止', true);
+        return '游戏已终止，已退还所有报名者的报名费';
+    });
 
     // 监听数字输入
     ctx.middleware(async (session, next) => {
@@ -584,8 +539,7 @@ export function guess_number(ctx: Context, config: Config) {
         // 动态计算星币奖励（如果是动态游戏）
         if (game.dynamicBonus) {
             // 计算所有报名费的总和
-            const totalEntryFee =
-                game.participants.size * config.guess_number.entryFee;
+            const totalEntryFee = game.participants.size * config.guess_number.entryFee;
             // 应用加法值
             game.rewardCoins = totalEntryFee + game.dynamicBonus;
             // 确保奖励不为负数
@@ -641,11 +595,7 @@ export function guess_number(ctx: Context, config: Config) {
     }
 
     // 处理猜数字
-    async function handleGuess(
-        game: GameData,
-        session: Session,
-        guess: number
-    ) {
+    async function handleGuess(game: GameData, session: Session, guess: number) {
         // 清除超时定时器
         if (game.guessTimer) {
             clearTimeout(game.guessTimer);
@@ -757,11 +707,7 @@ export function guess_number(ctx: Context, config: Config) {
     }
 
     // 结束游戏
-    async function endGame(
-        channelId: string,
-        message: string,
-        refundEntryFee: boolean = false
-    ) {
+    async function endGame(channelId: string, message: string, refundEntryFee: boolean = false) {
         const game = games.get(channelId);
         if (!game) return;
 
@@ -782,31 +728,18 @@ export function guess_number(ctx: Context, config: Config) {
             if (game.participants.size > 0) {
                 for (const [userId] of game.participants.entries()) {
                     refundPromises.push(
-                        StarCoinHelper.addUserStarCoin(
-                            ctx,
-                            userId,
-                            channelId,
-                            entryFee
-                        )
+                        StarCoinHelper.addUserStarCoin(ctx, userId, channelId, entryFee)
                     );
                 }
             }
 
             // 检查游戏创建者是否是付费开启游戏的用户 (authority < 3)
             try {
-                const creator = await ctx.database.getUser(
-                    game.platform,
-                    game.creatorId
-                );
+                const creator = await ctx.database.getUser(game.platform, game.creatorId);
                 if (creator && creator.authority < 3) {
                     // 退还 10 个星币开启费用
                     refundPromises.push(
-                        StarCoinHelper.addUserStarCoin(
-                            ctx,
-                            game.creatorId,
-                            channelId,
-                            10
-                        )
+                        StarCoinHelper.addUserStarCoin(ctx, game.creatorId, channelId, 10)
                     );
                 }
             } catch (error) {

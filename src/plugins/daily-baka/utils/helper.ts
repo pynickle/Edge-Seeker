@@ -1,8 +1,5 @@
-﻿import { Context, Session } from 'koishi';
-import {
-    getUserName,
-    getUserNameWithoutSession,
-} from '../../../utils/onebot_helper';
+import { getUserName, getUserNameWithoutSession } from '../../../utils/onebot_helper';
+import { Context, Session } from 'koishi';
 
 export async function generateInitialProbabilities(
     ctx: Context,
@@ -40,23 +37,10 @@ export function formatProbabilityTable(
     records: { userId: string; userName: string; probability: number }[]
 ) {
     // 按概率从大到小排序
-    const sortedRecords = [...records].sort(
-        (a, b) => b.probability - a.probability
-    );
+    const sortedRecords = [...records].sort((a, b) => b.probability - a.probability);
 
     // 定义排名对应的 emoji
-    const rankEmojis = [
-        '🥇',
-        '🥈',
-        '🥉',
-        '🔟',
-        '🎖️',
-        '🏵️',
-        '✨',
-        '💫',
-        '🌟',
-        '⭐',
-    ];
+    const rankEmojis = ['🥇', '🥈', '🥉', '🔟', '🎖️', '🏵️', '✨', '💫', '🌟', '⭐'];
 
     return (
         '🎲 当前笨蛋概率排行榜：\n' +

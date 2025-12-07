@@ -1,5 +1,5 @@
-﻿import axios from 'axios';
 import { MessageRecord, ProbabilityRecord } from '../utils/database';
+import axios from 'axios';
 
 // 互斥锁管理器
 export class ChatLock {

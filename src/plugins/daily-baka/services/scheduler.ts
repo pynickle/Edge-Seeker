@@ -1,7 +1,7 @@
 ﻿import '@pynickle/koishi-plugin-adapter-onebot';
-import { Context } from 'koishi';
 import { getUserNameWithoutSession } from '../../../utils/onebot_helper';
 import { generateInitialProbabilitiesWithoutSession } from '../utils/helper';
+import { Context } from 'koishi';
 
 // 预告功能：显示概率前三的危险分子
 async function sendDailyPreview(ctx: Context, channelId: string) {
@@ -13,19 +13,13 @@ async function sendDailyPreview(ctx: Context, channelId: string) {
     if (currentProbs.length === 0) return;
 
     // 按概率从高到低排序，取前三名
-    const topThree = currentProbs
-        .sort((a, b) => b.probability - a.probability)
-        .slice(0, 3);
+    const topThree = currentProbs.sort((a, b) => b.probability - a.probability).slice(0, 3);
 
     // 获取用户名
     const topThreeWithNames = await Promise.all(
         topThree.map(async (record) => ({
             userId: record.userId,
-            userName: await getUserNameWithoutSession(
-                ctx,
-                channelId,
-                record.userId
-            ),
+            userName: await getUserNameWithoutSession(ctx, channelId, record.userId),
             probability: record.probability,
         }))
     );
@@ -83,8 +77,7 @@ export async function finalizeDailySelection(ctx: Context, channelId: string) {
     }
 
     if (chosen) {
-        const chosenUserName =
-            newProbs.find((p) => p.userId === chosen)?.userName || chosen;
+        const chosenUserName = newProbs.find((p) => p.userId === chosen)?.userName || chosen;
         await bot.sendMessage(
             channelId,
             `🎉🎊 今日笨蛋诞生啦～\n👀 就是：${chosenUserName}！\n🎲 恭喜"中奖"～\n🔄 概率已重新洗牌，明天又是新的开始！`

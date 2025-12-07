@@ -12,10 +12,7 @@ export class StarCoinHelper {
         userId: string,
         channelId: string
     ): Promise<number> {
-        const records = await ctx.database
-            .select('sign_in')
-            .where({ userId, channelId })
-            .execute();
+        const records = await ctx.database.select('sign_in').where({ userId, channelId }).execute();
         return records.length > 0 ? records[0].starCoin : 0;
     }
 
@@ -85,11 +82,7 @@ export class StarCoinHelper {
                 // 用户已存在，更新星币数量
                 const currentStarCoin = records[0].starCoin;
                 const newStarCoin = currentStarCoin + amount;
-                await ctx.database.set(
-                    'sign_in',
-                    { userId, channelId },
-                    { starCoin: newStarCoin }
-                );
+                await ctx.database.set('sign_in', { userId, channelId }, { starCoin: newStarCoin });
             } else {
                 // 用户不存在，创建新记录
                 await ctx.database.upsert(
@@ -145,11 +138,7 @@ export class StarCoinHelper {
             const currentStarCoin = records[0].starCoin;
             const newStarCoin = Math.max(0, currentStarCoin - amount);
 
-            await ctx.database.set(
-                'sign_in',
-                { userId, channelId },
-                { starCoin: newStarCoin }
-            );
+            await ctx.database.set('sign_in', { userId, channelId }, { starCoin: newStarCoin });
 
             return true;
         } catch (error) {

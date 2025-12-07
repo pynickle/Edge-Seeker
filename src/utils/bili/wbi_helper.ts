@@ -3,10 +3,9 @@ import { Context } from 'koishi';
 
 // WBI 签名相关常量
 const mixinKeyEncTab = [
-    46, 47, 18, 2, 53, 8, 23, 32, 15, 50, 10, 31, 58, 3, 45, 35, 27, 43, 5, 49,
-    33, 9, 42, 19, 29, 28, 14, 39, 12, 38, 41, 13, 37, 48, 7, 16, 24, 55, 40,
-    61, 26, 17, 0, 1, 60, 51, 30, 4, 22, 25, 54, 21, 56, 59, 6, 63, 57, 62, 11,
-    36, 20, 34, 44, 52,
+    46, 47, 18, 2, 53, 8, 23, 32, 15, 50, 10, 31, 58, 3, 45, 35, 27, 43, 5, 49, 33, 9, 42, 19, 29,
+    28, 14, 39, 12, 38, 41, 13, 37, 48, 7, 16, 24, 55, 40, 61, 26, 17, 0, 1, 60, 51, 30, 4, 22, 25,
+    54, 21, 56, 59, 6, 63, 57, 62, 11, 36, 20, 34, 44, 52,
 ];
 
 // 定义 WBI Keys 缓存表结构
@@ -43,11 +42,7 @@ export function getMixinKey(orig: string): string {
  * @param sub_key 子密钥
  * @returns 签名后的查询字符串（不含 w_rid）
  */
-export function encWbi(
-    params: Record<string, string>,
-    img_key: string,
-    sub_key: string
-): string {
+export function encWbi(params: Record<string, string>, img_key: string, sub_key: string): string {
     // 生成混合密钥（虽然没有直接使用，但保留了原始逻辑）
     getMixinKey(img_key + sub_key);
 
@@ -139,14 +134,11 @@ export async function getWbiKeys(
         }
 
         // 缓存不存在或已过期，重新获取
-        const response = await axios.get(
-            'https://api.bilibili.com/x/web-interface/nav',
-            {
-                headers: {
-                    Cookie: cookie,
-                },
-            }
-        );
+        const response = await axios.get('https://api.bilibili.com/x/web-interface/nav', {
+            headers: {
+                Cookie: cookie,
+            },
+        });
         const data = response.data;
         if (!data || !data.data || !data.data.wbi_img) {
             ctx.logger('bili-wbi').error('无法获取 WBI 图像信息');
@@ -157,14 +149,8 @@ export async function getWbiKeys(
         const sub_url = data.data.wbi_img.sub_url;
 
         // 提取 key
-        const img_key = img_url.slice(
-            img_url.lastIndexOf('/') + 1,
-            img_url.lastIndexOf('.')
-        );
-        const sub_key = sub_url.slice(
-            sub_url.lastIndexOf('/') + 1,
-            sub_url.lastIndexOf('.')
-        );
+        const img_key = img_url.slice(img_url.lastIndexOf('/') + 1, img_url.lastIndexOf('.'));
+        const sub_key = sub_url.slice(sub_url.lastIndexOf('/') + 1, sub_url.lastIndexOf('.'));
 
         // 更新或插入记录
         await ctx.database.upsert('wbi_keys_cache', [
@@ -207,10 +193,7 @@ export async function generateSignedUrl(
 
     // 计算 MD5 签名
     const crypto = await import('crypto');
-    const md5 = crypto
-        .createHash('md5')
-        .update(signedQuery.slice(0, -8))
-        .digest('hex');
+    const md5 = crypto.createHash('md5').update(signedQuery.slice(0, -8)).digest('hex');
     signedQuery = signedQuery.slice(0, -8) + md5;
 
     return `${baseUrl}?${signedQuery}`;
