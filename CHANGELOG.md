@@ -1,3 +1,9 @@
+## [1.13.9](https://github.com/pynickle/Edge-Seeker/compare/v1.13.8...v1.13.9) (2025-12-14)
+
+### 🔧 Miscellaneous Changes
+
+* update dependencies ([e8c3a7f](https://github.com/pynickle/Edge-Seeker/commit/e8c3a7f3acf4b9367e31cf22b7d55ec202ccd6ab))
+
 ## [1.13.8](https://github.com/pynickle/Edge-Seeker/compare/v1.13.7...v1.13.8) (2025-12-07)
 
 ### 🐛 Bug Fixes
