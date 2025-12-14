@@ -1,3 +1,9 @@
+## [1.13.10](https://github.com/pynickle/Edge-Seeker/compare/v1.13.9...v1.13.10) (2025-12-14)
+
+### 🔧 Miscellaneous Changes
+
+* add repo ([2077822](https://github.com/pynickle/Edge-Seeker/commit/2077822815eca3186baa9310dfaae7dc4f2d2989))
+
 ## [1.13.9](https://github.com/pynickle/Edge-Seeker/compare/v1.13.8...v1.13.9) (2025-12-14)
 
 ### 🔧 Miscellaneous Changes
