@@ -5,7 +5,7 @@
     "type": "git",
     "url": "https://github.com/pynickle/Edge-Seeker"
   },
-  "version": "1.13.8",
+  "version": "1.13.9",
   "main": "lib/index.cjs",
   "typings": "lib/index.d.ts",
   "type": "module",
