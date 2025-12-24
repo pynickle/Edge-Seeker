@@ -5,8 +5,17 @@ import axios from 'axios';
 import { Context } from 'koishi';
 
 // 发送千赞请求的核心函数
-async function sendThousandLikes(ctx: Context, userId: string, roomId: string): Promise<string> {
+async function sendThousandLikes(
+    ctx: Context,
+    userId: string,
+    roomId: string,
+    click: number = 1000
+): Promise<string> {
     try {
+        if (click <= 0 || click > 1000) {
+            return '🚨 点赞数量不合理，请输入合法数字 (1-1000)';
+        }
+
         // 从数据库获取用户绑定的 B 站信息
         const userBiliInfo = await ctx.database
             .select('user_bili_info')
@@ -68,7 +77,7 @@ async function sendThousandLikes(ctx: Context, userId: string, roomId: string): 
             room_id: targetRoomId,
             anchor_id: targetAnchorId,
             uid: uid,
-            click_time: '1000',
+            click_time: click.toString(),
             like_time: Math.floor(Date.now() / 1000).toString(),
             csrf: csrf,
             csrf_token: csrf,
@@ -119,9 +128,12 @@ export const name = 'bili-thousand-likes';
 export async function thousand_likes(ctx: Context) {
     initWbiKeysCache(ctx);
 
-    ctx.command('bili.thousand-likes <roomId:string>', '向指定直播间发送 1000 次点赞')
+    ctx.command(
+        'bili.thousand-likes <roomId:string> [click:number]',
+        '向指定直播间发送 1000 (或自定义) 次点赞'
+    )
         .alias('bili.qz')
-        .action(async ({ session }, roomId) => {
+        .action(async ({ session }, roomId, click) => {
             const { userId } = session;
 
             ctx.logger('bili-thousand-likes').info(
@@ -129,6 +141,17 @@ export async function thousand_likes(ctx: Context) {
             );
 
             // 调用核心函数发送千赞
-            return await sendThousandLikes(ctx, userId, roomId);
+            return await sendThousandLikes(ctx, userId, roomId, click ?? 1000);
         });
+
+    ctx.command('qzm [click:number]', '向籽岷直播间发送 1000 (或自定义) 次点赞').action(
+        async ({ session }, click) => {
+            const { userId } = session;
+
+            ctx.logger('bili-thousand-likes').info(`用户 ${userId} 请求向籽岷直播间发送千赞`);
+
+            // 调用核心函数发送千赞
+            return await sendThousandLikes(ctx, userId, '544853', click ?? 1000);
+        }
+    );
 }

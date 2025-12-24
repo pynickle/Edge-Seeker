@@ -52,10 +52,10 @@
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",
     "@types/node": "^24.10.3",
     "conventional-changelog-conventionalcommits": "^9.1.0",
-    "esbuild": "^0.27.1",
+    "esbuild": "^0.27.2",
     "esbuild-plugin-yaml": "^0.0.1",
-    "oxfmt": "^0.17.0",
-    "oxlint": "^1.32.0",
+    "oxfmt": "^0.20.0",
+    "oxlint": "^1.35.0",
     "semantic-release": "^25.0.2",
     "typescript": "^5.9.3"
   }
