@@ -1,3 +1,9 @@
+## [1.14.0](https://github.com/pynickle/Edge-Seeker/compare/v1.13.10...v1.14.0) (2025-12-24)
+
+### ✨ Features
+
+* improve thousand like script ([38caaa6](https://github.com/pynickle/Edge-Seeker/commit/38caaa67299ec3683f1f89e24665dd5b478f5a38))
+
 ## [1.13.10](https://github.com/pynickle/Edge-Seeker/compare/v1.13.9...v1.13.10) (2025-12-14)
 
 ### 🔧 Miscellaneous Changes
