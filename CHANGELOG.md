@@ -1,3 +1,9 @@
+## [1.14.1](https://github.com/pynickle/Edge-Seeker/compare/v1.14.0...v1.14.1) (2025-12-24)
+
+### 🚀 Improvements
+
+* improve bili room info ([156032f](https://github.com/pynickle/Edge-Seeker/commit/156032f1924bfdffbeb65f12cebc33d64e9aa091))
+
 ## [1.14.0](https://github.com/pynickle/Edge-Seeker/compare/v1.13.10...v1.14.0) (2025-12-24)
 
 ### ✨ Features
