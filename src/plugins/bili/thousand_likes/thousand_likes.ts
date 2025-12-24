@@ -62,13 +62,12 @@ async function sendThousandLikes(
         );
         if (targetRoomInfoRes.data.code !== 0) {
             return `🌸 无法获取直播间信息，请确认直播间 ID 是否正确：${targetRoomId}`;
+        }
+        const roomData = targetRoomInfoRes.data.data;
+        if (roomData.live_status !== 1) {
+            return `🌸 目标直播间当前未开播，请选择一个正在直播的间：${targetRoomId}`;
         } else {
-            const roomData = targetRoomInfoRes.data.data;
-            if (roomData.live_status !== 1) {
-                return `🌸 目标直播间当前未开播，请选择一个正在直播的间：${targetRoomId}`;
-            } else {
-                targetAnchorId = roomData.uid;
-            }
+            targetAnchorId = roomData.uid;
         }
 
         const baseUrl =
@@ -113,7 +112,7 @@ async function sendThousandLikes(
 
         // 检查响应
         if (response.data && response.data.code === 0) {
-            return `✨ 千赞请求发送成功！已为直播间 ${targetRoomId} 提交 1000 次点赞 💖`;
+            return `✨ 千赞请求发送成功！已为直播间 ${roomData.title} 提交 ${click} 次点赞 💖`;
         } else {
             return `🌸 千赞请求失败：${response.data?.message || '未知错误'}`;
         }
