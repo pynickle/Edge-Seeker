@@ -18,3 +18,5 @@ tsconfig.tsbuildinfo
 *.sln
 .editorconfig
 /release/
+
+/test/

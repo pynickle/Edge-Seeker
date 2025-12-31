@@ -182,7 +182,6 @@ export async function buildFortuneHtml(
     <meta charset="UTF-8">
     <meta name="viewport" content="width=400, initial-scale=1.0">
     <title>${isTomorrow ? '明日' : '今日'}运势</title>
-    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/7.0.1/css/all.min.css">
     <link href="https://cdn.bootcdn.net/ajax/libs/bulma/1.0.4/css/bulma.min.css" rel="stylesheet">
     <style>
         body {
@@ -255,8 +254,18 @@ export async function buildFortuneHtml(
             margin-top: 6px;
         }
         .icon {
-            color: ${luckyColorValue};
-            margin-right: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            height: 1em;
+            vertical-align: middle;
+            margin-right: 0.5em;
+            color: red;
+        }
+
+        .icon svg {
+            width: 1em;
+            height: 1em;
+            stroke: currentColor;
         }
     </style>
 </head>
@@ -274,11 +283,11 @@ export async function buildFortuneHtml(
     </div>
     <div class="content">
         <div class="content-inner">
-            <p class="title is-4"><i class="fas fa-chart-line icon"></i>运势指数：${fortuneData.score}</p>
-            <p class="subtitle is-6 mt-4 mb-1"><i class="fas fa-quote-left icon"></i>${fortuneData.sentence}</p>
+            <p class="title is-4"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-line-icon lucide-chart-line"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg></span>运势指数：${fortuneData.score}</p>
+            <p class="subtitle is-6 mt-4 mb-1"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square-quote-icon lucide-message-square-quote"><path d="M14 14a2 2 0 0 0 2-2V8h-2"/><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M8 14a2 2 0 0 0 2-2V8H8"/></svg></span>${fortuneData.sentence}</p>
             <p class="is-7">—— ${fortuneData.sentenceFrom}</p>
-            <p class="mt-4"><i class="fas fa-dice icon"></i><strong>幸运数字:</strong> ${fortuneData.luckyNumber}</p>
-            <p><i class="fas fa-palette icon"></i><strong>幸运颜色:</strong> ${fortuneData.luckyColor}</p>
+            <p class="mt-4"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dices-icon lucide-dices"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg></span><strong>幸运数字:</strong> ${fortuneData.luckyNumber}</p>
+            <p><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-palette-icon lucide-palette"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/></svg></span><strong>幸运颜色:</strong> ${fortuneData.luckyColor}</p>
             <p class="mt-3"><strong>宜:</strong> ${fortuneData.dos}</p>
             <p><strong>忌:</strong> ${fortuneData.donts}</p>
         </div>
