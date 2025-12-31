@@ -259,7 +259,7 @@ export async function buildFortuneHtml(
             height: 1em;
             vertical-align: middle;
             margin-right: 0.5em;
-            color: red;
+            color: ${luckyColorValue};
         }
 
         .icon svg {
