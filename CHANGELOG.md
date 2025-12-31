@@ -1,3 +1,9 @@
+## [1.14.3](https://github.com/pynickle/Edge-Seeker/compare/v1.14.2...v1.14.3) (2025-12-31)
+
+### 🐛 Bug Fixes
+
+* fix jrys color wrong ([07f6209](https://github.com/pynickle/Edge-Seeker/commit/07f620930d6a7adf62c88809b3d15bf83293b479))
+
 ## [1.14.2](https://github.com/pynickle/Edge-Seeker/compare/v1.14.1...v1.14.2) (2025-12-31)
 
 ### 🚀 Improvements
