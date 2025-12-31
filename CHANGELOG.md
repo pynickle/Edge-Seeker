@@ -1,3 +1,9 @@
+## [1.14.2](https://github.com/pynickle/Edge-Seeker/compare/v1.14.1...v1.14.2) (2025-12-31)
+
+### 🚀 Improvements
+
+* use lucide for jrys ([5bc6964](https://github.com/pynickle/Edge-Seeker/commit/5bc6964f54bf356b5b688bd0b6bdfe8509e18fff))
+
 ## [1.14.1](https://github.com/pynickle/Edge-Seeker/compare/v1.14.0...v1.14.1) (2025-12-24)
 
 ### 🚀 Improvements
