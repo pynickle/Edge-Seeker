@@ -1,3 +1,9 @@
+## [1.14.4](https://github.com/pynickle/Edge-Seeker/compare/v1.14.3...v1.14.4) (2026-01-31)
+
+### 🔧 Miscellaneous Changes
+
+* update deps ([ee4853d](https://github.com/pynickle/Edge-Seeker/commit/ee4853dc15fbb3369223b66e2e224789e34ee0e2))
+
 ## [1.14.3](https://github.com/pynickle/Edge-Seeker/compare/v1.14.2...v1.14.3) (2025-12-31)
 
 ### 🐛 Bug Fixes
